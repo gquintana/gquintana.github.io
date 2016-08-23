@@ -1,6 +1,8 @@
 # First post
-:hp-tags: humor
+:hp-tags: mood
 :published_at: 2016-08-23
+:hp-image: hubpress.png
 
 This is my first post on this blog.
-I am trying out HubPress.io.
+
+I am trying out http://hubpress.io[HubPress.io], 5 minutes to setup un blog site based on AsciiDoc: I'm just amazed.
