@@ -1,3 +1,6 @@
 # First post
+:hp-tags: humor
+:published_at: 2016-08-23
 
 This is my first post on this blog.
+I am trying out HubPress.io.
