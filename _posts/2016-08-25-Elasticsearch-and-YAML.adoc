@@ -6,7 +6,7 @@
 Most examples in Elasticsearch documentation are using JSON to represent: documents, requests and responses.
 Writing JSON is not that hard but you sometimes become Raiders of the Lost Curly Brace.
 
-image::https://en.wikipedia.org/wiki/File:Raiders_of_the_Lost_Ark.jpg[Raiders of the Lost Ark]
+image::https://upload.wikimedia.org/wikipedia/en/4/4c/Raiders_of_the_Lost_Ark.jpg[Raiders of the Lost Ark]
 
 Do you know that you could replace JSON by YAML?
 
