@@ -1,1 +1,97 @@
 = Elasticsearch and YAML
+:hp-tags: elasticsearch
+:published_at: 2016-08-25
+:hp-image: images/logos/elasticsearch.png
+
+Most examples in Elasticsearch documentation are using JSON to represent: documents, requests and responses.
+Writing JSON is not that hard but you sometimes become Raiders of the Lost Curly Brace.
+image::https://en.wikipedia.org/wiki/File:Raiders_of_the_Lost_Ark.jpg[Raiders of the Lost Ark]
+Do you know that you could replace JSON by YAML?
+
+== In responses
+
+You can add `format=yaml` in the query params:
+
+----
+curl -XGET http://localhost:9200/logstash-*/_search?format=yaml
+
+---
+took: 13
+timed_out: false
+_shards:
+  total: 15
+  successful: 15
+  failed: 0
+hits:
+  total: 2382
+  max_score: 1.0
+  hits:
+  - _index: "logstash-2016.06.22"
+    _type: "test"
+    _id: "AVV36B3vd6qInGJw3x0r"
+    _score: 1.0
+    _source:
+      '@timestamp': "2016-06-22T11:39:07.431Z"
+  - _index: "logstash-2016.06.22"
+    _type: "test"
+    _id: "AVV36Cfrd6qInGJw3x0u"
+    _score: 1.0
+    _source:
+      '@timestamp': "2016-06-22T11:38:42.000Z"
+----
+
+You can also use the `Content-Type: application/yaml` HTTP header:
+
+----
+curl -XGET -H "Content-Type: application/yaml" http://localhost:9200/_cluster/health
+
+---
+cluster_name: "elasticsearch"
+status: "yellow"
+timed_out: false
+number_of_nodes: 1
+number_of_data_nodes: 1
+...
+----
+
+While using YAML format for responses you don't have to use the `pretty=true` query param
+as YAML is naturally indented.
+
+== In requests
+
+Just start your request body with `---`:
+
+```
+curl -XPOST http://localhost:9200/_search -d '---
+query:
+  match:
+    message: "Elasticsearch"
+'
+```
+
+This gets pretty handy when dealing with mappings and settings:
+
+[source,yaml]
+.movie.mapping.yaml
+----
+---
+properties:
+  title:
+    type: string
+  tags:
+    type: string
+    index: not_analyzed
+  year:
+    type: date
+    format: year
+----
+
+----
+curl -XPUT http://localhost:9200/movies/_mappings/movie --data-binary @movie.mapping.yaml
+----
+
+== Limits
+
+Some requests like `_bulk` request may not accept YAML.
+
+Sense (Kibana Console) and other Elasticsearch UIs do not handle YAML properly.
