@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <title>Elasticsearch and YAML</title>
+    <meta name="description" content="" />
+
+    <meta name="HandheldFriendly" content="True" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="shortcut icon" href="https://gquintana.github.io/favicon.ico">
+
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:400,700,400italic,700italic|Open+Sans:400italic,700italic,700,400">
+    <link rel="stylesheet" type="text/css" href="//gquintana.github.io/themes/roon/assets/css/screen.css?v=1472070452127" />
+
+    <link rel="canonical" href="https://gquintana.github.io/2016/08/25/Elasticsearch-and-YAML.html" />
+    <meta name="referrer" content="origin" />
+    
+    <meta property="og:site_name" content="JRald" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Elasticsearch and YAML" />
+    <meta property="og:description" content="Most examples in Elasticsearch documentation are using JSON to represent: documents, requests and responses. Writing JSON is not that hard but you sometimes become Raiders of the Lost Curly Brace. Do you know that you could replace JSON by YAML? In responses You can add format&#x3D;yaml in the query" />
+    <meta property="og:url" content="https://gquintana.github.io/2016/08/25/Elasticsearch-and-YAML.html" />
+    <meta property="article:tag" content="elasticsearch" />
+    
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Elasticsearch and YAML" />
+    <meta name="twitter:description" content="Most examples in Elasticsearch documentation are using JSON to represent: documents, requests and responses. Writing JSON is not that hard but you sometimes become Raiders of the Lost Curly Brace. Do you know that you could replace JSON by YAML? In responses You can add format&#x3D;yaml in the query" />
+    <meta name="twitter:url" content="https://gquintana.github.io/2016/08/25/Elasticsearch-and-YAML.html" />
+    
+    <script type="application/ld+json">
+null
+    </script>
+
+    <meta name="generator" content="HubPress" />
+    <link rel="alternate" type="application/rss+xml" title="JRald" href="https://gquintana.github.io/rss/" />
+</head>
+<body class="post-template tag-elasticsearch  ">
+
+    
+
+        <div id="feature_image">
+            <div class="inner" style="background-image: url('images/logos/elasticsearch.png')">
+                <img src="images/logos/elasticsearch.png">
+            </div>
+        </div>
+
+    <article role="main" class="image">
+        <header>
+            <a href="https://gquintana.github.io" id="home_link">«</a>
+            <div class="meta"><time datetime="2016-08-25"><a href="https://gquintana.github.io/2016/08/25/Elasticsearch-and-YAML.html">August 25, 2016</a></time> <span class="count" id="js-reading-time"></span></div>
+            <h1>Elasticsearch and YAML</h1>
+        </header>
+
+        <div class="text" id="js-post-content">
+            <div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Most examples in Elasticsearch documentation are using JSON to represent: documents, requests and responses.
+Writing JSON is not that hard but you sometimes become Raiders of the Lost Curly Brace.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://en.wikipedia.org/wiki/File:Raiders_of_the_Lost_Ark.jpg" alt="Raiders of the Lost Ark">
+</div>
+</div>
+<div class="paragraph">
+<p>Do you know that you could replace JSON by YAML?</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_in_responses">In responses</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You can add <code>format=yaml</code> in the query params:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>curl -XGET http://localhost:9200/logstash-*/_search?format=yaml
+
+---
+took: 13
+timed_out: false
+_shards:
+  total: 15
+  successful: 15
+  failed: 0
+hits:
+  total: 2382
+  max_score: 1.0
+  hits:
+  - _index: "logstash-2016.06.22"
+    _type: "test"
+    _id: "AVV36B3vd6qInGJw3x0r"
+    _score: 1.0
+    _source:
+      '@timestamp': "2016-06-22T11:39:07.431Z"
+  - _index: "logstash-2016.06.22"
+    _type: "test"
+    _id: "AVV36Cfrd6qInGJw3x0u"
+    _score: 1.0
+    _source:
+      '@timestamp': "2016-06-22T11:38:42.000Z"</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can also use the <code>Content-Type: application/yaml</code> HTTP header:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>curl -XGET -H "Content-Type: application/yaml" http://localhost:9200/_cluster/health
+
+---
+cluster_name: "elasticsearch"
+status: "yellow"
+timed_out: false
+number_of_nodes: 1
+number_of_data_nodes: 1
+...</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>While using YAML format for responses you don&#8217;t have to use the <code>pretty=true</code> query param
+as YAML is naturally indented.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_in_requests">In requests</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Just start your request body with <code>---</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>curl -XPOST http://localhost:9200/_search -d '---
+query:
+  match:
+    message: "Elasticsearch"
+'</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This gets pretty handy when dealing with mappings and settings:</p>
+</div>
+<div class="listingblock">
+<div class="title">movie.mapping.yaml</div>
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">---
+properties:
+  title:
+    type: string
+  tags:
+    type: string
+    index: not_analyzed
+  year:
+    type: date
+    format: year</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>curl -XPUT http://localhost:9200/movies/_mappings/movie --data-binary @movie.mapping.yaml</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_limits">Limits</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Some requests like <code>_bulk</code> request may not accept YAML.</p>
+</div>
+<div class="paragraph">
+<p>Sense (Kibana Console) and other Elasticsearch UIs do not handle YAML properly.</p>
+</div>
+</div>
+</div>
+        </div>
+
+        <menu>
+            <a href="" id="btn_share" class="btn" title="Share">
+                <span aria-hidden="true" data-icon="S"></span>
+                <strong>Share</strong>
+            </a>
+            <a href="http://twitter.com/share?text=Elasticsearch%20and%20YAML&url=https://gquintana.github.io/2016/08/25/Elasticsearch-and-YAML.html" onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;" id="btn_comment" class="btn" target="_blank">
+                <span aria-hidden="true" data-icon="C"></span> Comment on Twitter
+            </a>
+        </menu>
+
+
+        <footer class="post-footer" role="contentinfo">
+
+            <div class="vcard">
+                <a href="https://gquintana.github.io/rss" id="btn_feed" class="btn" title="Feed" target="_blank">
+                    <span aria-hidden="true" data-icon=")"></span>
+                    <strong>Feed</strong>
+                </a>
+
+                <a href="https://gquintana.github.io/author/gquintana/" class="photo">
+                    <span style="background-image: url('https://avatars.githubusercontent.com/u/755587?v&#x3D;3');">
+                        <img src="https://avatars.githubusercontent.com/u/755587?v&#x3D;3" alt="Gerald Quintana">
+                    </span>
+                </a>
+
+                <div class="details">
+                    <h4><a href="https://gquintana.github.io/author/gquintana/" class="url n">Gerald Quintana</a></h4>
+                    Lyon, France<br>
+                    
+                </div>
+            </div>
+
+            <div id="user_bio">
+                <div class="inner">
+                    
+                </div>
+            </div>
+
+        </footer>
+
+
+
+
+    </article>
+
+    <div id="share_modal">
+        <div class="wrap">
+            <div class="inner">
+                <header>
+                    Share
+                    <a href="" class="close" title="Close">&times;</a>
+                </header>
+
+                <div class="roon-share-links">
+                    <a href="https://twitter.com/share" class="twitter-share-button" data-dnt="true">Tweet</a>
+                    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+                    <div id="fb-elems">
+                        <div id="fb-root"></div>
+                        <script>(function(d, s, id) {
+                        var js, fjs = d.getElementsByTagName(s)[0];
+                        if (d.getElementById(id)) return;
+                        js = d.createElement(s); js.id = id;
+                        js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=463438580397968";
+                        fjs.parentNode.insertBefore(js, fjs);
+                        }(document, 'script', 'facebook-jssdk'));</script>
+                        <div class="fb-like" data-send="false" data-layout="button_count" data-width="110" data-show-faces="false" data-font="arial"></div>
+                    </div>
+
+                    <div id="pinit-btn">
+                        <a href="//pinterest.com/pin/create/button/?url=https://gquintana.github.io/2016/08/25/Elasticsearch-and-YAML.html&amp;description=Elasticsearch%20and%20YAML-JRald " data-pin-do="buttonPin" data-pin-config="beside"><img src="//assets.pinterest.com/images/pidgets/pin_it_button.png"></a>
+                        <script type="text/javascript" src="//assets.pinterest.com/js/pinit.js"></script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+    <script>
+
+            function get_text(el) {
+                ret = "";
+                var length = el.childNodes.length;
+                for(var i = 0; i < length; i++) {
+                    var node = el.childNodes[i];
+                    if(node.nodeType != 8) {
+                        ret += node.nodeType != 1 ? node.nodeValue : get_text(node);
+                    }
+                }
+                return ret;
+            }
+            function reading_time () {
+                var post_content = document.getElementById('js-post-content');
+                if (post_content) {
+                    var words = get_text(post_content),
+                        count = words.split(/\s+/).length,
+                        read_time = Math.ceil((count / 150)),
+                        read_time_node = document.createTextNode(read_time + ' min read');
+                    document.getElementById('js-reading-time').appendChild(read_time_node);
+                }
+            }
+
+        function no_schema_links () {
+            var links = document.querySelectorAll('.js-remove-domain-schema');
+            if (links) {
+                for (i = 0; i < links.length; ++i) {
+                    var link = links[i],
+                        text = link.innerHTML,
+                        no_schema = text.replace(/.*?:\/\//g, "");
+                    link.innerHTML = no_schema;
+                }
+            }
+        }
+
+        window.onload = function () {
+            no_schema_links();
+
+            reading_time();
+        }
+    </script>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js?v="></script> <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment-with-locales.min.js?v="></script> <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js?v="></script> 
+      <script type="text/javascript">
+        jQuery( document ).ready(function() {
+          // change date with ago
+          jQuery('ago.ago').each(function(){
+            var element = jQuery(this).parent();
+            element.html( moment(element.text()).fromNow());
+          });
+        });
+
+        hljs.initHighlightingOnLoad();
+      </script>
+
+        <script>
+            $(function(){
+                var share_modal = $("#share_modal"),
+                    update_social_links = true;
+
+                $("#btn_share").click(function(){
+                    var that = $(this);
+                    share_modal.fadeIn(200);
+                    return false;
+                });
+
+                share_modal.click(function(e){
+                    if (e.target.className == "wrap" || e.target.id == "share_modal") {
+                        share_modal.fadeOut(200);
+                    }
+                    return false;
+                });
+
+                share_modal.find("div.inner > header > a.close").click(function(){
+                    share_modal.fadeOut(200);
+                    return false;
+                });
+            });
+        </script>
+
+
+
+</body>
+</html>
