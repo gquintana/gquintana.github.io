@@ -56,8 +56,8 @@ number_of_data_nodes: 1
 ...
 ----
 
-While using YAML format for responses you don't have to use the `pretty=true` query param
-as YAML is naturally indented.
+While using YAML format for responses you don't have to use the `pretty=true` query param,
+as YAML is naturally indented and human readable.
 
 == In requests
 
