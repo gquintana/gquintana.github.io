@@ -1,7 +1,7 @@
 # First post
 :hp-tags: mood
 :published_at: 2016-08-23
-:hp-image: images/logos/hubpress.png
+:hp-image: images/hubpress.png
 
 This is my first post on this blog.
 
