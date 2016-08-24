@@ -4,7 +4,11 @@
     "repositoryName": "gquintana.github.io",
     "branch": "master"
   },
-  "site": {},
+  "site": {
+    "title": "JRald",
+    "description": "Yet another blog about tech stuff",
+    "postsPerPage": "5"
+  },
   "socialnetwork": {},
   "theme": {
     "name": "roon"
