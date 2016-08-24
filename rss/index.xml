@@ -1,4 +1,127 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Wed, 24 Aug 2016 20:26:46 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[First post]]></title><description><![CDATA[<div class="paragraph">
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Wed, 24 Aug 2016 20:27:32 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Elasticsearch and YAML]]></title><description><![CDATA[<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Most examples in Elasticsearch documentation are using JSON to represent: documents, requests and responses.
+Writing JSON is not that hard but you sometimes become Raiders of the Lost Curly Brace.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://en.wikipedia.org/wiki/File:Raiders_of_the_Lost_Ark.jpg" alt="Raiders of the Lost Ark">
+</div>
+</div>
+<div class="paragraph">
+<p>Do you know that you could replace JSON by YAML?</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_in_responses">In responses</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You can add <code>format=yaml</code> in the query params:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>curl -XGET http://localhost:9200/logstash-*/_search?format=yaml
+
+---
+took: 13
+timed_out: false
+_shards:
+  total: 15
+  successful: 15
+  failed: 0
+hits:
+  total: 2382
+  max_score: 1.0
+  hits:
+  - _index: "logstash-2016.06.22"
+    _type: "test"
+    _id: "AVV36B3vd6qInGJw3x0r"
+    _score: 1.0
+    _source:
+      '@timestamp': "2016-06-22T11:39:07.431Z"
+  - _index: "logstash-2016.06.22"
+    _type: "test"
+    _id: "AVV36Cfrd6qInGJw3x0u"
+    _score: 1.0
+    _source:
+      '@timestamp': "2016-06-22T11:38:42.000Z"</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can also use the <code>Content-Type: application/yaml</code> HTTP header:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>curl -XGET -H "Content-Type: application/yaml" http://localhost:9200/_cluster/health
+
+---
+cluster_name: "elasticsearch"
+status: "yellow"
+timed_out: false
+number_of_nodes: 1
+number_of_data_nodes: 1
+...</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>While using YAML format for responses you don&#8217;t have to use the <code>pretty=true</code> query param
+as YAML is naturally indented.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_in_requests">In requests</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Just start your request body with <code>---</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>curl -XPOST http://localhost:9200/_search -d '---
+query:
+  match:
+    message: "Elasticsearch"
+'</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This gets pretty handy when dealing with mappings and settings:</p>
+</div>
+<div class="listingblock">
+<div class="title">movie.mapping.yaml</div>
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">---
+properties:
+  title:
+    type: string
+  tags:
+    type: string
+    index: not_analyzed
+  year:
+    type: date
+    format: year</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>curl -XPUT http://localhost:9200/movies/_mappings/movie --data-binary @movie.mapping.yaml</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_limits">Limits</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Some requests like <code>_bulk</code> request may not accept YAML.</p>
+</div>
+<div class="paragraph">
+<p>Sense (Kibana Console) and other Elasticsearch UIs do not handle YAML properly.</p>
+</div>
+</div>
+</div>]]></description><link>https://gquintana.github.io/2016/08/25/Elasticsearch-and-YAML.html</link><guid isPermaLink="true">https://gquintana.github.io/2016/08/25/Elasticsearch-and-YAML.html</guid><category><![CDATA[elasticsearch]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Thu, 25 Aug 2016 00:00:00 GMT</pubDate></item><item><title><![CDATA[First post]]></title><description><![CDATA[<div class="paragraph">
 <p>This is my first post on this blog.</p>
 </div>
 <div class="paragraph">
