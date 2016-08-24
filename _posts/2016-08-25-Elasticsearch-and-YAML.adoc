@@ -3,12 +3,12 @@
 :published_at: 2016-08-25
 :hp-image: images/logos/elasticsearch.png
 
-Most examples in Elasticsearch documentation are using JSON to represent: documents, requests and responses.
+Most examples in Elasticsearch documentation are using JSON to represent documents, requests and responses.
 Writing JSON is not that hard but you sometimes become Raiders of the Lost Curly Brace.
 
 image::https://upload.wikimedia.org/wikipedia/en/4/4c/Raiders_of_the_Lost_Ark.jpg[Raiders of the Lost Ark]
 
-Do you know that you could replace JSON by YAML?
+Do you know that you can replace JSON by YAML?
 
 == In responses
 
