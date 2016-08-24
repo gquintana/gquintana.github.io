@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Wed, 24 Aug 2016 20:33:38 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Elasticsearch and YAML]]></title><description><![CDATA[<div id="preamble">
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Wed, 24 Aug 2016 20:34:42 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Elasticsearch and YAML]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Most examples in Elasticsearch documentation are using JSON to represent: documents, requests and responses.
+<p>Most examples in Elasticsearch documentation are using JSON to represent documents, requests and responses.
 Writing JSON is not that hard but you sometimes become Raiders of the Lost Curly Brace.</p>
 </div>
 <div class="imageblock">
@@ -10,7 +10,7 @@ Writing JSON is not that hard but you sometimes become Raiders of the Lost Curly
 </div>
 </div>
 <div class="paragraph">
-<p>Do you know that you could replace JSON by YAML?</p>
+<p>Do you know that you can replace JSON by YAML?</p>
 </div>
 </div>
 </div>
