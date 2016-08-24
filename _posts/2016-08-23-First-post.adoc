@@ -6,5 +6,5 @@
 This is my first post on this blog.
 
 I am trying out http://hubpress.io[HubPress.io], 5 minutes to setup un blog site on GitHub.
-A backoffice to administrate it, post writen in AsciiDoc with live preview.
+A backoffice to administrate it, posts written in AsciiDoc with live preview.
 I'm just amazed.
