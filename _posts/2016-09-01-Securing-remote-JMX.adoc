@@ -14,7 +14,7 @@ But JMX has several drawbacks:
 
 So securing JMX is not an option.
 
-== Remote JMX
+== Going remote
 
 By default, JMX is only locally accessible and secure: It can be accessed through Unix sockets.
 This means you need to have access to the machine and run JMX tools with the same user as your application.
@@ -159,3 +159,8 @@ java -Dcom.sun.management.config.file=/path/to/jmxremote.properties \
 ----
 
 Such a JMX configuration file already exists in your JRE, it's named `JRE/lib/management/management.properties`.
+
+== Some pointers
+
+* https://docs.oracle.com/javase/8/docs/technotes/guides/management/(Java 8 JMX)
+* https://www.jtips.info/index.php?title=JMX/Remote(JTips) in French
