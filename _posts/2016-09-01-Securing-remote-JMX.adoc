@@ -162,5 +162,5 @@ Such a JMX configuration file already exists in your JRE, it's named `JRE/lib/ma
 
 == Some pointers
 
-* https://docs.oracle.com/javase/8/docs/technotes/guides/management/(Java 8 JMX)
-* https://www.jtips.info/index.php?title=JMX/Remote(JTips) in French
+* https://docs.oracle.com/javase/8/docs/technotes/guides/management/[Java 8 JMX]
+* https://www.jtips.info/index.php?title=JMX/Remote[JTips] in French
