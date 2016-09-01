@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Wed, 24 Aug 2016 20:34:42 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Elasticsearch and YAML]]></title><description><![CDATA[<div id="preamble">
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Thu, 01 Sep 2016 19:12:50 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Elasticsearch and YAML]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>Most examples in Elasticsearch documentation are using JSON to represent documents, requests and responses.
@@ -121,28 +121,4 @@ properties:
 <p>Sense (Kibana Console) and other Elasticsearch UIs do not handle YAML properly.</p>
 </div>
 </div>
-</div>]]></description><link>https://gquintana.github.io/2016/08/25/Elasticsearch-and-YAML.html</link><guid isPermaLink="true">https://gquintana.github.io/2016/08/25/Elasticsearch-and-YAML.html</guid><category><![CDATA[elasticsearch]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Thu, 25 Aug 2016 00:00:00 GMT</pubDate></item><item><title><![CDATA[First post]]></title><description><![CDATA[<div class="paragraph">
-<p>This is my first post on this blog.</p>
-</div>
-<div class="paragraph">
-<p>I am trying out <a href="http://hubpress.io">HubPress.io</a> and I&#8217;m just amazed:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>5 minutes to setup un blog site on GitHub.</p>
-</li>
-<li>
-<p>A neat backoffice to administrate it</p>
-</li>
-<li>
-<p>Posts written in AsciiDoc with live preview.</p>
-</li>
-<li>
-<p>Built with cool tech: React, Redux,</p>
-</li>
-<li>
-<p>Mostly built in France: cock-a-doodle-doo</p>
-</li>
-</ul>
-</div>]]></description><link>https://gquintana.github.io/2016/08/23/First-post.html</link><guid isPermaLink="true">https://gquintana.github.io/2016/08/23/First-post.html</guid><category><![CDATA[mood]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Tue, 23 Aug 2016 00:00:00 GMT</pubDate></item></channel></rss>
+</div>]]></description><link>https://gquintana.github.io/2016/08/25/Elasticsearch-and-YAML.html</link><guid isPermaLink="true">https://gquintana.github.io/2016/08/25/Elasticsearch-and-YAML.html</guid><category><![CDATA[elasticsearch]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Thu, 25 Aug 2016 00:00:00 GMT</pubDate></item></channel></rss>
