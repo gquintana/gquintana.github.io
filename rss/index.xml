@@ -1,4 +1,222 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Thu, 01 Sep 2016 19:18:21 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Securing remote JMX]]></title><description><![CDATA[<div id="preamble">
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Wed, 07 Sep 2016 21:34:57 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Testing Logstash configuration]]></title><description><![CDATA[<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>You wrote a piece of Logstash configuration which can parse some logs.
+You tested several corner cases to ensure the output in Elasticsearch was alright.
+How do you protect this clever configuration file against regressions?</p>
+</div>
+<div class="paragraph">
+<p>Unit testing to the rescue of course!</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_simple_example">Simple example</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>For the sake of simplicity, we will take an obvious example: access logs.
+The input looks like</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>172.17.0.1 - - [05/Sep/2016:20:06:17 +0000] "GET /images/logos/hubpress.png HTTP/1.1" 200 5432 "http://localhost/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/51.0.2704.79 Chrome/51.0.2704.79 Safari/537.36" "-"</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The output, once in Elasticsearch, should look like</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-json" data-lang="json">{ "@version":"1",
+  "@timestamp":"2016-09-05T20:06:17.000Z",
+  "type":"nginx",
+  "host":"nginx-server", "path":"/var/log/nginx/access.log",
+  "clientip":"172.17.0.1", "ident":"-", "auth":"-",
+  "verb":"GET","request":"/images/logos/hubpress.png","httpversion":"1.1",
+  "response":200, "bytes":5432, "referrer":"\"http://localhost/\"",
+  "agent": "\"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/51.0.2704.79 Chrome/51.0.2704.79 Safari/537.36\""
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The configuration could look like</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-ruby" data-lang="ruby">input {
+    file {
+        path =&gt; "/var/log/nginx/access*.log"
+        type =&gt; "nginx"
+    }
+}
+filter {
+    if [type] == "nginx" {
+        grok {
+            match =&gt; [ "message" , "%{COMBINEDAPACHELOG}"]
+        }
+        date {
+            match =&gt; [ "timestamp" , "dd/MMM/YYYY:HH:mm:ss Z" ]
+        }
+        mutate {
+            convert =&gt; ["response", "integer"]
+            convert =&gt; ["bytes", "integer"]
+        }
+    }
+}
+output {
+    elasticsearch {
+      hosts =&gt; [ "es-server"]
+      index =&gt; "logstash-%{+YYYY.MM.dd}"
+      document_type =&gt; "%{type}"
+    }
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_split_the_file">Split the file</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In the above config file, the interesting part, the one containing logic is the filter part.
+In order to test it, the first thing to do is split this big file into small pieces:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>01_logstash_input_nginx.conf</code> contains the nginx file input</p>
+</li>
+<li>
+<p><code>02_logstash_filter_nginx.conf</code> contains the nginx filter section</p>
+</li>
+<li>
+<p><code>03_logstash_output.conf</code> contains the elasticsearch output</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>In production, you can load multiple config files as if they were a single one:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>logstash agent -f /etc/logstash.d/*.conf"</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>At test time, by picking a single configuration file <code>02_logstash_filter_nginx.conf</code>, the Nginx log parsing can be tested in isolation.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_write_the_unit_test">Write the unit test</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Now let&#8217;s test the <code>02_logstash_filter_nginx.conf</code> file alone and write a simple Ruby test case.
+As you may know, Logstash is written in JRuby.</p>
+</div>
+<div class="listingblock">
+<div class="title">02_logstash_filter_nginx_spec.rb</div>
+<div class="content">
+<pre class="highlight"><code class="language-ruby" data-lang="ruby"># encoding: utf-8
+require "logstash/devutils/rspec/spec_helper"
+
+# Load the configuration file
+@@configuration = String.new
+@@configuration &lt;&lt; File.read("conf/02_logstash_nginx_filter.conf")
+
+describe "Nginx filter" do
+
+  config(@@configuration) <i class="conum" data-value="1"></i><b>(1)</b>
+
+  # Inject input event/message into the pipeline
+  message = "172.17.0.1 - - [05/Sep/2016:20:06:17 +0000] \"GET /images/logos/hubpress.png HTTP/1.1\" 200 5432 \"http://localhost/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/51.0.2704.79 Chrome/51.0.2704.79 Safari/537.36\" \"-\""
+  sample("message" =&gt; message, "type" =&gt; "nginx") do <i class="conum" data-value="2"></i><b>(2)</b>
+    # Check the ouput event/message properties
+    insist { subject.get("type") } == "nginx" <i class="conum" data-value="3"></i><b>(3)</b>
+    insist { subject.get("@timestamp").to_iso8601 } == "2016-09-05T20:06:17.000Z"
+    insist { subject.get("verb") } == "GET"
+    insist { subject.get("request") } == "/images/logos/hubpress.png"
+    insist { subject.get("response") } == 200
+    insist { subject.get("bytes") } == 5432
+    reject { subject.get("tags").include?("_grokparsefailure") }
+    reject { subject.get("tags").include?("_dateparsefailure") }
+  end
+end</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Load configuration file</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Inject input event/message into the pipeline</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Check the ouput event/message properties</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>This test uses the JRuby testing framework called RSpec (<code>describe</code> method).
+The <code>config</code> and <code>sample</code> functions are located in the <a href="https://github.com/elastic/logstash-devutils">Logstash DevUtils</a> library.
+The <code>insist</code> and <code>reject</code> functions are part of the <a href="https://github.com/jordansissel/ruby-insist">Ruby Insist</a> assertion library.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_run_the_unit_tests">Run the unit tests</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>First we will need to download and install additional development libraries like those mentioned above.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ logstash-2.4.0/bin/logstash-plugin install --development
+Installing logstash-devutils, logstash-input-generator, logstash-codec-json, logstash-output-null, logstash-filter-mutate, flores, rspec, stud, pry, rspec-wait, childprocess, ftw, logstash-output-elasticsearch, rspec-sequencing, gmetric, gelf, timecop, jdbc-derby, docker-api, logstash-codec-plain, simplecov, coveralls, longshoreman, rumbster, logstash-filter-kv, logstash-filter-ruby, sinatra, webrick, poseidon, logstash-output-lumberjack, webmock, logstash-codec-line, logstash-filter-grok
+Installation successful</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now we can run the test, Logstash comes with a <code>rspec</code> command to run these spec files.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ logstash-2.4.0/bin/rspec 02_logstash_nginx_filter_spec.rb
+Using Accessor#strict_set for specs
+Run options: exclude {:redis=&gt;true, :socket=&gt;true, :performance=&gt;true, :couchdb=&gt;true, :elasticsearch=&gt;true, :elasticsearch_secure=&gt;true, :export_cypher=&gt;true, :integration=&gt;true, :windows=&gt;true}
+.
+
+Finished in 0.115 seconds (files took 0.784 seconds to load)
+1 example, 0 failures
+
+Randomized with seed 4384</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>rspec</code> command can also run multiple tests at once.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ logstash-2.4.0/bin/rspec spec -P '**/*_spec.rb'</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To prevent test dependencies, they are randomly ordered: This called randomized testing.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_give_me_the_code">Give me the code!</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>All the code shown in this article is available in <a href="https://github.com/gquintana/gquintana.github.io/tree/master/sources/2016-09-07-Testing-Logstash-configuration">Github</a>.</p>
+</div>
+</div>
+</div>]]></description><link>https://gquintana.github.io/2016/09/07/Testing-Logstash-configuration.html</link><guid isPermaLink="true">https://gquintana.github.io/2016/09/07/Testing-Logstash-configuration.html</guid><category><![CDATA[logstash]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Wed, 07 Sep 2016 00:00:00 GMT</pubDate></item><item><title><![CDATA[Securing remote JMX]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>Like it or not, JMX is one the main tools for JVM monitoring.
