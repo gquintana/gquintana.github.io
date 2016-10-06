@@ -1,7 +1,7 @@
 = Elasticsearch and YAML
 :hp-tags: elasticsearch
 :published_at: 2016-08-25
-:hp-image: images/logos/elasticsearch.png
+:hp-image: /images/logos/elasticsearch.png
 
 Most examples in Elasticsearch documentation are using JSON to represent documents, requests and responses.
 Writing JSON is not that hard but you sometimes become Raiders of the Lost Curly Brace.

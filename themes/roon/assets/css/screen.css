@@ -372,7 +372,7 @@ body.noimage {
 #feature_image {
     position: relative;
     width: 100%;
-    height: 60%;
+    height: 30%;
 }
 #feature_image .inner {
     position: absolute;
@@ -380,7 +380,7 @@ body.noimage {
     right: 0;
     bottom: 0;
     left: 0;
-    background-size: cover;
+/* GQ  background-size: cover; */
     background-position: center center;
     background-repeat: no-repeat;
 }

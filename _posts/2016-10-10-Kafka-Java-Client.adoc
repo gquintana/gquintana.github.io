@@ -1,7 +1,7 @@
 = Kafka Java Client
 :hp-tags: kafka, java
 :published_at: 2016-10-10
-:hp-image: images/logos/kafka.png
+:hp-image: /images/logos/kafka.png
 :sourcedir: ../sources
 
 Apache Kafka is trendy sofware which mixes a message broker and an event log.

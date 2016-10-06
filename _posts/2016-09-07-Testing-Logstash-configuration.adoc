@@ -1,7 +1,7 @@
 = Testing Logstash configuration
 :hp-tags: logstash
 :published_at: 2016-09-07
-:hp-image: images/logos/logstash.png
+:hp-image: /images/logos/logstash.png
 :sourcedir: ../sources
 :source-highlighter: hightlightjs
 
