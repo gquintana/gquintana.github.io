@@ -1,5 +1,5 @@
 = Kafka Java Client
-:hp-tags: kafka,java
+:hp-tags: kafka, java
 :published_at: 2016-10-10
 :hp-image: images/logos/kafka.png
 :sourcedir: ../sources
@@ -10,8 +10,6 @@ It was created by LinkedIn in 2011 and is now supported by the Confluent company
 
 For Java developpers, until Kafka 0.8, there was only an intricate Scala API.
 Since 0.9 there is a pure Java API which makes things simpler.
-
-
 
 == Creating a Topic
 
@@ -81,7 +79,6 @@ it will hash the record key and the record directly to the appropriate partition
 image::2016-10-10-Kafka-Java-Client/kafka_producer.svg[Producer]
 
 This producer is initialized and configured with some properties.
-In a Java application, there is usually a single producer instance per Kafka cluster.
 
 [source,java]
 ----
