@@ -2,19 +2,17 @@
 
 {{#post}}
 
-    {{#if image}}
-        <div id="feature_image">
-            <div class="inner" style="background-image: url('{{image}}')">
-                <img src="{{image}}">
-            </div>
-        </div>
-    {{/if}}
 
     <article role="main" class="{{#if image}}image{{/if}}">
         <header>
             <a href="{{@blog.url}}" id="home_link">«</a>
             <div class="meta"><time datetime="{{date format='YYYY-MM-DD'}}"><a href="{{url}}">{{date format="MMMM DD, YYYY"}}</a></time> <span class="count" id="js-reading-time"></span></div>
-            <h1>{{title}}</h1>
+            <h1>
+                {{#if image}}
+                    <img src="{{image}}">
+                {{/if}}
+                {{title}}
+            </h1>
         </header>
 
         <div class="text" id="js-post-content">
