@@ -1,0 +1,180 @@
+= Kafka Java Client
+:hp-tags: kafka,java
+:published_at: 2016-10-10
+:hp-image: images/logos/kafka.png
+:sourcedir: ../sources
+
+Apache Kafka is trendy sofware which mixes a message broker and an event log.
+From the ground up, it's a distributed solution designed for scalability and performance.
+It was created by LinkedIn in 2011 and is now supported by the Confluent company.
+
+For Java developpers, until Kafka 0.8, there was only an intricate Scala API.
+Since 0.9 there is a pure Java API which makes things simpler.
+
+
+
+== Creating a Topic
+
+The *topic* is the place where messages are sent and where they are stored.
+A topic is split into multiple *partitions*.
+Each partition usually belongs to a different Kafka node.
+Each partition can be *replicated* many times in order to tolerate node failures.
+Among replicas, a leader is elected, it has the privilege of receiving messages first and sending messages to consumers.
+
+At topic is automatically created when the first message arrives.
+Alternatively, it may be manually created with the `kafka-topic.sh` command line tool:
+
+[source]
+----
+$ bin/kafka-topics.sh --zookeeper localhost:2181 --create --topic newtopic --partitions 5 --replication-factor 2
+Created topic "newtopic".
+$ bin/kafka-topics.sh --zookeeper localhost:2181 --describe --topic newtopic
+Topic:newtopic  PartitionCount:5        ReplicationFactor:2     Configs:
+        Topic: newtopic Partition: 0    Leader: 2       Replicas: 2,3   Isr: 2,3
+        Topic: newtopic Partition: 1    Leader: 3       Replicas: 3,1   Isr: 3,1
+        Topic: newtopic Partition: 2    Leader: 1       Replicas: 1,2   Isr: 1,2
+        Topic: newtopic Partition: 3    Leader: 2       Replicas: 2,1   Isr: 2,1
+        Topic: newtopic Partition: 4    Leader: 3       Replicas: 3,2   Isr: 3,2
+----
+In the above example, the topic has five partitions.
+Partition 0 has two replicas: one on node 2, the other node 3.
+The replica on node 2 is the leader.
+Leader partitions are evenly distributed among this 2 node cluster.
+The leader partition is where message are
+
+Each partition is an independent log of events.
+In this log, messages are *sorted* by their arrival order.
+Each message is identified by its position in the log, this position is called *offset*.
+
+image::2016-10-10-Kafka-Java-Client/kafka_topic.svg[Topic, Partitions and Offsets]
+
+At the time of writing (Kafka 0.10), it is not possible to create or delete a Topic with the Kafka Client library.
+You'll have to stick to the Scala library which contains an `AdminUtils` class.
+
+=== Message / Record
+
+A message is also called a *record* in the Kafka vocabulary.
+It consists of:
+
+- An optional *key*: it doesn't guarantee message uniqueness, multiple messages can have have the same key.
+- A *value*: the body of the message
+- A *timestamp* (since Kafka 0.10): when the message was created by the producer or recorded in the broker
+- An *offset*: a big number describing the position of the message in the log
+
+When the key is provided, it is hashed and this hash is used to determine in which partition it should go.
+Two messages with same key will end in the same partition.
+Messages having the same key can be merged together by an optional process called compaction which runs in background.
+
+The key and the value can be of any type: `String`, `long`, `byte[]`...
+This is made possible by *serializers* and *deserializers*
+which are strategies to read and write anything from byte stream.
+There are some provided (de)serializers for basic types
+as well as some third party (de)serializers to handle structured types.
+For example, it's possible to exchange plain objects written in https://github.com/confluentinc/schema-registry/tree/master/json-serializer[JSON] or Avro format.
+
+== Sending messages
+
+Messages are sent to the Kafka broker using a *producer*.
+The producer knows the distribution of topic partitions on nodes,
+it will hash the record key and the record directly to the appropriate partition/node.
+
+image::2016-10-10-Kafka-Java-Client/kafka_producer.svg[Producer]
+
+This producer is initialized and configured with some properties.
+In a Java application, there is usually a single producer instance per Kafka cluster.
+
+[source,java]
+----
+Map<String, Object> producerConfig = new HashMap<>();
+producerConfig.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka1:9092,kafka2:9092"); <1>
+producerConfig.put(ProducerConfig.ACKS_CONFIG, "1"); <4>
+producerConfig.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class); <5>
+producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+try (Producer<String, String> producer = new KafkaProducer<>(producerConfig)) {
+    ProducerRecord<String, String> record = new ProducerRecord<>("the_topic", "the_key","The Message"); <2>
+    Future<RecordMetadata> futureMetadata = producer.send(record);<3>
+    RecordMetadata metadata = producer.get(); <4>
+}
+----
+<1> Connect to these Kafka connect nodes.
+  The first Kafka node to answer will give the full list of nodes.
+<2> Create the record/message
+<3> Send the message.
+  By default, this operation is asynchronous and non blocking, it immediately returns a `Future`
+<4> Wait for message acknowledgement.
+  The *Acks* config indicates how brokers should write the message to disk before returning an acknowledgement to the producer.
+<5> The messages are written on the wire and on the disk using the string string serializer.
+
+== Receiving messages
+
+Messages are received from the Kafka broker by a *consumer*.
+A consumer is a process in charge for reading messages from topic and dealing with read messages.
+As an acknowledgement, the consumer writes the message offset back into the broker, it's called *offset commit*.
+
+A *consumer group* is a set of consumers distributed on many machines.
+For a given topic and group, each partition gets read by a single consumer.
+This prevents messages from being consumed twice in the consumer group.
+On the contrary, a consumer can be in charge of many partitions.
+
+image::2016-10-10-Kafka-Java-Client/kafka_group.svg[Consumer and Consumer Group]
+
+In short, the Kafka cluster tells each consumer which partition it should read.
+In case of consumer failure, Kafka reassigns the partitions to other consumers.
+
+Like the producer, the consumer is initialized and configured with some properties.
+[source,java]
+----
+Map<String, Object> consumerConfig = new HashMap<>();
+consumerConfig.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka1:9092,kafka2:9092"); <1>
+consumerConfig.put(ConsumerConfig.GROUP_ID_CONFIG, "test_group");
+consumerConfig.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+consumerConfig.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+consumerConfig.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+consumerConfig.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true); <4>
+consumerConfig.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, 1000L);
+try (Consumer<String, String> consumer = new KafkaConsumer<>(consumerConfig)) {
+    consumer.subscribe(Arrays.asList("the_topic")); <2>
+    ConsumerRecords<String, String> records = consumer.poll(1000L); <3>
+    for (ConsumerRecord<String, String> record : records) {
+        LOGGER.info("Found message {} {}", record.key(), record.value());
+    }
+}
+----
+<1> Connect to these Kafka connect nodes.
+  Like the producer, it doesn't have to be the whole Kafka cluster.
+<2> Register this application as consumer group for this list of topics
+<3> Try to pull messages from the broker.
+  The Kafka client doesn't have a push API with message listeners.
+<4> Pulled messages are automatically acknowledged.
+  This message acknowledgement is called offset commit,
+  because Kafka keeps track the latest consumed message offset for each topic + partition + consumer group.
+
+In the above example, the offsets of read messages are automatically commited to the broker every second.
+By the way, this offset commit can also be manual in order to ensure messages are acknowledged once they have been processed.
+
+[source,java]
+----
+consumerConfig.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true);
+try (Consumer<String, String> consumer = new KafkaConsumer<>(consumerConfig)) {
+    consumer.subscribe(Arrays.asList("the_topic"));
+    ConsumerRecords<String, String> records = consumer.poll(1000L);
+    for (ConsumerRecord<String, String> record : records) {
+        LOGGER.info("Found message {} {}", record.key(), record.value());
+    }
+    consumer.commitSync();
+}
+----
+
+== Using the Spring framework
+
+You may have noticed that the consumer API is pull API.
+In a real application you'll have to create a consuming loop in separate thread,
+and build a push API.
+
+The http://docs.spring.io/spring-kafka/docs/current/reference/html/[Spring Kafka] does all the heavy lifting for you
+and smoothly integrates Kafka with Spring and Spring Integration:
+
+- The `KafkaTemplate` can send messages
+- The `KafkaListener` can receive message in a push manner
+
+This library makes Kafka usage very similar to ActiveMQ or RabbitMQ.
