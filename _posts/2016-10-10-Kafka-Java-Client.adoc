@@ -4,18 +4,18 @@
 :hp-image: /images/logos/kafka.png
 :sourcedir: ../sources
 
-Apache Kafka is trendy sofware which mixes a message broker and an event log.
+Apache Kafka is trendy software which mixes a message broker and an event log.
 From the ground up, it's a distributed solution designed for scalability and performance.
-It was created by LinkedIn in 2011 and is now supported by the Confluent company.
+It was created by LinkedIn in 2011, it is now open-source and supported by the Confluent company.
 
-For Java developpers, until Kafka 0.8, there was only an intricate Scala API.
+For Java developers, until Kafka 0.8, there was only an intricate Scala API with Java bindings.
 Since 0.9 there is a pure Java API which makes things simpler.
 
 == Creating a Topic
 
 The *topic* is the place where messages are sent and where they are stored.
 A topic is split into multiple *partitions*.
-Each partition usually belongs to a different Kafka node.
+Each partition is usually placed on a different Kafka node.
 Each partition can be *replicated* many times in order to tolerate node failures.
 Among replicas, a leader is elected, it has the privilege of receiving messages first and sending messages to consumers.
 
@@ -46,35 +46,34 @@ Each message is identified by its position in the log, this position is called *
 
 image::2016-10-10-Kafka-Java-Client/kafka_topic.svg[Topic, Partitions and Offsets]
 
-At the time of writing (Kafka 0.10), it is not possible to create or delete a Topic with the Kafka Client library.
-You'll have to stick to the Scala library which contains an `AdminUtils` class.
+At the time of writing (Kafka 0.10.0), it is not possible to create or delete a Topic with the Kafka Client library.
+This should change in the upcoming release (0.10.1).
+Right now, you'll have to stick to the Scala library which contains an `AdminUtils` class, or the forementioned command line tool.
 
 === Message / Record
 
 A message is also called a *record* in the Kafka vocabulary.
 It consists of:
 
-- An optional *key*: it doesn't guarantee message uniqueness, multiple messages can have have the same key.
-- A *value*: the body of the message
+- An optional *key*: it doesn't guarantee message uniqueness, multiple messages may have the same key.
+- A *value*: the body, the main part of the message
 - A *timestamp* (since Kafka 0.10): when the message was created by the producer or recorded in the broker
 - An *offset*: a big number describing the position of the message in the log
 
 When the key is provided, it is hashed and this hash is used to determine in which partition it should go.
 Two messages with same key will end in the same partition.
-Messages having the same key can be merged together by an optional process called compaction which runs in background.
+Messages having the same key can be merged together by an optional background process called compaction.
 
 The key and the value can be of any type: `String`, `long`, `byte[]`...
-This is made possible by *serializers* and *deserializers*
-which are strategies to read and write anything from byte stream.
-There are some provided (de)serializers for basic types
-as well as some third party (de)serializers to handle structured types.
+This is made possible by *serializers* and *deserializers* which are strategies to read and write anything from byte stream.
+There are some provided (de)serializers for basic types, as well as some third party (de)serializers to handle complex types.
 For example, it's possible to exchange plain objects written in https://github.com/confluentinc/schema-registry/tree/master/json-serializer[JSON] or Avro format.
 
 == Sending messages
 
 Messages are sent to the Kafka broker using a *producer*.
 The producer knows the distribution of topic partitions on nodes,
-it will hash the record key and the record directly to the appropriate partition/node.
+it will hash the record key and send the record directly to the appropriate partition/node.
 
 image::2016-10-10-Kafka-Java-Client/kafka_producer.svg[Producer]
 
@@ -102,11 +101,13 @@ try (Producer<String, String> producer = new KafkaProducer<>(producerConfig)) {
   The *Acks* config indicates how brokers should write the message to disk before returning an acknowledgement to the producer.
 <5> The messages are written on the wire and on the disk using the string string serializer.
 
+In a real world application, the producer should be instanciated only once and reused for the application lifespan.
+
 == Receiving messages
 
 Messages are received from the Kafka broker by a *consumer*.
-A consumer is a process in charge for reading messages from topic and dealing with read messages.
-As an acknowledgement, the consumer writes the message offset back into the broker, it's called *offset commit*.
+A consumer is a process in charge for reading messages from a topic and dealing with them.
+As an acknowledgement, the consumer writes the message offset back to the broker, it's called *offset commit*.
 
 A *consumer group* is a set of consumers distributed on many machines.
 For a given topic and group, each partition gets read by a single consumer.
@@ -115,10 +116,11 @@ On the contrary, a consumer can be in charge of many partitions.
 
 image::2016-10-10-Kafka-Java-Client/kafka_group.svg[Consumer and Consumer Group]
 
-In short, the Kafka cluster tells each consumer which partition it should read.
-In case of consumer failure, Kafka reassigns the partitions to other consumers.
+Said differently, the Kafka cluster tells each consumer which partition it should read.
+In case of consumer failure, Kafka reassigns the partitions to other consumers of the same group.
 
 Like the producer, the consumer is initialized and configured with some properties.
+
 [source,java]
 ----
 Map<String, Object> consumerConfig = new HashMap<>();
@@ -126,9 +128,6 @@ consumerConfig.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka1:9092,kafka2:
 consumerConfig.put(ConsumerConfig.GROUP_ID_CONFIG, "test_group");
 consumerConfig.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 consumerConfig.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-consumerConfig.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-consumerConfig.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true); <4>
-consumerConfig.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, 1000L);
 try (Consumer<String, String> consumer = new KafkaConsumer<>(consumerConfig)) {
     consumer.subscribe(Arrays.asList("the_topic")); <2>
     ConsumerRecords<String, String> records = consumer.poll(1000L); <3>
@@ -139,19 +138,44 @@ try (Consumer<String, String> consumer = new KafkaConsumer<>(consumerConfig)) {
 ----
 <1> Connect to these Kafka connect nodes.
   Like the producer, it doesn't have to be the whole Kafka cluster.
-<2> Register this application as consumer group for this list of topics
+<2> Register this application as a consumer for this list of topics.
+  Kafka will assign some partitions to this consumer.
 <3> Try to pull messages from the broker.
-  The Kafka client doesn't have a push API with message listeners.
 <4> Pulled messages are automatically acknowledged.
-  This message acknowledgement is called offset commit,
-  because Kafka keeps track the latest consumed message offset for each topic + partition + consumer group.
 
-In the above example, the offsets of read messages are automatically commited to the broker every second.
-By the way, this offset commit can also be manual in order to ensure messages are acknowledged once they have been processed.
+In the above example, connecting to the broker, subscribing to one or more topics,
+and being assigned partitions takes time and is usually done once during application start-up.
+On the contrary, the `poll` should be run in loop,
+it returns a batch of records whose size is controlled by the `max.poll.records` setting.
+
+Unlike the producer, the consumer is not thread-safe.
+In order to consumer records in parallel, each thread should have it's own consumer.
+
+== Acknowledging received messages
+
+The message acknowledgement is called offset commit,
+because Kafka keeps track the offset of the last consumed message for each topic + partition + consumer group.
+
+In the previous example, the offsets were automatically and periodically committed to the broker.
 
 [source,java]
 ----
 consumerConfig.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true);
+consumerConfig.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, 1000L);
+try (Consumer<String, String> consumer = new KafkaConsumer<>(consumerConfig)) {
+    consumer.subscribe(Arrays.asList("the_topic"));
+    ConsumerRecords<String, String> records = consumer.poll(1000L);
+    for (ConsumerRecord<String, String> record : records) {
+        LOGGER.info("Found message {} {}", record.key(), record.value());
+    }
+}
+----
+
+By the way, this offset commit can also be manual in order to ensure messages are acknowledged once they have been processed.
+
+[source,java]
+----
+consumerConfig.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
 try (Consumer<String, String> consumer = new KafkaConsumer<>(consumerConfig)) {
     consumer.subscribe(Arrays.asList("the_topic"));
     ConsumerRecords<String, String> records = consumer.poll(1000L);
@@ -162,9 +186,16 @@ try (Consumer<String, String> consumer = new KafkaConsumer<>(consumerConfig)) {
 }
 ----
 
+This offset can even be moved forward (to skip records) and backwards (to replay records):
+
+[source,java]
+----
+    consumer.seekToBeginning(consumer.assignment());
+----
+
 == Using the Spring framework
 
-You may have noticed that the consumer API is pull API.
+You may have noticed that the consumer API is a pull API.
 In a real application you'll have to create a consuming loop in separate thread,
 and build a push API.
 
