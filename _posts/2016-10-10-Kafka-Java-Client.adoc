@@ -120,7 +120,7 @@ For a given topic and group, each partition gets read by a single consumer.
 This prevents messages from being consumed twice in the consumer group.
 On the contrary, a consumer can be in charge of several partitions.
 
-image::2016-10-10-Kafka-Java-Client/kafka_group.svg[Consumer and Consumer Group]
+image::2016-10-10-Kafka-Java-Client/kafka_consumer.svg[Consumer and Consumer Group]
 
 The Kafka cluster tells each consumer which partition it should read from.
 Each consumer takes care of its portion of topic.
