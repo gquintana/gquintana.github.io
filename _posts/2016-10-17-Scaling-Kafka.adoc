@@ -1,5 +1,5 @@
-= Kafka Java Client
-:hp-tags: kafka, java
+= Scaling Kafka
+:hp-tags: kafka
 :published_at: 2016-10-17
 :hp-image: /images/logos/kafka.png
 :sourcedir: ../sources
@@ -34,7 +34,7 @@ image::2016-10-17-Scaling-Kafka/kafka-create-topic.svg[Creating a topic]
 
 == Adding a broker node
 
-Now we will add a fourth node: 3.
+Now we will add a fourth node with Id 3.
 Once the node is started and as successfully joined the cluster,
 it doesn't automatically receive partitions assignments:
 
@@ -273,7 +273,7 @@ Topic:test_topic        PartitionCount:5        ReplicationFactor:2     Configs:
         Topic: test_topic       Partition: 4    Leader: 1       Replicas: 1,2   Isr: 1,2
 ----
 
-image::2016-10-17-Scaling-Kafka/kafka-remove-node.svg[Rack awareness]
+image::2016-10-17-Scaling-Kafka/kafka-rack.svg[Rack awareness]
 
 == Simple scaling
 
