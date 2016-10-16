@@ -25,7 +25,7 @@ Among replicas, a leader is elected, it has the privilege of receiving messages 
 A topic is automatically created when the first message arrives.
 Alternatively, it may be manually created with the `kafka-topic.sh` command line tool:
 
-[source]
+[source,bash]
 ----
 $ bin/kafka-topics.sh --zookeeper localhost:2181 --create --topic newtopic --partitions 5 --replication-factor 2
 Created topic "newtopic".

@@ -14,7 +14,7 @@ In this article I will tackle an operational need: adding and removing nodes in 
 We will start with a 3 node cluster: 0, 1, 2.
 We first create a topic with 5 partitions and replication factor of 2 using the `kafka-topics.sh` tool:
 
-[source,shell]
+[source,bash]
 ----
 $ bin/kafka-topics.sh --zookeeper localhost:2181 --create --topic test_topic --partitions 5 --replication-factor 2
 Created topic "test_topic".
@@ -38,7 +38,7 @@ Now we will add a fourth node with Id 3.
 Once the node is started and as successfully joined the cluster,
 it doesn't automatically receive partitions assignments:
 
-[source,shell]
+[source,bash]
 ----
 $ bin/kafka-topics.sh --zookeeper localhost:2181 --describe --topic test_topic
 Topic:test_topic        PartitionCount:5        ReplicationFactor:2     Configs:
@@ -52,7 +52,7 @@ Topic:test_topic        PartitionCount:5        ReplicationFactor:2     Configs:
 So we are going to redistribute partitions on the 4 nodes.
 Our cluster has 2 topics:
 
-[source,shell]
+[source,bash]
 ----
 $ bin/kafka-topics.sh --zookeeper localhost:2181 --list
 __consumer_offsets
@@ -63,7 +63,7 @@ test_topic
 * `__consumer_offsets` is an internal topic used to track consumer offsets.
   It has 5 partitions and a replication factor of 3:
 
-[source,shell]
+[source,bash]
 ----
 $ bin/kafka-topics.sh --zookeeper localhost:2181 --describe --topic __consumer_offsets
 Topic:__consumer_offsets        PartitionCount:5        ReplicationFactor:3     Configs:segment.bytes=104857600,cleanup.policy=compact,compression.type=producer
@@ -91,7 +91,7 @@ We need to write a JSON file to list the topics we want to reorganize:
 We use the `kafka-reassign-partitions.sh` tool to generate partition assignments.
 It takes the topic list and the broker list as input, and produces the assignment plan in JSON format:
 
-[source,shell]
+[source,bash]
 ----
 $ bin/kafka-reassign-partitions.sh --zookeeper localhost:2181 --generate --topics-to-move-json-file topics.json --broker-list 0,1,2,3
 Current partition replica assignment
@@ -219,7 +219,7 @@ The tool proposes the following reassignement:
 
 Once executed, the topic is reorganized like this:
 
-[source,shell]
+[source,bash]
 ----
 $ bin/kafka-topics.sh --zookeeper localhost:2181 --describe --topic test_topic
 Topic:test_topic        PartitionCount:5        ReplicationFactor:2     Configs:
@@ -259,7 +259,7 @@ are in rack B.
 Now, let's create a topic with a replication factor two,
 each partition has a replica in each rack.
 
-[source,shell]
+[source,bash]
 ----
 $ bin/kafka-topics.sh --zookeeper localhost:2181 --create --topic test_topic --partitions 5 --replication-factor 2
 Created topic "test_topic".
