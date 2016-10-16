@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Sun, 16 Oct 2016 19:51:51 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Kafka Java Client]]></title><description><![CDATA[<div id="preamble">
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Sun, 16 Oct 2016 20:04:42 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Kafka Java Client]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>Apache Kafka is trendy software which mixes a message broker and an event log.
@@ -31,7 +31,7 @@ Alternatively, it may be manually created with the <code>kafka-topic.sh</code> c
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code>$ bin/kafka-topics.sh --zookeeper localhost:2181 --create --topic newtopic --partitions 5 --replication-factor 2
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ bin/kafka-topics.sh --zookeeper localhost:2181 --create --topic newtopic --partitions 5 --replication-factor 2
 Created topic "newtopic".
 $ bin/kafka-topics.sh --zookeeper localhost:2181 --describe --topic newtopic
 Topic:newtopic  PartitionCount:5        ReplicationFactor:2     Configs:
