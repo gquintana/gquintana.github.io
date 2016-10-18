@@ -58,9 +58,9 @@ get /brokers/topics/test_topic/partitions/0/state
 
 == Adding a broker node
 
-Now we will add a fourth node with Id 3.
+Now we will add a fourth node with Id 3 to our cluster.
 Once the node is started and has successfully joined the cluster,
-it doesn't automatically receive partitions assignments:
+it doesn't automatically receive partitions:
 
 [source,bash]
 ----
@@ -216,7 +216,7 @@ The recipe to remove a node is very similar to the previous one:
 4. `kafka-reassign-partitions.sh --verify` to check whether the assignment plan is applied
 5. Stop the broker and remove it
 
-As an example, we will remove the broker with id 1.
+As an example, we will remove the broker with Id 1.
 
 ----
 $ bin/kafka-reassign-partitions.sh --zookeeper zkhost:2181 --generate --topics-to-move-json-file topics.json --broker-list 0,2,3
@@ -309,14 +309,13 @@ but it makes the assignment harder to build manually.
 
 As you have seen it, horizontally scaling a Kafka cluster is not that hard, but it is tedious.
 
-Kafka Manager allows, through its web UI, to reassign partitions to nodes.
+Kafka Manager allows, through its web UI, to visually reassign partitions to nodes.
 
 Running on a highly elastic environment, like a Docker cluster scheduler, seems sensitive.
-
 Some solutions exist though:
 
 * *Confluent Enterprise 3.1* contains a feature called http://www.confluent.io/product/auto-data-balancing/[Auto data balancing]
   whose purpose is to ease these operations.
-  Unfortunately, it is not in the open source.
+  Unfortunately, it is not open source.
 * *Mesos* has an https://github.com/mesos/kafka[integration] which seems to be able to make https://docs.mesosphere.com/1.9/usage/service-guides/kafka/[Kafka scaling smoother]
 
