@@ -1,0 +1,184 @@
+= Java tests with Elasticsearch 5.0
+:hp-tags: elasticsearch
+:published_at: 2016-11-29
+:hp-image: /images/logos/elasticsearch.png
+
+A long time ago, I wrote https://blog.zenika.com/2013/04/29/integrer-elasticsearch-dans-une-application-java/[this article in french] explaining
+how to test a Java application talking to Elasticsearch.
+At that time (Elasticsearch 1.x), it was easy to start en embedded Elasticsearch, it was  matter of a single line of code:
+
+[source,java]
+----
+Node node = NodeBuilder.nodeBuilder().node();
+----
+Starting with Elasticsearch 5.0, it's https://www.elastic.co/blog/elasticsearch-the-server#_embedded_elasticsearch_not_supported[forbidden to start an embedded Elasticsearch].
+The `NodeBuilder` class used above doesn't exist anymore, and most of classes used to start Elasticsearch as a server are hidden and sealed.
+In short, it's not as easy as before to test your Elasticsearch access layer.
+
+Let's see which options are left.
+
+
+== Elasticsearch Testing framework
+
+This test framework is used to test Elasticsearch itself is available as library:
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.elasticsearch.test</groupId>
+  <artifactId>framework</artifactId>
+  <version>5.0.1</version>
+  <scope>test</scope>
+</dependency>
+----
+
+It contains an `ESIntegTestCase` which is able to bootstrap an Elasticsearch for tests:
+
+[source,java]
+----
+public class CustomerDaoTests extends ESIntegTestCase {
+
+}
+----
+
+It looks simple and convenient, but for the average Java developer, this library raises multiple problems:
+
+- It brings numerous dependencies in your test environment (Log4J2, Commons *...)
+- It doesn't mix properly with usual libraries (see below)
+- It enforces security by enabling Java's Security Manager (see below)
+- It doesn't support HTTP protocol (only internal transport procol)
+
+----
+java.lang.RuntimeException: found jar hell in test classpath
+
+	at org.elasticsearch.bootstrap.BootstrapForTesting.<clinit>(BootstrapForTesting.java:90)
+	at org.elasticsearch.test.ESTestCase.<clinit>(ESTestCase.java:145)
+
+
+java.security.AccessControlException: access denied ("java.lang.RuntimePermission" "accessDeclaredMembers")
+
+	at java.security.AccessControlContext.checkPermission(AccessControlContext.java:472)
+----
+
+In short, this library is appropriate to develop an Elasticsearch plugin, but that's all.
+
+If we can not start Elasticsearch from inside the test, let's start it from outside.
+
+== Elasticsearch scripting
+
+From now on, we will start a real Elasticsearch process,
+we won't use not slimmed down version with specifics settings.
+Our tests will get more realistic.
+
+In order to automate test execution, my first solution is to create a script to setup and start Elasticsearch.
+This script can later be ran from CI configuration, before running the build script (Maven, Gradle...).
+
+Here is a short example:
+
+[source,shell]
+.elasticsearch-start.sh
+----
+#!/usr/bin/env bash
+
+TARGET_DIR="$(dirname $0)/target"
+ES_VERSION=5.0.0
+ES_DIR=${TARGET_DIR}/elasticsearch-${ES_VERSION}
+mkdir -p ${TARGET_DIR}
+
+ES_TAR=${TARGET_DIR}/elasticsearch-${ES_VERSION}.tar.gz
+ES_URL=https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${ES_VERSION}.tar.gz
+curl -o ${ES_TAR} ${ES_URL}                                                     # <1>
+tar -xzf ${ES_TAR} -C ${TARGET_DIR}                                             # <2>
+
+cd ${ES_DIR}
+bin/elasticsearch -d -p pid                                                     # <3>
+
+sleep 10s
+curl "http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=30s" # <4>
+----
+<1> Download Elasticsearch. We could download it from a corporate repository (Nexus, web server...).
+<2> Unzip the downloaded archive.
+<3> Start Elasticsearch as a background process and keep it's PID so as to be able to stop it at the end.
+<4> Wait for Elasticsearch to be up and running.
+
+The drawback of this script is that it can not run on Windows.
+We could rewrite it using Ant, https://github.com/elastic/elasticsearch/blob/5.0/dev-tools/smoke_test_rc.py[Python] or Groovy/Gradle to make it more portable:
+
+[source,xml]
+.build.xml
+----
+<target name="elasticsearch-start" >
+    <get src="https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${es.version}.tar.gz"
+         dest="${target.dir}/elasticsearch-${es.version}.tar.gz"
+         verbose="true" skipexisting="true"
+    />
+    <untar src="${target.dir}/elasticsearch-${es.version}.tar.gz" dest="${target.dir}" compression="gzip"/>
+    <exec executable="cmd" failonerror="true" osfamily="winnt" dir="${es.dir}">
+        <arg value="/c"/>
+        <arg value="bin/elasticsearch.bat"/>
+    </exec>
+    <exec executable="sh" failonerror="true" osfamily="unix" dir="${es.dir}">
+        <arg value="bin/elasticsearch"/>
+        <arg value="-d"/>
+        <arg value="-p"/>
+        <arg value="pid"/>
+    </exec>
+    <waitfor maxwait="30" maxwaitunit="second" checkevery="10" checkeveryunit="second">
+        <http url="http://localhost:9200/_cluster/health?wait_for_status=yellow&amp;timeout=5s"/>
+    </waitfor>
+</target>
+----
+
+This Ant script does exactly the same as the above shell script.
+I have to admit, this idea is not mine, it's explained in detail on http://david.pilato.fr/blog/2016/10/18/elasticsearch-real-integration-tests-updated-for-ga/[David Pilato's blog].
+This Ant script could be called from Maven using the Antrun plugin.
+
+This solution based on scripting has several shortcomings:
+
+* It should be improved to avoid downloading and decompressing the archive again and again.
+* It should be completed with a script to stop Elasticsearch and do household chores.
+* It could become more complicated: it is sometimes needed to install some plugin,
+  tweak the `elasticsearch.yml` configuration file or set some environment variables.
+* As any piece of code, it should be loved and maintained.
+
+
+== Elasticsearch in a container
+
+We can delegate the downloading, starting and stopping logic to Docker.
+Starting Elasticsearch in a container is nearly as easy as:
+
+[source,shell]
+----
+docker run -d --name elasticsearch-5.0 -v /usr/share/elasticsearch/data:$PWD/target/data -P elasticsearch:5.0.1
+curl "http://172.17.0.1:9200/_cluster/health?wait_for_status=yellow&timeout=30s"
+
+# Run tests here...
+
+docker stop elasticsearch-5.0
+----
+We should still wait for Elasticsearch to be started before running tests.
+We could run Docker container using:
+
+* https://github.com/fabric8io/docker-maven-plugin[Docker Maven plugin]
+* https://plugins.jenkins.io/docker-plugin[Docker Jenkins plugin]
+
+However, running Elasticsearch in docker may not be as easy as it may seem at first sight.
+On many Linux boxes, the Elasticsearch container will stop immediately with this kind of error:
+
+----
+[2016-11-26T14:58:32,140][INFO ][o.e.b.BootstrapCheck     ] [3mI2H8T] bound or publishing to a non-loopback or non-link-local address, enforcing bootstrap checks
+ERROR: bootstrap checks failed
+max virtual memory areas vm.max_map_count [65530] is too low, increase to at least [262144]
+----
+
+When Elasticsearch 5.0 is running inside a Docker container, it has to listen on Docker interface, not localhost.
+This network setting make Elasticsearch think it is running in production mode.
+As a consequence, Elasticsearch does some additional https://www.elastic.co/blog/bootstrap_checks_annoying_instead_of_devastating[bootstrap checks] to avoid common production issues.
+Like on your production server, you'll have to do some the system level tuning to allow it to start:
+
+----
+sudo sysctl -w vm.max_map_count=262144
+----
+
+If you don't have sufficient privileges to change such setting, then you're in trouble.
+I personally missing a setting to be able to disable bootstrap checking.
