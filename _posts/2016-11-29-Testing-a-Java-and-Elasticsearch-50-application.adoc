@@ -135,6 +135,56 @@ This Ant script does exactly the same as the above shell script (download, unzip
 I have to admit, this idea is not mine, it's explained in detail on http://david.pilato.fr/blog/2016/10/18/elasticsearch-real-integration-tests-updated-for-ga/[David Pilato's blog].
 This Ant script could be called from Maven using the Antrun plugin or from Groovy/Gradle using http://docs.groovy-lang.org/latest/html/documentation/ant-builder.html[AntBuilder].
 
+I've created a https://github.com/gquintana/gquintana.github.io/tree/master/sources/2016-11-29-Testing-a-Java-and-Elasticsearch-50-application[sample Java project] using Elasticsearch Java Rest client to access read and write data.
+Maven starts Elasticsearch, runs integration tests and finally stops Elasticsearch:
+
+[source,shell]
+----
+$ mvn -Pit install  
+
+------------------------------------------------------------------------
+Building Testing with Elasticsearch 5.0 0.0.1-SNAPSHOT
+------------------------------------------------------------------------
+
+...
+
+--- maven-antrun-plugin:1.8:run (start-es) @ test-elasticsearch5 ---                                   
+Executing tasks                                                                                        
+                                                                                                       
+main:                                                                                                  
+                                                                                                       
+setup:                                                                                                 
+                                                                                                       
+start:                                                                                                 
+     [echo] Starting Elasticsearch 5.0.1                                                               
+     [echo] Started Elasticsearch with PID 6256                                                        
+Executed tasks                                                                                         
+                                                                                                       
+--- maven-failsafe-plugin:2.19.1:integration-test (default) @ test-elasticsearch5 ---                  
+                                                                                                       
+-------------------------------------------------------                                                
+ T E S T S                                                                                             
+-------------------------------------------------------                                                
+Running com.github.gquintana.elasticsearch.ProductRepositoryIT
+Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 10.141 sec - in com.github.gquintana.elasticsearch.ProductRepositoryIT
+
+Results :
+
+Tests run: 4, Failures: 0, Errors: 0, Skipped: 0
+
+
+--- maven-antrun-plugin:1.8:run (stop-es) @ test-elasticsearch5 ---
+Executing tasks
+
+main:
+
+stop:
+     [echo] Stopping Elasticsearch with PID 6256
+     [echo] Stopped Elasticsearch
+Executed tasks
+...
+----
+
 This solution based on scripting has several shortcomings:
 
 * It should be improved to avoid downloading and decompressing the archive again and again.
