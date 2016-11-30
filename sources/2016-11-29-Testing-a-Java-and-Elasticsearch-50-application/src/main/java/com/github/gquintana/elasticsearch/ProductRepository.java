@@ -11,16 +11,18 @@ import org.elasticsearch.client.RestClient;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.Map;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ProductRepository {
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final String url = "http://localhost:9200";
     private RestClient client;
 
     public void initialize() {
-        client = RestClient.builder(new HttpHost("localhost", 9200)).build();
+        client = RestClientFactory.create();
     }
 
     public void close() throws IOException {

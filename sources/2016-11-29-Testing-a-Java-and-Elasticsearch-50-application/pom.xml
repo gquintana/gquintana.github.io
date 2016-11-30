@@ -55,6 +55,12 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -69,6 +75,9 @@
     <profiles>
         <profile>
             <id>it</id>
+            <properties>
+                <elasticsearch.url>http://localhost:9200</elasticsearch.url>
+            </properties>
             <build>
                 <plugins>
                     <plugin>
