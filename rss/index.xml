@@ -1,4 +1,477 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Tue, 18 Oct 2016 19:16:02 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Scaling Kafka]]></title><description><![CDATA[<div id="preamble">
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Wed, 30 Nov 2016 20:09:21 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Testing a Java and Elasticsearch 5.0 application]]></title><description><![CDATA[<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>A long time ago, I wrote <a href="https://blog.zenika.com/2013/04/29/integrer-elasticsearch-dans-une-application-java/">this article in french</a> explaining
+how to test a Java application talking to Elasticsearch.
+At that time (Elasticsearch 1.x), it was easy to start en embedded Elasticsearch, it was a oneliner:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-java" data-lang="java">Node node = NodeBuilder.nodeBuilder().node();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Starting with Elasticsearch 5.0, it&#8217;s <a href="https://www.elastic.co/blog/elasticsearch-the-server#_embedded_elasticsearch_not_supported">forbidden to start an embedded Elasticsearch</a>.
+The <code>NodeBuilder</code> class used above doesn&#8217;t exist anymore, and most of classes used to start Elasticsearch as a server are hidden and sealed.
+In short, it&#8217;s not as easy as before to test your Elasticsearch access layer, Java developers have lost their advantage of using the same language as Elasticsearch.
+Most solutions described in this article can probably apply to other languages: Ruby, Python, JavaScript&#8230;&#8203;</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s see which options are left.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_elasticsearch_testing_framework">Elasticsearch Testing framework</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This test framework is used by the Elastic team to test Elasticsearch itself.
+Undercover, it uses the <a href="http://labs.carrotsearch.com/randomizedtesting.html">Randomized Testing</a> which is also used to test Apache Lucene.
+This library can be downloaded as a Maven dependency:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-xml" data-lang="xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.elasticsearch.test&lt;/groupId&gt;
+  &lt;artifactId&gt;framework&lt;/artifactId&gt;
+  &lt;version&gt;5.0.1&lt;/version&gt;
+  &lt;scope&gt;test&lt;/scope&gt;
+&lt;/dependency&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It contains an <code>ESIntegTestCase</code> which is able to bootstrap an Elasticsearch for tests:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-java" data-lang="java">public class CustomerDaoTests extends ESIntegTestCase {
+
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It looks simple and convenient, but for the average Java developer, this library raises multiple problems:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>It brings numerous dependencies in your test environment (Log4J2, Commons *&#8230;&#8203;)</p>
+</li>
+<li>
+<p>It doesn&#8217;t mix properly with usual libraries (see jar hell error below)</p>
+</li>
+<li>
+<p>It enforces security by enabling Java&#8217;s Security Manager (see access denied error below)</p>
+</li>
+<li>
+<p>It doesn&#8217;t support HTTP protocol (only internal transport procol)</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>java.lang.RuntimeException: found jar hell in test classpath
+
+	at org.elasticsearch.bootstrap.BootstrapForTesting.&lt;clinit&gt;(BootstrapForTesting.java:90)
+	at org.elasticsearch.test.ESTestCase.&lt;clinit&gt;(ESTestCase.java:145)
+
+
+java.security.AccessControlException: access denied ("java.lang.RuntimePermission" "accessDeclaredMembers")
+
+	at java.security.AccessControlContext.checkPermission(AccessControlContext.java:472)</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In short, this library is appropriate to develop an Elasticsearch plugin, but that&#8217;s all.</p>
+</div>
+<div class="paragraph">
+<p>If we can not start Elasticsearch from inside the test, let&#8217;s start it from outside.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_elasticsearch_scripting">Elasticsearch scripting</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>From now on, we will start a real Elasticsearch process,
+we won&#8217;t use anymore a slimmed down version with specifics settings.
+Our tests will get more realistic, but also harder to set up.</p>
+</div>
+<div class="paragraph">
+<p>In order to automate test execution, my first solution is to create a script to install and start Elasticsearch.
+This script can later be ran from CI configuration, before running the build script (Maven, Gradle&#8230;&#8203;).</p>
+</div>
+<div class="paragraph">
+<p>Here is a short example:</p>
+</div>
+<div class="listingblock">
+<div class="title">elasticsearch-start.sh</div>
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">#!/usr/bin/env bash
+
+TARGET_DIR="$(dirname $0)/target"
+ES_VERSION=5.0.0
+ES_DIR=${TARGET_DIR}/elasticsearch-${ES_VERSION}
+mkdir -p ${TARGET_DIR}
+
+ES_TAR=${TARGET_DIR}/elasticsearch-${ES_VERSION}.tar.gz
+ES_URL=https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${ES_VERSION}.tar.gz
+curl -o ${ES_TAR} ${ES_URL}                                                     <i class="conum" data-value="1"></i><b>(1)</b>
+tar -xzf ${ES_TAR} -C ${TARGET_DIR}                                             <i class="conum" data-value="2"></i><b>(2)</b>
+
+cd ${ES_DIR}
+bin/elasticsearch -d -p pid                                                     <i class="conum" data-value="3"></i><b>(3)</b>
+
+sleep 10s
+curl "http://localhost:9200/_cluster/health?wait_for_status=yellow&amp;timeout=30s" <i class="conum" data-value="4"></i><b>(4)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Download Elasticsearch. We could also download it from a corporate repository (Nexus, web server&#8230;&#8203;).</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Unzip the downloaded archive.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Start Elasticsearch as a background process and keep it&#8217;s PID so as to be able to stop it at the end.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Wait for Elasticsearch to be up and running.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The main drawback of this script is that it can not run on Windows: it is not portable.
+We could rewrite it using Ant, <a href="https://github.com/elastic/elasticsearch/blob/5.0/dev-tools/smoke_test_rc.py">Python</a> or Groovy/Gradle:</p>
+</div>
+<div class="listingblock">
+<div class="title">build.xml</div>
+<div class="content">
+<pre class="highlight"><code class="language-xml" data-lang="xml">&lt;target name="elasticsearch-start" &gt;
+    &lt;get src="https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${es.version}.tar.gz"
+         dest="${target.dir}/elasticsearch-${es.version}.tar.gz"
+         verbose="true" skipexisting="true"
+    /&gt;
+    &lt;untar src="${target.dir}/elasticsearch-${es.version}.tar.gz" dest="${target.dir}" compression="gzip"/&gt;
+    &lt;exec executable="cmd" failonerror="true" osfamily="winnt" dir="${es.dir}"&gt;
+        &lt;arg value="/c"/&gt;
+        &lt;arg value="bin/elasticsearch.bat"/&gt;
+    &lt;/exec&gt;
+    &lt;exec executable="sh" failonerror="true" osfamily="unix" dir="${es.dir}"&gt;
+        &lt;arg value="bin/elasticsearch"/&gt;
+        &lt;arg value="-d"/&gt;
+        &lt;arg value="-p"/&gt;
+        &lt;arg value="pid"/&gt;
+    &lt;/exec&gt;
+    &lt;waitfor maxwait="30" maxwaitunit="second" checkevery="10" checkeveryunit="second"&gt;
+        &lt;http url="http://localhost:9200/_cluster/health?wait_for_status=yellow&amp;amp;timeout=5s"/&gt;
+    &lt;/waitfor&gt;
+&lt;/target&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This Ant script does exactly the same as the above shell script (download, unzip, start and wait).
+I have to admit, this idea is not mine, it&#8217;s explained in detail on <a href="http://david.pilato.fr/blog/2016/10/18/elasticsearch-real-integration-tests-updated-for-ga/">David Pilato&#8217;s blog</a>.
+This Ant script could be called from Maven using the Antrun plugin or from Groovy/Gradle using <a href="http://docs.groovy-lang.org/latest/html/documentation/ant-builder.html">AntBuilder</a>.</p>
+</div>
+<div class="paragraph">
+<p>I&#8217;ve created a <a href="https://github.com/gquintana/gquintana.github.io/tree/master/sources/2016-11-29-Testing-a-Java-and-Elasticsearch-50-application">sample Java project</a> using Elasticsearch Java Rest client to access read and write data.
+Maven starts Elasticsearch, runs integration tests and finally stops Elasticsearch:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-xml" data-lang="xml">        &lt;profile&gt;
+            &lt;id&gt;ant&lt;/id&gt;
+            &lt;properties&gt;
+                &lt;elasticsearch.url&gt;http://localhost:9200&lt;/elasticsearch.url&gt;
+            &lt;/properties&gt;
+            &lt;build&gt;
+                &lt;plugins&gt;
+                    &lt;plugin&gt;
+                        &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+                        &lt;artifactId&gt;maven-dependency-plugin&lt;/artifactId&gt;
+                        &lt;version&gt;2.10&lt;/version&gt;
+                        &lt;executions&gt;
+                            &lt;execution&gt;
+                                &lt;id&gt;get-es&lt;/id&gt;
+                                &lt;phase&gt;pre-integration-test&lt;/phase&gt;
+                                &lt;goals&gt;
+                                    &lt;goal&gt;copy&lt;/goal&gt;
+                                &lt;/goals&gt;
+                                &lt;configuration&gt;
+                                    &lt;artifactItems&gt;
+                                        &lt;artifactItem&gt;
+                                            &lt;groupId&gt;org.elasticsearch.distribution.zip&lt;/groupId&gt;
+                                            &lt;artifactId&gt;elasticsearch&lt;/artifactId&gt;
+                                            &lt;version&gt;${elasticsearch.version}&lt;/version&gt;
+                                            &lt;type&gt;zip&lt;/type&gt;
+                                        &lt;/artifactItem&gt;
+                                    &lt;/artifactItems&gt;
+                                    &lt;outputDirectory&gt;${project.build.directory}/it&lt;/outputDirectory&gt;
+                                &lt;/configuration&gt;
+                            &lt;/execution&gt;
+                        &lt;/executions&gt;
+                    &lt;/plugin&gt;
+                    &lt;plugin&gt;
+                        &lt;artifactId&gt;maven-antrun-plugin&lt;/artifactId&gt;
+                        &lt;version&gt;1.8&lt;/version&gt;
+                        &lt;executions&gt;
+                            &lt;execution&gt;
+                                &lt;id&gt;start-es&lt;/id&gt;
+                                &lt;phase&gt;pre-integration-test&lt;/phase&gt;
+                                &lt;goals&gt;
+                                    &lt;goal&gt;run&lt;/goal&gt;
+                                &lt;/goals&gt;
+                                &lt;configuration&gt;
+                                    &lt;target&gt;
+                                        &lt;property name="target.dir" value="${project.build.directory}"/&gt;
+                                        &lt;property name="elasticsearch.version" value="${elasticsearch.version}"/&gt;
+                                        &lt;ant antfile="${basedir}/it.xml" target="start"/&gt;
+                                    &lt;/target&gt;
+                                &lt;/configuration&gt;
+                            &lt;/execution&gt;
+                            &lt;execution&gt;
+                                &lt;id&gt;stop-es&lt;/id&gt;
+                                &lt;phase&gt;post-integration-test&lt;/phase&gt;
+                                &lt;goals&gt;
+                                    &lt;goal&gt;run&lt;/goal&gt;
+                                &lt;/goals&gt;
+                                &lt;configuration&gt;
+                                    &lt;target&gt;
+                                        &lt;property name="target.dir" value="${project.build.directory}"/&gt;
+                                        &lt;property name="elasticsearch.version" value="${elasticsearch.version}"/&gt;
+                                        &lt;ant antfile="${basedir}/it.xml" target="stop"/&gt;
+                                    &lt;/target&gt;
+                                &lt;/configuration&gt;
+                            &lt;/execution&gt;
+                        &lt;/executions&gt;
+                    &lt;/plugin&gt;
+                    &lt;plugin&gt;
+                        &lt;artifactId&gt;maven-failsafe-plugin&lt;/artifactId&gt;
+                        &lt;version&gt;2.19.1&lt;/version&gt;
+                        &lt;executions&gt;
+                            &lt;execution&gt;
+                                &lt;goals&gt;
+                                    &lt;goal&gt;integration-test&lt;/goal&gt;
+                                    &lt;goal&gt;verify&lt;/goal&gt;
+                                &lt;/goals&gt;
+                            &lt;/execution&gt;
+                        &lt;/executions&gt;
+                    &lt;/plugin&gt;
+                &lt;/plugins&gt;
+            &lt;/build&gt;
+        &lt;/profile&gt;</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">$ mvn -Pant install
+
+------------------------------------------------------------------------
+Building Testing with Elasticsearch 5.0 0.0.1-SNAPSHOT
+------------------------------------------------------------------------
+
+...
+
+--- maven-antrun-plugin:1.8:run (start-es) @ test-elasticsearch5 ---
+Executing tasks
+
+main:
+
+setup:
+
+start:
+     [echo] Starting Elasticsearch 5.0.1
+     [echo] Started Elasticsearch with PID 6256
+Executed tasks
+
+--- maven-failsafe-plugin:2.19.1:integration-test (default) @ test-elasticsearch5 ---
+
+-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
+Running com.github.gquintana.elasticsearch.ProductRepositoryIT
+Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 10.141 sec - in com.github.gquintana.elasticsearch.ProductRepositoryIT
+
+Results :
+
+Tests run: 4, Failures: 0, Errors: 0, Skipped: 0
+
+
+--- maven-antrun-plugin:1.8:run (stop-es) @ test-elasticsearch5 ---
+Executing tasks
+
+main:
+
+stop:
+     [echo] Stopping Elasticsearch with PID 6256
+     [echo] Stopped Elasticsearch
+Executed tasks
+...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This solution based on scripting has several shortcomings:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>It should be improved to avoid downloading and decompressing the archive again and again.</p>
+</li>
+<li>
+<p>It should be completed with a script to stop Elasticsearch and do household chores (remove, data, logs).</p>
+</li>
+<li>
+<p>It could become more complicated: it is sometimes needed to install plugins,
+tweak the <code>elasticsearch.yml</code> configuration file or set some environment variables.</p>
+</li>
+<li>
+<p>As any piece of code, it should be loved and maintained.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_elasticsearch_in_a_container">Elasticsearch in a container</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>We can delegate the downloading, starting and stopping logic to Docker.
+Starting Elasticsearch in a container is nearly as easy as:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">docker run -d --name elasticsearch-5.0 -v /usr/share/elasticsearch/data:$PWD/target/data -P elasticsearch:5.0.1
+curl "http://172.17.0.1:9200/_cluster/health?wait_for_status=yellow&amp;timeout=30s"
+
+# Run tests here...
+
+docker stop elasticsearch-5.0</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We should still wait for Elasticsearch to be started before running tests.
+Once you&#8217;re familiar with Docker, you can run the Elasticsearch container using:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://plugins.jenkins.io/docker-plugin">Docker Jenkins plugin</a></p>
+</li>
+<li>
+<p><a href="https://github.com/fabric8io/docker-maven-plugin">Docker Maven plugin</a>:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-xml" data-lang="xml">        &lt;profile&gt;
+            &lt;id&gt;docker&lt;/id&gt;
+            &lt;properties&gt;
+                &lt;elasticsearch.url&gt;http://172.17.0.1:9200&lt;/elasticsearch.url&gt;
+            &lt;/properties&gt;
+            &lt;build&gt;
+                &lt;plugins&gt;
+                    &lt;plugin&gt;
+                        &lt;groupId&gt;io.fabric8&lt;/groupId&gt;
+                        &lt;artifactId&gt;docker-maven-plugin&lt;/artifactId&gt;
+                        &lt;version&gt;0.18.1&lt;/version&gt;
+                        &lt;configuration&gt;
+                            &lt;images&gt;
+                                &lt;image&gt;
+                                    &lt;alias&gt;elasticsearch5&lt;/alias&gt;
+                                    &lt;name&gt;elasticsearch:5.0.1&lt;/name&gt;
+                                    &lt;run&gt;
+                                        &lt;volumes&gt;
+                                            &lt;bind&gt;
+                                                &lt;volume&gt;/usr/share/elasticsearch/data:${project.build.directory}/data&lt;/volume&gt;
+                                            &lt;/bind&gt;
+                                        &lt;/volumes&gt;
+                                        &lt;env&gt;
+                                            &lt;ES_JAVA_OPTS&gt;-Xmx1g -Xms1g&lt;/ES_JAVA_OPTS&gt;
+                                        &lt;/env&gt;
+                                        &lt;ports&gt;
+                                            &lt;port&gt;9200:9200&lt;/port&gt;
+                                        &lt;/ports&gt;
+                                        &lt;wait&gt;
+                                            &lt;http&gt;
+                                                &lt;url&gt;${elasticsearch.url}/_cluster/health?wait_for_status=yellow&amp;amp;timeout=30s&lt;/url&gt;
+                                                &lt;method&gt;GET&lt;/method&gt;
+                                                &lt;status&gt;200&lt;/status&gt;
+                                            &lt;/http&gt;
+                                        &lt;/wait&gt;
+                                    &lt;/run&gt;
+                                &lt;/image&gt;
+                            &lt;/images&gt;
+                        &lt;/configuration&gt;
+                        &lt;executions&gt;
+                            &lt;execution&gt;
+                                &lt;id&gt;docker-start&lt;/id&gt;
+                                &lt;phase&gt;pre-integration-test&lt;/phase&gt;
+                                &lt;goals&gt;
+                                    &lt;goal&gt;start&lt;/goal&gt;
+                                &lt;/goals&gt;
+                            &lt;/execution&gt;
+                            &lt;execution&gt;
+                                &lt;id&gt;docker-stop&lt;/id&gt;
+                                &lt;phase&gt;post-integration-test&lt;/phase&gt;
+                                &lt;goals&gt;
+                                    &lt;goal&gt;stop&lt;/goal&gt;
+                                &lt;/goals&gt;
+                            &lt;/execution&gt;
+                        &lt;/executions&gt;
+                    &lt;/plugin&gt;
+                    &lt;plugin&gt;
+                        &lt;artifactId&gt;maven-failsafe-plugin&lt;/artifactId&gt;
+                        &lt;version&gt;2.19.1&lt;/version&gt;
+                        &lt;executions&gt;
+                            &lt;execution&gt;
+                                &lt;goals&gt;
+                                    &lt;goal&gt;integration-test&lt;/goal&gt;
+                                    &lt;goal&gt;verify&lt;/goal&gt;
+                                &lt;/goals&gt;
+                            &lt;/execution&gt;
+                        &lt;/executions&gt;
+                    &lt;/plugin&gt;
+                &lt;/plugins&gt;
+            &lt;/build&gt;
+        &lt;/profile&gt;</code></pre>
+</div>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>However, running Elasticsearch in docker may not be as easy as it may seem at first sight.
+On many Linux boxes, the Elasticsearch container will stop immediately with this kind of error:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[2016-11-26T14:58:32,140][INFO ][o.e.b.BootstrapCheck     ] [3mI2H8T] bound or publishing to a non-loopback or non-link-local address, enforcing bootstrap checks
+ERROR: bootstrap checks failed
+max virtual memory areas vm.max_map_count [65530] is too low, increase to at least [262144]</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When Elasticsearch 5.0 is running inside a Docker container, it doesn&#8217;t to listen on localhost interface, but on a container interface.
+This network setting makes Elasticsearch think it is running in production mode.
+As a consequence, Elasticsearch does some additional <a href="https://www.elastic.co/blog/bootstrap_checks_annoying_instead_of_devastating">bootstrap checks</a> to avoid common production issues.
+Like on your production server, you&#8217;ll have to do some the system level tuning to allow it to start:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>sudo sysctl -w vm.max_map_count=262144</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If you don&#8217;t have sufficient privileges to change such setting, then you&#8217;re in trouble.
+I personally miss a setting to be able to disable bootstrap checking.</p>
+</div>
+</div>
+</div>]]></description><link>https://gquintana.github.io/2016/11/29/Testing-a-Java-and-Elasticsearch-50-application.html</link><guid isPermaLink="true">https://gquintana.github.io/2016/11/29/Testing-a-Java-and-Elasticsearch-50-application.html</guid><category><![CDATA[elasticsearch]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Tue, 29 Nov 2016 00:00:00 GMT</pubDate></item><item><title><![CDATA[Scaling Kafka]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>In my previous article about Kafka, I introduced some basic concepts,
