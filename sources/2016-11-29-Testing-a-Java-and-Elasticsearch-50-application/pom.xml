@@ -73,8 +73,9 @@
         </plugins>
     </build>
     <profiles>
+        <!-- tag::profile_ant[]-->
         <profile>
-            <id>it</id>
+            <id>ant</id>
             <properties>
                 <elasticsearch.url>http://localhost:9200</elasticsearch.url>
             </properties>
@@ -154,5 +155,79 @@
                 </plugins>
             </build>
         </profile>
+        <!-- end::profile_ant[]-->
+        <!-- tag::profile_docker[]-->
+        <profile>
+            <id>docker</id>
+            <properties>
+                <elasticsearch.url>http://172.17.0.1:9200</elasticsearch.url>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.fabric8</groupId>
+                        <artifactId>docker-maven-plugin</artifactId>
+                        <version>0.18.1</version>
+                        <configuration>
+                            <images>
+                                <image>
+                                    <alias>elasticsearch5</alias>
+                                    <name>elasticsearch:5.0.1</name>
+                                    <run>
+                                        <volumes>
+                                            <bind>
+                                                <volume>/usr/share/elasticsearch/data:${project.build.directory}/data</volume>
+                                            </bind>
+                                        </volumes>
+                                        <env>
+                                            <ES_JAVA_OPTS>-Xmx1g -Xms1g</ES_JAVA_OPTS>
+                                        </env>
+                                        <ports>
+                                            <port>9200:9200</port>
+                                        </ports>
+                                        <wait>
+                                            <http>
+                                                <url>${elasticsearch.url}/_cluster/health?wait_for_status=yellow&amp;timeout=30s</url>
+                                                <method>GET</method>
+                                                <status>200</status>
+                                            </http>
+                                        </wait>
+                                    </run>
+                                </image>
+                            </images>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>docker-start</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>start</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>docker-stop</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>2.19.1</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <!-- end::profile_docker[]-->
     </profiles>
 </project>

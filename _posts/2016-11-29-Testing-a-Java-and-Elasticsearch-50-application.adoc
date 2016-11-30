@@ -2,10 +2,11 @@
 :hp-tags: elasticsearch
 :published_at: 2016-11-29
 :hp-image: /images/logos/elasticsearch.png
+:source_dir: ../sources/2016-11-29-Testing-a-Java-and-Elasticsearch-50-application
 
 A long time ago, I wrote https://blog.zenika.com/2013/04/29/integrer-elasticsearch-dans-une-application-java/[this article in french] explaining
 how to test a Java application talking to Elasticsearch.
-At that time (Elasticsearch 1.x), it was easy to start en embedded Elasticsearch, it was  matter of a single line of code:
+At that time (Elasticsearch 1.x), it was easy to start en embedded Elasticsearch, it was a oneliner:
 
 [source,java]
 ----
@@ -138,9 +139,14 @@ This Ant script could be called from Maven using the Antrun plugin or from Groov
 I've created a https://github.com/gquintana/gquintana.github.io/tree/master/sources/2016-11-29-Testing-a-Java-and-Elasticsearch-50-application[sample Java project] using Elasticsearch Java Rest client to access read and write data.
 Maven starts Elasticsearch, runs integration tests and finally stops Elasticsearch:
 
+[source,xml]
+----
+include::{source_dir}/pom.xml[tags=profile_ant]
+----
+
 [source,shell]
 ----
-$ mvn -Pit install  
+$ mvn -Pant install
 
 ------------------------------------------------------------------------
 Building Testing with Elasticsearch 5.0 0.0.1-SNAPSHOT
@@ -148,23 +154,23 @@ Building Testing with Elasticsearch 5.0 0.0.1-SNAPSHOT
 
 ...
 
---- maven-antrun-plugin:1.8:run (start-es) @ test-elasticsearch5 ---                                   
-Executing tasks                                                                                        
-                                                                                                       
-main:                                                                                                  
-                                                                                                       
-setup:                                                                                                 
-                                                                                                       
-start:                                                                                                 
-     [echo] Starting Elasticsearch 5.0.1                                                               
-     [echo] Started Elasticsearch with PID 6256                                                        
-Executed tasks                                                                                         
-                                                                                                       
---- maven-failsafe-plugin:2.19.1:integration-test (default) @ test-elasticsearch5 ---                  
-                                                                                                       
--------------------------------------------------------                                                
- T E S T S                                                                                             
--------------------------------------------------------                                                
+--- maven-antrun-plugin:1.8:run (start-es) @ test-elasticsearch5 ---
+Executing tasks
+
+main:
+
+setup:
+
+start:
+     [echo] Starting Elasticsearch 5.0.1
+     [echo] Started Elasticsearch with PID 6256
+Executed tasks
+
+--- maven-failsafe-plugin:2.19.1:integration-test (default) @ test-elasticsearch5 ---
+
+-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
 Running com.github.gquintana.elasticsearch.ProductRepositoryIT
 Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 10.141 sec - in com.github.gquintana.elasticsearch.ProductRepositoryIT
 
@@ -209,10 +215,15 @@ curl "http://172.17.0.1:9200/_cluster/health?wait_for_status=yellow&timeout=30s"
 docker stop elasticsearch-5.0
 ----
 We should still wait for Elasticsearch to be started before running tests.
-Then we could run Docker container using:
+Once you're familiar with Docker, you can run the Elasticsearch container using:
 
-* https://github.com/fabric8io/docker-maven-plugin[Docker Maven plugin]
 * https://plugins.jenkins.io/docker-plugin[Docker Jenkins plugin]
+* https://github.com/fabric8io/docker-maven-plugin[Docker Maven plugin]:
++
+[source,xml]
+----
+include::{source_dir}/pom.xml[tags=profile_docker]
+----
 
 However, running Elasticsearch in docker may not be as easy as it may seem at first sight.
 On many Linux boxes, the Elasticsearch container will stop immediately with this kind of error:
@@ -223,7 +234,7 @@ ERROR: bootstrap checks failed
 max virtual memory areas vm.max_map_count [65530] is too low, increase to at least [262144]
 ----
 
-When Elasticsearch 5.0 is running inside a Docker container, it has to listen on a Docker interface, not localhost.
+When Elasticsearch 5.0 is running inside a Docker container, it doesn't to listen on localhost interface, but on a container interface.
 This network setting makes Elasticsearch think it is running in production mode.
 As a consequence, Elasticsearch does some additional https://www.elastic.co/blog/bootstrap_checks_annoying_instead_of_devastating[bootstrap checks] to avoid common production issues.
 Like on your production server, you'll have to do some the system level tuning to allow it to start:
