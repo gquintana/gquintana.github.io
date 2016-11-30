@@ -1,6 +1,6 @@
 = Testing a Java and Elasticsearch 5.0 application
 :hp-tags: elasticsearch
-:published_at: 2016-11-29
+:published_at: 2016-11-30
 :hp-image: /images/logos/elasticsearch.png
 :source_dir: ../sources/2016-11-29-Testing-a-Java-and-Elasticsearch-50-application
 
