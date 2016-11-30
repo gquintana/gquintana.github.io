@@ -24,8 +24,9 @@
         <echo message="Starting Elasticsearch ${elasticsearch.version}"/>
         <exec executable="cmd" osfamily="windows" dir="${es.dir}" failonerror="true">
             <arg value="/c"/>
+            <arg value="start"/>
+            <arg value="/b"/>
             <arg value="bin\elasticsearch.bat"/>
-            <arg value="-d"/>
             <arg value="-p"/>
             <arg value="pid"/>
         </exec>
@@ -48,6 +49,7 @@
         <read-pid/>
         <echo message="Stopping Elasticsearch with PID ${es.pid}"/>
         <exec executable="taskkill" osfamily="windows" dir="${es.dir}" failonerror="true">
+            <arg value="/F"/>
             <arg value="/pid"/>
             <arg value="${es.pid}"/>
         </exec>
