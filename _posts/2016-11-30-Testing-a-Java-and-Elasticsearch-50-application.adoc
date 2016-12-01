@@ -245,3 +245,7 @@ sudo sysctl -w vm.max_map_count=262144
 
 If you don't have sufficient privileges to change such setting, then you're in trouble.
 I personally miss a setting to be able to disable bootstrap checking.
+
+As y colleague https://twitter.com/mickaeljeanroy/status/804263195359715328[MickaelJeanroy pointed out], we could also start this Docker container from JUnit.
+There are indeed several libraries to mix Docker and JUnit: https://github.com/geowarin/docker-junit-rule[Docker JUnit Rule],another https://github.com/tdomzal/junit-docker-rule[JUnit Docker Rule], 
+https://github.com/testcontainers/testcontainers-java[Test containers].
