@@ -246,6 +246,22 @@ sudo sysctl -w vm.max_map_count=262144
 If you don't have sufficient privileges to change such setting, then you're in trouble.
 I personally miss a setting to be able to disable bootstrap checking.
 
-As y colleague https://twitter.com/mickaeljeanroy/status/804263195359715328[MickaelJeanroy pointed out], we could also start this Docker container from JUnit.
-There are indeed several libraries to mix Docker and JUnit: https://github.com/geowarin/docker-junit-rule[Docker JUnit Rule],another https://github.com/tdomzal/junit-docker-rule[JUnit Docker Rule], 
+As my colleague https://twitter.com/mickaeljeanroy/status/804263195359715328[Mickael Jeanroy pointed out], we could also start this Docker container from JUnit.
+There are indeed several libraries to mix Docker and JUnit: https://github.com/geowarin/docker-junit-rule[Docker JUnit Rule],another https://github.com/tdomzal/junit-docker-rule[JUnit Docker Rule],
 https://github.com/testcontainers/testcontainers-java[Test containers].
+Most of these libraries are based on Spotify's https://github.com/spotify/docker-client[Docker client for Java].
+
+With that kind of library, starting Elasticsearch becomes easy again:
+
+[source,java]
+----
+@ClassRule
+public static DockerRule elasticsearchRule = DockerRule.builder()
+        .imageName("elasticsearch:5.0.1")
+        .mountFrom("/usr/share/elasticsearch/data").to(dataDir())
+        .env("ES_JAVA_OPTS","-Xmx1g -Xms1g")
+        .expose("9200", "9200")
+        .waitForMessage("started")
+        .waitForHttpPing(9200)
+        .build();
+----
