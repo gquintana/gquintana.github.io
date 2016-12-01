@@ -13,7 +13,7 @@
     <link rel="shortcut icon" href="https://gquintana.github.io/favicon.ico">
 
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:400,700,400italic,700italic|Open+Sans:400italic,700italic,700,400">
-    <link rel="stylesheet" type="text/css" href="//gquintana.github.io/themes/roon/assets/css/screen.css?v=1480536867090" />
+    <link rel="stylesheet" type="text/css" href="//gquintana.github.io/themes/roon/assets/css/screen.css?v=1480625500719" />
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/idea.min.css" />
 
     <link rel="canonical" href="https://gquintana.github.io/2016/11/30/Testing-a-Java-and-Elasticsearch-50-application.html" />
@@ -525,6 +525,11 @@ Like on your production server, you&#8217;ll have to do some the system level tu
 <div class="paragraph">
 <p>If you don&#8217;t have sufficient privileges to change such setting, then you&#8217;re in trouble.
 I personally miss a setting to be able to disable bootstrap checking.</p>
+</div>
+<div class="paragraph">
+<p>As y colleague <a href="https://twitter.com/mickaeljeanroy/status/804263195359715328">MickaelJeanroy pointed out</a>, we could also start this Docker container from JUnit.
+There are indeed several libraries to mix Docker and JUnit: <a href="https://github.com/geowarin/docker-junit-rule">Docker JUnit Rule</a>,another <a href="https://github.com/tdomzal/junit-docker-rule">JUnit Docker Rule</a>,
+<a href="https://github.com/testcontainers/testcontainers-java">Test containers</a>.</p>
 </div>
 </div>
 </div>
