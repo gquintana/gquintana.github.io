@@ -13,7 +13,7 @@
     <link rel="shortcut icon" href="https://gquintana.github.io/favicon.ico">
 
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:400,700,400italic,700italic|Open+Sans:400italic,700italic,700,400">
-    <link rel="stylesheet" type="text/css" href="//gquintana.github.io/themes/roon/assets/css/screen.css?v=1480625500719" />
+    <link rel="stylesheet" type="text/css" href="//gquintana.github.io/themes/roon/assets/css/screen.css?v=1480627926808" />
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/idea.min.css" />
 
     <link rel="canonical" href="https://gquintana.github.io/2016/11/30/Testing-a-Java-and-Elasticsearch-50-application.html" />
@@ -527,9 +527,26 @@ Like on your production server, you&#8217;ll have to do some the system level tu
 I personally miss a setting to be able to disable bootstrap checking.</p>
 </div>
 <div class="paragraph">
-<p>As y colleague <a href="https://twitter.com/mickaeljeanroy/status/804263195359715328">MickaelJeanroy pointed out</a>, we could also start this Docker container from JUnit.
+<p>As my colleague <a href="https://twitter.com/mickaeljeanroy/status/804263195359715328">Mickael Jeanroy pointed out</a>, we could also start this Docker container from JUnit.
 There are indeed several libraries to mix Docker and JUnit: <a href="https://github.com/geowarin/docker-junit-rule">Docker JUnit Rule</a>,another <a href="https://github.com/tdomzal/junit-docker-rule">JUnit Docker Rule</a>,
-<a href="https://github.com/testcontainers/testcontainers-java">Test containers</a>.</p>
+<a href="https://github.com/testcontainers/testcontainers-java">Test containers</a>.
+Most of these libraries are based on Spotify&#8217;s <a href="https://github.com/spotify/docker-client">Docker client for Java</a>.</p>
+</div>
+<div class="paragraph">
+<p>With that kind of library, starting Elasticsearch becomes easy again:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-java" data-lang="java">@ClassRule
+public static DockerRule elasticsearchRule = DockerRule.builder()
+        .imageName("elasticsearch:5.0.1")
+        .mountFrom("/usr/share/elasticsearch/data").to(dataDir())
+        .env("ES_JAVA_OPTS","-Xmx1g -Xms1g")
+        .expose("9200", "9200")
+        .waitForMessage("started")
+        .waitForHttpPing(9200)
+        .build();</code></pre>
+</div>
 </div>
 </div>
 </div>
