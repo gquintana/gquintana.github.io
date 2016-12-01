@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Thu, 01 Dec 2016 20:51:40 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Testing a Java and Elasticsearch 5.0 application]]></title><description><![CDATA[<div id="preamble">
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Thu, 01 Dec 2016 21:32:06 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Testing a Java and Elasticsearch 5.0 application]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>A long time ago, I wrote <a href="https://blog.zenika.com/2013/04/29/integrer-elasticsearch-dans-une-application-java/">this article in french</a> explaining
@@ -471,9 +471,26 @@ Like on your production server, you&#8217;ll have to do some the system level tu
 I personally miss a setting to be able to disable bootstrap checking.</p>
 </div>
 <div class="paragraph">
-<p>As y colleague <a href="https://twitter.com/mickaeljeanroy/status/804263195359715328">MickaelJeanroy pointed out</a>, we could also start this Docker container from JUnit.
+<p>As my colleague <a href="https://twitter.com/mickaeljeanroy/status/804263195359715328">Mickael Jeanroy pointed out</a>, we could also start this Docker container from JUnit.
 There are indeed several libraries to mix Docker and JUnit: <a href="https://github.com/geowarin/docker-junit-rule">Docker JUnit Rule</a>,another <a href="https://github.com/tdomzal/junit-docker-rule">JUnit Docker Rule</a>,
-<a href="https://github.com/testcontainers/testcontainers-java">Test containers</a>.</p>
+<a href="https://github.com/testcontainers/testcontainers-java">Test containers</a>.
+Most of these libraries are based on Spotify&#8217;s <a href="https://github.com/spotify/docker-client">Docker client for Java</a>.</p>
+</div>
+<div class="paragraph">
+<p>With that kind of library, starting Elasticsearch becomes easy again:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-java" data-lang="java">@ClassRule
+public static DockerRule elasticsearchRule = DockerRule.builder()
+        .imageName("elasticsearch:5.0.1")
+        .mountFrom("/usr/share/elasticsearch/data").to(dataDir())
+        .env("ES_JAVA_OPTS","-Xmx1g -Xms1g")
+        .expose("9200", "9200")
+        .waitForMessage("started")
+        .waitForHttpPing(9200)
+        .build();</code></pre>
+</div>
 </div>
 </div>
 </div>]]></description><link>https://gquintana.github.io/2016/11/30/Testing-a-Java-and-Elasticsearch-50-application.html</link><guid isPermaLink="true">https://gquintana.github.io/2016/11/30/Testing-a-Java-and-Elasticsearch-50-application.html</guid><category><![CDATA[elasticsearch]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Wed, 30 Nov 2016 00:00:00 GMT</pubDate></item><item><title><![CDATA[Scaling Kafka]]></title><description><![CDATA[<div id="preamble">
