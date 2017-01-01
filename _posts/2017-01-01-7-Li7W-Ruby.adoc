@@ -1,0 +1,36 @@
+# 7Li7W: Ruby
+
+:hp-tags: 7li7w, ruby
+
+One of my 2017 resolutions is to try different languages and see how they compare to Java.
+This is inspired by the https://pragprog.com/book/btlang/seven-languages-in-seven-weeks[7 languages in 7 weeks] book by Bruce A. Tate.
+
+The first language I've tried is Ruby.
+Ruby was created by Yukihiro Matsumoto in the nineties (like Java).
+I mostly heard of it through the Ruby on Rails web framework.
+I used the http://rubykoans.com/[Ruby Koans] to teach myself Ruby.
+
+## The good
+
+[source,ruby]
+----
+a=["one","two","three","four"]
+puts a[1..-2]
+# => two three
+first, *tail = a
+----
+
+## The bad
+
+
+## Everything else
+
+Objects have a numeric Id which can be used for reference comparison
+
+[source,ruby]
+----
+o=Object.new
+put o.object_id
+# => 4376500
+----
+
