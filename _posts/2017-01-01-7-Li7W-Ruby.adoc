@@ -23,7 +23,7 @@ first, *tail = a
 ## The bad
 
 
-## Everything else
+## The odd
 
 Objects have a numeric Id which can be used for reference comparison
 
@@ -34,3 +34,10 @@ put o.object_id
 # => 4376500
 ----
 
+Strings are mutable
+
+[source, ruby]
+----
+hi = "Hello "
+hi << "world"
+----
