@@ -4,6 +4,7 @@
 
 One of my 2017 resolutions is to try different languages and see how they compare to Java.
 This is inspired by the https://pragprog.com/book/btlang/seven-languages-in-seven-weeks[7 languages in 7 weeks] book by Bruce A. Tate.
+I don't expect to learn a new language each week though, since it took me several weeks for Ruby.
 
 The first language I've tried is Ruby.
 Ruby was created by Yukihiro Matsumoto in the nineties (like Java).
@@ -12,21 +13,96 @@ I used the http://rubykoans.com/[Ruby Koans] to teach myself Ruby.
 
 ## The good
 
+Ruby has a lot of syntactic sugar which makes code really easy to read and short to write.
+
+The first example deals with arrays:
 [source,ruby]
 ----
 a=["one","two","three","four"]
-puts a[1..-2]
-# => two three
-first, *tail = a
+puts a[1..-2] # <1>
+
+first, *tail = a # <2>
 ----
+<1> Prints two and three whose indices are between 1 and length-2
+<2> Is used to destructure the array `first` contains one and tail an array of two, three, four
+
+There is a really nice templating system in strings:
+[source,ruby]
+----
+i=4
+puts "Square root of #{i} is #{Math.sqrt(i)}" <1>
+# => Square root of 4 is 2.0
+----
+<1> Prints _Square root of 4 is 2.0_
 
 ## The bad
+
+There is a an `unless` which does the contrary of `if`
+[source,ruby]
+----
+b=false
+unless b    # Same as if !b
+  puts "False"
+end
+----
+Sticking to the `if` keyword looks like better option to me.
+
+Doing functional programming with Ruby is clearly possible.
+But it doesn't look natural to me.
+First the lambda functions syntax could be simpler:
+[source,ruby]
+----
+twice = lambda { |x| 2 * x } # <1>
+puts twice.call(3) # <2>
+
+twice = lambda do |x| <2>
+  2 * x
+end
+----
+<1> Means x -> 2 * x
+<2> The `call` method is used to invoke the function
+<3> the `{ ... }` delimiter can be replaced by `do ... end` for multiline functions
+
+The passing functions to methods can use a special feature.
+Methods can receive a block of code as a special argument,
+this block is then called using the `yield` keyword.
+[source,ruby]
+----
+class Demo
+  def say_hello
+    if block_given?
+      message = yield("Hello World!") <2> # Calls the code block
+    else
+      message = "Hello World!"
+    end
+    puts message
+  end
+  def yell_hello
+    say_hello { |s| s.upcase } <1>
+  end
+end
+----
+<1> Invoke the `say_hello` method if a block of code
+<2> Invoke the block and pass it some parameters
+
+I first wondered why the block wasn't passed as other method arguments,
+and why it was handled as a special argument.
+The reason is that it allows do "sandwich code":
+[source,ruby]
+----
+open(file_name) do |file| # <1>
+  # Do something with opened file
+end # <2>
+----
+<1> Open the file named `file_name` and make it available to the block
+<2> Close the file
+
+This looks like Java's try-with-resources
 
 
 ## The odd
 
-Objects have a numeric Id which can be used for reference comparison
-
+Objects have a numeric Id which can be used for reference comparison:
 [source,ruby]
 ----
 o=Object.new
@@ -34,10 +110,28 @@ put o.object_id
 # => 4376500
 ----
 
-Strings are mutable
-
+Strings are mutable:
 [source, ruby]
 ----
 hi = "Hello "
 hi << "world"
+----
+The above example is similar to a Java `StringBuilder`.
+
+Multiline strings is something I miss in Java, but Ruby's syntax is strange.
+They are delimited with `%{ ... }` or `%! ... !` or ...:
+[source, ruby]
+----
+multiline = %{
+First line
+Second line
+}
+----
+
+I had hard time understanding the concept of *Symbol*.
+A symbol is a kind of immutable and unique string which can be used as a constant or as a label.
+[source, ruby]
+----
+color = :red
+color = :blue
 ----
