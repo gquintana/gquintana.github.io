@@ -1,4 +1,4 @@
-# 7Li7W: Ruby
+# From Java to Ruby
 
 :hp-tags: 7li7w, ruby
 
