@@ -1,19 +1,22 @@
 # From Java to Ruby
 
 :hp-tags: 7li7w, ruby
+:source_dir: ../sources/2017-01-01-From-Java-to-Ruby
 
-One of my 2017 resolutions is to try different languages and see how they compare to Java.
+One of my 2017 resolutions wille be to try different languages and see how they compare to Java.
 This is inspired by the https://pragprog.com/book/btlang/seven-languages-in-seven-weeks[7 languages in 7 weeks] book by Bruce A. Tate.
 I don't expect to learn a new language each week though, since it took me several weeks for Ruby.
 
 The first language I've tried is Ruby.
 Ruby was created by Yukihiro Matsumoto in the nineties (like Java).
-I mostly heard of it through the Ruby on Rails web framework.
+I've seen and used Ruby many times: Vagrant configuration, Logstash plugins, FluentD plugins, Rails applications...
 I used the http://rubykoans.com/[Ruby Koans] to teach myself Ruby.
 
 ## The good
 
-Ruby has a lot of syntactic sugar which makes code really easy to read and short to write.
+Ruby has a lot of syntactic sugar which makes code really easy to read, and short to write.
+
+### Syntactic sugar everywhere
 
 The first example deals with arrays:
 [source,ruby]
@@ -26,44 +29,93 @@ first, *tail = a # <2>
 <1> Prints two and three whose indices are between 1 and length-2
 <2> Is used to destructure the array `first` contains one and tail an array of two, three, four
 
-There is a really nice templating system in strings:
+The second one shows the templating system in strings:
 [source,ruby]
 ----
 i=4
-puts "Square root of #{i} is #{Math.sqrt(i)}" <1>
-# => Square root of 4 is 2.0
+puts "Square root of #{i} is #{Math.sqrt(i)}" # <1>
 ----
 <1> Prints _Square root of 4 is 2.0_
 
-## The bad
-
-There is a an `unless` which does the contrary of `if`
+Now let's see getters and setters.
+By default attributes a private, while methods are public:
 [source,ruby]
 ----
-b=false
-unless b    # Same as if !b
-  puts "False"
+class Person
+  def name            # <1>
+    @name
+  end
+  def name=(new_name) # <2>
+    @name=new_name
+  end
 end
+
+p=Person.new
+p.name="John Doe"     # <3>
+puts p.name           # <4>
 ----
+<1> Declare a getter, `return` is optional
+<2> Declare a setter, notice this funny method name `name=`
+<3> Call the setter
+<4> Call the getter
+
+### Meta programming
+
+Ruby has a powerful API similar to Java reflection:
+[source,ruby]
+----
+include::{source_dir}/reflect.rb[]
+----
+----
+Hello
+Call say with ["Goodbye"]
+----
+The above example shows how to generate methods in an existing class.
+With this API, creating a proxy to wrap an object and do some kind of AOP is simple:
+[source,ruby]
+----
+include::{source_dir}/proxy.rb[]
+----
+----
+Before upcase []
+After upcase: HELLO WORLD!
+HELLO WORLD!
+----
+
+
+## The bad
+
+### Unless
+
+There is a an `unless` keyword which does the contrary of `if`
+[source,ruby]
+----
+include::{source_dir}/control.rb[tags=unless1]
+----
+<1> Is the same as `if !rude`
+
 Sticking to the `if` keyword looks like better option to me.
+
+However, I have to admit that this syntax is not as bad:
+[source,ruby]
+----
+include::{source_dir}/control.rb[tags=unless2]
+----
+
+### Functional programming
 
 Doing functional programming with Ruby is clearly possible.
 But it doesn't look natural to me.
 First the lambda functions syntax could be simpler:
 [source,ruby]
 ----
-twice = lambda { |x| 2 * x } # <1>
-puts twice.call(3) # <2>
-
-twice = lambda do |x| <2>
-  2 * x
-end
+include::{source_dir}/functional.rb[tags=simple]
 ----
 <1> Means x -> 2 * x
 <2> The `call` method is used to invoke the function
 <3> the `{ ... }` delimiter can be replaced by `do ... end` for multiline functions
 
-The passing functions to methods can use a special feature.
+Then passing functions to methods uses a special feature.
 Methods can receive a block of code as a special argument,
 this block is then called using the `yield` keyword.
 [source,ruby]
@@ -71,14 +123,14 @@ this block is then called using the `yield` keyword.
 class Demo
   def say_hello
     if block_given?
-      message = yield("Hello World!") <2> # Calls the code block
+      message = yield("Hello World!") # <2>
     else
       message = "Hello World!"
     end
     puts message
   end
   def yell_hello
-    say_hello { |s| s.upcase } <1>
+    say_hello { |s| s.upcase } # <1>
   end
 end
 ----
@@ -87,7 +139,7 @@ end
 
 I first wondered why the block wasn't passed as other method arguments,
 and why it was handled as a special argument.
-The reason is that it allows do "sandwich code":
+The reason is probably that it allows do "sandwich code":
 [source,ruby]
 ----
 open(file_name) do |file| # <1>
@@ -99,6 +151,60 @@ end # <2>
 
 This looks like Java's try-with-resources
 
+### Open classes
+
+Classes are open which means, anyone can add a method to any class, even system ones:
+[source,ruby]
+----
+class ::Integer      # <1>
+  def even?          # <2>
+    (self % 2) == 0
+  end
+end
+
+puts 1.even?         # <3>
+----
+<1> Let's add method to integers
+<2> Funny fact: in Ruby's naming conventions method returning a boolean should end with `?`
+<3> Prints `false`
+
+While it can be useful, placed in wrong hands, this weapon may be harmful.
+Yet existing methods can not be replaced.
+
+### Building and packaging
+
+Ruby libraries and applications are packaged as _Gems_ which are Zip archive
+along with metadata like Java's Jar files.
+
+To start a Ruby project, 4 tools are needed:
+
+* *Ruby*: there are multiple versions and variants (MRI, JRuby...) to choose from.
+  *https://rvm.io[RVM]* (Ruby Version Manager) is an optional tool to install
+  and activate the appropriate one.
+* *Gem* is the tool to download gems from http://rubygems.org
+  (which is a sort of Maven Central repository)
+  and unzip them in the local repository.
+* *http://bundler.io[Bundler]* takes a bill of materials,
+  the list of dependencies for the project,
+  and runs Gem to download and install them.
+* *http://www.rubyrake.org[Rake]*
+  (Ruby Make) is Ruby build tool, it can process files, run unit tests...
+
+And 2 files are need to describe a project:
+
+* *Gemfile* contains the list of Gems needed to build and run the project
+[source,ruby]
+----
+include::{source_dir}/fizzbuzz/Gemfile[]
+----
+* *Rakefile* describes how to build the project
+[source,ruby]
+----
+include::{source_dir}/fizzbuzz/Rakefile[]
+----
+
+For the newcomer, starting a project is not a trivial task.
+I had to read each tool documentation, look for an example and assemble the tools.
 
 ## The odd
 
@@ -110,13 +216,15 @@ put o.object_id
 # => 4376500
 ----
 
+### Strings
+
 Strings are mutable:
 [source, ruby]
 ----
 hi = "Hello "
 hi << "world"
 ----
-The above example is similar to a Java `StringBuilder`.
+The above example is similar to a Java `StringBuilder`: at the end `hi` contains `Hello world`.
 
 Multiline strings is something I miss in Java, but Ruby's syntax is strange.
 They are delimited with `%{ ... }` or `%! ... !` or ...:
@@ -128,10 +236,65 @@ Second line
 }
 ----
 
+### Symbols
+
 I had hard time understanding the concept of *Symbol*.
+
 A symbol is a kind of immutable and unique string which can be used as a constant or as a label.
 [source, ruby]
 ----
 color = :red
 color = :blue
 ----
+`red` and `blue` are symbols.
+
+Symbols are used with meta programming to identify methods, attributes and so forth:
+[source, ruby]
+----
+class Person
+  attr_reader :id  <1>
+  attr_accessor :name <2>
+end
+----
+<1> The `id` attribute is read-only, it has a setter
+<2> The `name` attribute is read/write, it has a getter and a setter
+
+Symbols are often used as hash map keys because they are unique:
+[source, ruby]
+----
+ages = { :bob => 23, :john => 35 }
+ages = { bob: 23, john: 35}
+----
+Since Ruby 2, the two above hashes are identical.
+
+
+### Modules
+
+Modules are a bit like Java packages, they are used as namespaces.
+
+The weird part, is that a module can contain classes and a class can contain modules:
+[source, ruby]
+----
+module Demo # <1>
+  class Thing
+    module Nameable # <2>
+      def set_name(name)
+        @name = name
+      end
+    end
+  end
+  class Pet < Thing
+    include Thing::Nameable
+  end
+end
+
+medor = Demo::Pet.new
+medor.set_name("Médor") # <3>
+----
+<1> The `Demo` module is used as a _container_ for `Thing` and `Pet` classes.
+<2> The `Nameable` module is used as a _mixin_.
+<3> The `Pet` class as `set_name` method.
+
+## Conclusion
+
+I don't pretend to be a Ruby expert at all, if I wrote something wrong, tell me.
