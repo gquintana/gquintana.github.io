@@ -4,20 +4,20 @@
 :source_dir: ../sources/2017-01-01-From-Java-to-Ruby
 :hp-image: /images/logos/ruby.png
 
-One of my 2017 resolutions wille be to try different languages and see how they compare to Java.
+One of my 2017 resolutions will be to try different languages and see how they compare to Java.
 This is inspired by the https://pragprog.com/book/btlang/seven-languages-in-seven-weeks[7 languages in 7 weeks] book by Bruce A. Tate.
-I don't expect to learn a new language each week though, since it took me several weeks for Ruby.
+Yet I don't expect to learn a new language each week though, since it took me several weeks for Ruby.
 
 The first language I've tried is Ruby.
 Ruby was created by Yukihiro Matsumoto in the nineties (like Java).
-I've seen and used Ruby many times: Vagrant configuration, Logstash plugins, FluentD plugins, Rails applications...
+I've already seen and used Ruby many times: Vagrant configuration, Logstash plugins, FluentD plugins, Rails applications...
 I used the http://rubykoans.com/[Ruby Koans] to teach myself Ruby.
 
 ## The good
 
-Ruby has a lot of syntactic sugar which makes code really easy to read, and short to write.
-
 ### Syntactic sugar everywhere
+
+Ruby has a lot of syntactic sugar which makes code really easy to read, and short to write.
 
 The first example deals with arrays:
 [source,ruby]
@@ -28,9 +28,9 @@ puts a[1..-2] # <1>
 first, *tail = a # <2>
 ----
 <1> Prints two and three whose indices are between 1 and length-2
-<2> Is used to destructure the array `first` contains one and tail an array of two, three, four
+<2> The array is destructured: `first` contains one and `tail` an array of two, three, four
 
-The second one shows the templating system in strings:
+The second example shows the templating system in strings:
 [source,ruby]
 ----
 i=4
@@ -88,7 +88,7 @@ HELLO WORLD!
 
 ### Unless
 
-There is a an `unless` keyword which does the contrary of `if`
+I am not a big fan of this `unless` keyword which does the contrary of `if`
 [source,ruby]
 ----
 include::{source_dir}/control.rb[tags=unless1]
@@ -107,6 +107,7 @@ include::{source_dir}/control.rb[tags=unless2]
 
 Doing functional programming with Ruby is clearly possible.
 But it doesn't look natural to me.
+
 First the lambda functions syntax could be simpler:
 [source,ruby]
 ----
@@ -150,7 +151,7 @@ end # <2>
 <1> Open the file named `file_name` and make it available to the block
 <2> Close the file
 
-This looks like Java's try-with-resources
+This looks like Java's try-with-resources statement.
 
 ### Open classes
 
@@ -165,7 +166,7 @@ end
 
 puts 1.even?         # <3>
 ----
-<1> Let's add method to integers
+<1> Let's add a method to integers
 <2> Funny fact: in Ruby's naming conventions method returning a boolean should end with `?`
 <3> Prints `false`
 
@@ -205,7 +206,7 @@ include::{source_dir}/fizzbuzz/Rakefile[]
 ----
 
 For the newcomer, starting a project is not a trivial task.
-I had to read each tool documentation, look for an example and assemble the tools.
+I had to read each tool documentation, look for an example of each config file and assemble the whole.
 
 ## The odd
 
@@ -295,6 +296,8 @@ medor.set_name("Médor") # <3>
 <1> The `Demo` module is used as a _container_ for `Thing` and `Pet` classes.
 <2> The `Nameable` module is used as a _mixin_.
 <3> The `Pet` class as `set_name` method.
+
+In fact a module and a class are close concepts, a class is a module which can be instiated.
 
 ## Conclusion
 
