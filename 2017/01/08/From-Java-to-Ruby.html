@@ -13,7 +13,7 @@
     <link rel="shortcut icon" href="https://gquintana.github.io/favicon.ico">
 
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:400,700,400italic,700italic|Open+Sans:400italic,700italic,700,400">
-    <link rel="stylesheet" type="text/css" href="//gquintana.github.io/themes/roon/assets/css/screen.css?v=1483867814737" />
+    <link rel="stylesheet" type="text/css" href="//gquintana.github.io/themes/roon/assets/css/screen.css?v=1483906314119" />
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/idea.min.css" />
 
     <link rel="canonical" href="https://gquintana.github.io/2017/01/08/From-Java-to-Ruby.html" />
@@ -60,13 +60,13 @@ null
 <div class="paragraph">
 <p>One of my 2017 resolutions is to try different languages and see how they compare to Java.
 This is inspired by the <a href="https://pragprog.com/book/btlang/seven-languages-in-seven-weeks">7 languages in 7 weeks</a> book by Bruce A. Tate.
-I don&#8217;t expect to learn a new language each week though, since it took me several weeks for Ruby.</p>
+I don&#8217;t expect to learn a new language each week though, since it took me several weeks only for the first one.</p>
 </div>
 <div class="paragraph">
-<p>So the first language I&#8217;ve tried is Ruby.
-Ruby was created by Yukihiro Matsumoto in the nineties (like Java).
-I&#8217;ve already seen and used Ruby many times: Vagrant configuration, Logstash plugins, FluentD plugins, Rails applications&#8230;&#8203;
-I used the <a href="http://rubykoans.com/">Ruby Koans</a> to teach myself Ruby.</p>
+<p>The first language I&#8217;ve tried is Ruby.
+I&#8217;ve already seen Ruby used many times: Vagrant configuration, Logstash plugins, FluentD plugins, web applications like Kibana 2&#8230;&#8203;
+But I don&#8217;t have any experience in Ruby development.
+So I used the <a href="http://rubykoans.com/">Ruby Koans</a> to teach myself Ruby.</p>
 </div>
 </div>
 </div>
@@ -174,7 +174,7 @@ puts p.name           <i class="conum" data-value="4"></i><b>(4)</b></code></pre
     puts "Hello"
   end
   def method_missing(method_name, *arguments, &amp;block)
-    puts "Call #{method_name} with #{arguments}"
+    puts "Call #{method_name} with #{arguments}" <i class="conum" data-value="1"></i><b>(1)</b>
   end
 end
 
@@ -182,6 +182,10 @@ s = Talkative.new
 s.say_hello
 s.say("Goodbye")</code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p>As the <code>say</code> method is not implemented, the <code>method_missing</code> is called.
+You will notice that a method call is made of a <code>method_name</code>, an array of <code>arguments</code>, and a code <code>block</code> (I&#8217;ll tell more on that later).</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -200,18 +204,34 @@ With this API, creating a proxy to wrap an object and do some kind of AOP is sim
     @object = target_object
   end
   def method_missing(method_name, *arguments, &amp;block)
-    if @object.respond_to?(method_name)
+    if @object.respond_to?(method_name)                      <i class="conum" data-value="1"></i><b>(1)</b>
       puts "Before #{method_name} #{arguments}"
-      result = @object.send(method_name, *arguments, &amp;block)
+      result = @object.send(method_name, *arguments, &amp;block) <i class="conum" data-value="2"></i><b>(2)</b>
       puts "After #{method_name}: #{result}"
       return result
     end
   end
 end
 
-s = Proxy.new("Hello world!")
+s = Proxy.new("Hello world!")                                <i class="conum" data-value="3"></i><b>(3)</b>
 puts s.upcase</code></pre>
 </div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Check whether the target object has the method or not</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Call the method on the target object.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Wrap the string in a proxy</td>
+</tr>
+</table>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -257,7 +277,7 @@ Second line
 <div class="sect2">
 <h3 id="_unless">Unless</h3>
 <div class="paragraph">
-<p>I am not a big fan of this <code>unless</code> keyword which does the contrary of <code>if</code></p>
+<p>I am not a big fan of the <code>unless</code> keyword which does the contrary of <code>if</code></p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -442,7 +462,8 @@ and activate the appropriate one.</p>
 <li>
 <p><strong>Gem</strong> is the tool to download gems from <a href="http://rubygems.org" class="bare">http://rubygems.org</a>
 (which is a sort of Maven Central repository)
-and unzip them in the local repository.</p>
+and unzip them in the local repository.
+It&#8217;s a package manager like Yum, NPM&#8230;&#8203;</p>
 </li>
 <li>
 <p><strong><a href="http://bundler.io">Bundler</a></strong> takes a bill of materials,
@@ -461,7 +482,7 @@ and runs Gem to download and install them.</p>
 <div class="ulist">
 <ul>
 <li>
-<p><strong>Gemfile</strong> contains the list of Gems needed to build and run the project</p>
+<p><strong>Gemfile</strong> contains the list of Gems needed to build and run the project. It&#8217;s used by Bundler.</p>
 </li>
 </ul>
 </div>
@@ -476,7 +497,7 @@ gem 'rspec-collection_matchers'</pre>
 <div class="ulist">
 <ul>
 <li>
-<p><strong>Rakefile</strong> describes how to build the project</p>
+<p><strong>Rakefile</strong> describes how to build the project. It&#8217;s Rake configuration file.</p>
 </li>
 </ul>
 </div>
@@ -495,7 +516,8 @@ end</pre>
 </div>
 <div class="paragraph">
 <p>For the newcomer, starting a project is not a trivial task.
-I had to read each tool documentation, look for an example of each config file and assemble the whole.</p>
+I had to read each tool documentation independently,
+look for an example of each config file and assemble the whole.</p>
 </div>
 </div>
 </div>
@@ -561,7 +583,7 @@ end</code></pre>
 </table>
 </div>
 <div class="paragraph">
-<p>Symbols are often used as hash map keys because they are unique:</p>
+<p>Symbols are also used as hash map keys because they are unique:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -626,7 +648,8 @@ medor.set_name("Médor") <i class="conum" data-value="3"></i><b>(3)</b></code></
 <h2 id="_conclusion">Conclusion</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Ruby is close to Java because has the same OOP roots, both are inspired by Smalltalk.</p>
+<p>Ruby is close to Java because it has the same OOP roots: both are inspired by Smalltalk,
+both were born in the nineties.</p>
 </div>
 <div class="paragraph">
 <p>I don&#8217;t pretend to be a Ruby expert at all, if I wrote something wrong, tell me.</p>
