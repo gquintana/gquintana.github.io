@@ -4,11 +4,11 @@
 :source_dir: ../sources/2017-01-01-From-Java-to-Ruby
 :hp-image: /images/logos/ruby.png
 
-One of my 2017 resolutions will be to try different languages and see how they compare to Java.
+One of my 2017 resolutions is to try different languages and see how they compare to Java.
 This is inspired by the https://pragprog.com/book/btlang/seven-languages-in-seven-weeks[7 languages in 7 weeks] book by Bruce A. Tate.
-Yet I don't expect to learn a new language each week though, since it took me several weeks for Ruby.
+I don't expect to learn a new language each week though, since it took me several weeks for Ruby.
 
-The first language I've tried is Ruby.
+So the first language I've tried is Ruby.
 Ruby was created by Yukihiro Matsumoto in the nineties (like Java).
 I've already seen and used Ruby many times: Vagrant configuration, Logstash plugins, FluentD plugins, Rails applications...
 I used the http://rubykoans.com/[Ruby Koans] to teach myself Ruby.
@@ -60,6 +60,8 @@ puts p.name           # <4>
 <3> Call the setter
 <4> Call the getter
 
+I'll show later that getters and setters can be generated.
+
 ### Meta programming
 
 Ruby has a powerful API similar to Java reflection:
@@ -85,6 +87,27 @@ HELLO WORLD!
 
 
 ## The bad
+
+### Strings
+
+Strings are mutable:
+[source, ruby]
+----
+hi = "Hello "
+hi << "world"
+----
+The above example is similar to a Java `StringBuilder`: at the end `hi` contains `Hello world`.
+I know that having immutable Strings in Java allows many optimizations in the JVM, I wonder what's the performance penalty of having mutable strings.
+
+Multiline strings is something I miss in Java, but Ruby's syntax is rather strange.
+They are delimited with `%{ ... }` or `%! ... !` or ...:
+[source, ruby]
+----
+multiline = %{
+First line
+Second line
+}
+----
 
 ### Unless
 
@@ -117,7 +140,7 @@ include::{source_dir}/functional.rb[tags=simple]
 <2> The `call` method is used to invoke the function
 <3> the `{ ... }` delimiter can be replaced by `do ... end` for multiline functions
 
-Then passing functions to methods uses a special feature.
+Then, passing functions to methods uses a special feature.
 Methods can receive a block of code as a special argument,
 this block is then called using the `yield` keyword.
 [source,ruby]
@@ -148,10 +171,11 @@ open(file_name) do |file| # <1>
   # Do something with opened file
 end # <2>
 ----
-<1> Open the file named `file_name` and make it available to the block
+<1> Open the file named `file_name` and make it available to the block.
 <2> Close the file
 
-This looks like Java's try-with-resources statement.
+The `open` method takes two arguments the file name and the code block dealing with the file.
+In the end, this looks like Java's try-with-resources statement.
 
 ### Open classes
 
@@ -175,8 +199,8 @@ Yet existing methods can not be replaced.
 
 ### Building and packaging
 
-Ruby libraries and applications are packaged as _Gems_ which are Zip archive
-along with metadata like Java's Jar files.
+Ruby libraries and applications are packaged as _Gems_ which are Zip archives
+containing code and metadata, a bit like Java's Jar files.
 
 To start a Ruby project, 4 tools are needed:
 
@@ -214,29 +238,9 @@ Objects have a numeric Id which can be used for reference comparison:
 [source,ruby]
 ----
 o=Object.new
-put o.object_id
-# => 4376500
+puts o.object_id # <1>
 ----
-
-### Strings
-
-Strings are mutable:
-[source, ruby]
-----
-hi = "Hello "
-hi << "world"
-----
-The above example is similar to a Java `StringBuilder`: at the end `hi` contains `Hello world`.
-
-Multiline strings is something I miss in Java, but Ruby's syntax is strange.
-They are delimited with `%{ ... }` or `%! ... !` or ...:
-[source, ruby]
-----
-multiline = %{
-First line
-Second line
-}
-----
+<1> The object Id is a numeric value, for instance 4376500
 
 ### Symbols
 
@@ -248,7 +252,7 @@ A symbol is a kind of immutable and unique string which can be used as a constan
 color = :red
 color = :blue
 ----
-`red` and `blue` are symbols.
+In this example, `red` and `blue` are symbols used as enum values.
 
 Symbols are used with meta programming to identify methods, attributes and so forth:
 [source, ruby]
@@ -300,5 +304,7 @@ medor.set_name("Médor") # <3>
 In fact a module and a class are close concepts, a class is a module which can be instiated.
 
 ## Conclusion
+
+Ruby is close to Java because has the same OOP roots, both are inspired by Smalltalk.
 
 I don't pretend to be a Ruby expert at all, if I wrote something wrong, tell me.
