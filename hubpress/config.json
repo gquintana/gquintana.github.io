@@ -8,7 +8,8 @@
     "title": "JRald",
     "description": "Yet another blog about tech stuff",
     "postsPerPage": "5",
-    "googleAnalytics": "UA-85700184-1"
+    "googleAnalytics": "UA-85700184-1",
+    "disqus": "https-gquintana-github-io"
   },
   "socialnetwork": {
     "twitter": "gerald_quintana",
