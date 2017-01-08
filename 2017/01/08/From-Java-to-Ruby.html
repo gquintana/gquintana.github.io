@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <title>From Java to Ruby</title>
+    <meta name="description" content="" />
+
+    <meta name="HandheldFriendly" content="True" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="shortcut icon" href="https://gquintana.github.io/favicon.ico">
+
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:400,700,400italic,700italic|Open+Sans:400italic,700italic,700,400">
+    <link rel="stylesheet" type="text/css" href="//gquintana.github.io/themes/roon/assets/css/screen.css?v=1483867814737" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/idea.min.css" />
+
+    <link rel="canonical" href="https://gquintana.github.io/2017/01/08/From-Java-to-Ruby.html" />
+    <meta name="referrer" content="origin" />
+    
+    <meta property="og:site_name" content="JRald" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="From Java to Ruby" />
+    <meta property="og:description" content="One of my 2017 resolutions is to try different languages and see how they compare to Java. This is inspired by the 7 languages in 7 weeks book by Bruce A. Tate. I don&amp;#8217;t expect to learn a new language each week though, since it took me several" />
+    <meta property="og:url" content="https://gquintana.github.io/2017/01/08/From-Java-to-Ruby.html" />
+    <meta property="article:tag" content="7li7w" />
+    <meta property="article:tag" content=" ruby" />
+    
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="From Java to Ruby" />
+    <meta name="twitter:description" content="One of my 2017 resolutions is to try different languages and see how they compare to Java. This is inspired by the 7 languages in 7 weeks book by Bruce A. Tate. I don&amp;#8217;t expect to learn a new language each week though, since it took me several" />
+    <meta name="twitter:url" content="https://gquintana.github.io/2017/01/08/From-Java-to-Ruby.html" />
+    
+    <script type="application/ld+json">
+null
+    </script>
+
+    <meta name="generator" content="HubPress" />
+    <link rel="alternate" type="application/rss+xml" title="JRald" href="https://gquintana.github.io/rss/" />
+</head>
+<body class="post-template tag-7li7w tag-ruby  ">
+
+    
+
+
+    <article role="main" class="image">
+        <header>
+            <a href="https://gquintana.github.io" id="home_link">«</a>
+            <div class="meta"><time datetime="2017-01-08"><a href="https://gquintana.github.io/2017/01/08/From-Java-to-Ruby.html">January 08, 2017</a></time> <span class="count" id="js-reading-time"></span></div>
+            <h1>
+                    <img src="../../..//images/logos/ruby.png">
+                From Java to Ruby
+            </h1>
+        </header>
+
+        <div class="text" id="js-post-content">
+            <div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>One of my 2017 resolutions is to try different languages and see how they compare to Java.
+This is inspired by the <a href="https://pragprog.com/book/btlang/seven-languages-in-seven-weeks">7 languages in 7 weeks</a> book by Bruce A. Tate.
+I don&#8217;t expect to learn a new language each week though, since it took me several weeks for Ruby.</p>
+</div>
+<div class="paragraph">
+<p>So the first language I&#8217;ve tried is Ruby.
+Ruby was created by Yukihiro Matsumoto in the nineties (like Java).
+I&#8217;ve already seen and used Ruby many times: Vagrant configuration, Logstash plugins, FluentD plugins, Rails applications&#8230;&#8203;
+I used the <a href="http://rubykoans.com/">Ruby Koans</a> to teach myself Ruby.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_good">The good</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_syntactic_sugar_everywhere">Syntactic sugar everywhere</h3>
+<div class="paragraph">
+<p>Ruby has a lot of syntactic sugar which makes code really easy to read, and short to write.</p>
+</div>
+<div class="paragraph">
+<p>The first example deals with arrays:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-ruby" data-lang="ruby">a=["one","two","three","four"]
+puts a[1..-2] <i class="conum" data-value="1"></i><b>(1)</b>
+
+first, *tail = a <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Prints two and three whose indices are between 1 and length-2</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The array is destructured: <code>first</code> contains one and <code>tail</code> an array of two, three, four</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The second example shows the templating system in strings:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-ruby" data-lang="ruby">i=4
+puts "Square root of #{i} is #{Math.sqrt(i)}" <i class="conum" data-value="1"></i><b>(1)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Prints <em>Square root of 4 is 2.0</em></td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Now let&#8217;s see getters and setters.
+By default attributes a private, while methods are public:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-ruby" data-lang="ruby">class Person
+  def name            <i class="conum" data-value="1"></i><b>(1)</b>
+    @name
+  end
+  def name=(new_name) <i class="conum" data-value="2"></i><b>(2)</b>
+    @name=new_name
+  end
+end
+
+p=Person.new
+p.name="John Doe"     <i class="conum" data-value="3"></i><b>(3)</b>
+puts p.name           <i class="conum" data-value="4"></i><b>(4)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Declare a getter, <code>return</code> is optional</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Declare a setter, notice this funny method name <code>name=</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Call the setter</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Call the getter</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>I&#8217;ll show later that getters and setters can be generated.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_meta_programming">Meta programming</h3>
+<div class="paragraph">
+<p>Ruby has a powerful API similar to Java reflection:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-ruby" data-lang="ruby">class Talkative
+  def say_hello
+    puts "Hello"
+  end
+  def method_missing(method_name, *arguments, &amp;block)
+    puts "Call #{method_name} with #{arguments}"
+  end
+end
+
+s = Talkative.new
+s.say_hello
+s.say("Goodbye")</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>Hello
+Call say with ["Goodbye"]</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The above example shows how to generate methods in an existing class.
+With this API, creating a proxy to wrap an object and do some kind of AOP is simple:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-ruby" data-lang="ruby">class Proxy
+  def initialize(target_object)
+    @object = target_object
+  end
+  def method_missing(method_name, *arguments, &amp;block)
+    if @object.respond_to?(method_name)
+      puts "Before #{method_name} #{arguments}"
+      result = @object.send(method_name, *arguments, &amp;block)
+      puts "After #{method_name}: #{result}"
+      return result
+    end
+  end
+end
+
+s = Proxy.new("Hello world!")
+puts s.upcase</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>Before upcase []
+After upcase: HELLO WORLD!
+HELLO WORLD!</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_bad">The bad</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_strings">Strings</h3>
+<div class="paragraph">
+<p>Strings are mutable:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-ruby" data-lang="ruby">hi = "Hello "
+hi &lt;&lt; "world"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The above example is similar to a Java <code>StringBuilder</code>: at the end <code>hi</code> contains <code>Hello world</code>.
+I know that having immutable Strings in Java allows many optimizations in the JVM, I wonder what&#8217;s the performance penalty of having mutable strings.</p>
+</div>
+<div class="paragraph">
+<p>Multiline strings is something I miss in Java, but Ruby&#8217;s syntax is rather strange.
+They are delimited with <code>%{ &#8230;&#8203; }</code> or <code>%! &#8230;&#8203; !</code> or &#8230;&#8203;:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-ruby" data-lang="ruby">multiline = %{
+First line
+Second line
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_unless">Unless</h3>
+<div class="paragraph">
+<p>I am not a big fan of this <code>unless</code> keyword which does the contrary of <code>if</code></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-ruby" data-lang="ruby">rude = false
+unless rude    <i class="conum" data-value="1"></i><b>(1)</b>
+  puts "Please"
+end</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Is the same as <code>if !rude</code></td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Sticking to the <code>if</code> keyword looks like better option to me.</p>
+</div>
+<div class="paragraph">
+<p>However, I have to admit that this syntax is not as bad:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-ruby" data-lang="ruby">rude = true
+child.say_hello("mister") unless rude</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_functional_programming">Functional programming</h3>
+<div class="paragraph">
+<p>Doing functional programming with Ruby is clearly possible.
+But it doesn&#8217;t look natural to me.</p>
+</div>
+<div class="paragraph">
+<p>First the lambda functions syntax could be simpler:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-ruby" data-lang="ruby">twice = lambda { |x| 2 * x } <i class="conum" data-value="1"></i><b>(1)</b>
+puts twice.call(3) <i class="conum" data-value="2"></i><b>(2)</b>
+
+twice = lambda do |x| <i class="conum" data-value="3"></i><b>(3)</b>
+  2 * x
+end</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Means x &#8594; 2 * x</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The <code>call</code> method is used to invoke the function</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>the <code>{ &#8230;&#8203; }</code> delimiter can be replaced by <code>do &#8230;&#8203; end</code> for multiline functions</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Then, passing functions to methods uses a special feature.
+Methods can receive a block of code as a special argument,
+this block is then called using the <code>yield</code> keyword.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-ruby" data-lang="ruby">class Demo
+  def say_hello
+    if block_given?
+      message = yield("Hello World!") <i class="conum" data-value="2"></i><b>(2)</b>
+    else
+      message = "Hello World!"
+    end
+    puts message
+  end
+  def yell_hello
+    say_hello { |s| s.upcase } <i class="conum" data-value="1"></i><b>(1)</b>
+  end
+end</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Invoke the <code>say_hello</code> method if a block of code</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Invoke the block and pass it some parameters</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>I first wondered why the block wasn&#8217;t passed as other method arguments,
+and why it was handled as a special argument.
+The reason is probably that it allows do "sandwich code":</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-ruby" data-lang="ruby">open(file_name) do |file| <i class="conum" data-value="1"></i><b>(1)</b>
+  # Do something with opened file
+end <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Open the file named <code>file_name</code> and make it available to the block.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Close the file</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The <code>open</code> method takes two arguments the file name and the code block dealing with the file.
+In the end, this looks like Java&#8217;s try-with-resources statement.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_open_classes">Open classes</h3>
+<div class="paragraph">
+<p>Classes are open which means, anyone can add a method to any class, even system ones:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-ruby" data-lang="ruby">class ::Integer      <i class="conum" data-value="1"></i><b>(1)</b>
+  def even?          <i class="conum" data-value="2"></i><b>(2)</b>
+    (self % 2) == 0
+  end
+end
+
+puts 1.even?         <i class="conum" data-value="3"></i><b>(3)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Let&#8217;s add a method to integers</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Funny fact: in Ruby&#8217;s naming conventions method returning a boolean should end with <code>?</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Prints <code>false</code></td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>While it can be useful, placed in wrong hands, this weapon may be harmful.
+Yet existing methods can not be replaced.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_building_and_packaging">Building and packaging</h3>
+<div class="paragraph">
+<p>Ruby libraries and applications are packaged as <em>Gems</em> which are Zip archives
+containing code and metadata, a bit like Java&#8217;s Jar files.</p>
+</div>
+<div class="paragraph">
+<p>To start a Ruby project, 4 tools are needed:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Ruby</strong>: there are multiple versions and variants (MRI, JRuby&#8230;&#8203;) to choose from.
+<strong><a href="https://rvm.io">RVM</a></strong> (Ruby Version Manager) is an optional tool to install
+and activate the appropriate one.</p>
+</li>
+<li>
+<p><strong>Gem</strong> is the tool to download gems from <a href="http://rubygems.org" class="bare">http://rubygems.org</a>
+(which is a sort of Maven Central repository)
+and unzip them in the local repository.</p>
+</li>
+<li>
+<p><strong><a href="http://bundler.io">Bundler</a></strong> takes a bill of materials,
+the list of dependencies for the project,
+and runs Gem to download and install them.</p>
+</li>
+<li>
+<p><strong><a href="http://www.rubyrake.org">Rake</a></strong>
+(Ruby Make) is Ruby build tool, it can process files, run unit tests&#8230;&#8203;</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>And 2 files are need to describe a project:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Gemfile</strong> contains the list of Gems needed to build and run the project</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>source 'https://rubygems.org'
+
+gem 'rspec'
+gem 'rspec-collection_matchers'</pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Rakefile</strong> describes how to build the project</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>begin
+  require 'rspec/core/rake_task'
+
+  RSpec::Core::RakeTask.new(:spec)
+
+  task :default =&gt; :spec
+rescue LoadError
+  # RSpec not available
+end</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For the newcomer, starting a project is not a trivial task.
+I had to read each tool documentation, look for an example of each config file and assemble the whole.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_odd">The odd</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Objects have a numeric Id which can be used for reference comparison:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-ruby" data-lang="ruby">o=Object.new
+puts o.object_id <i class="conum" data-value="1"></i><b>(1)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The object Id is a numeric value, for instance 4376500</td>
+</tr>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_symbols">Symbols</h3>
+<div class="paragraph">
+<p>I had hard time understanding the concept of <strong>Symbol</strong>.</p>
+</div>
+<div class="paragraph">
+<p>A symbol is a kind of immutable and unique string which can be used as a constant or as a label.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-ruby" data-lang="ruby">color = :red
+color = :blue</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In this example, <code>red</code> and <code>blue</code> are symbols used as enum values.</p>
+</div>
+<div class="paragraph">
+<p>Symbols are used with meta programming to identify methods, attributes and so forth:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-ruby" data-lang="ruby">class Person
+  attr_reader :id  <i class="conum" data-value="1"></i><b>(1)</b>
+  attr_accessor :name <i class="conum" data-value="2"></i><b>(2)</b>
+end</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The <code>id</code> attribute is read-only, it has a setter</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The <code>name</code> attribute is read/write, it has a getter and a setter</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Symbols are often used as hash map keys because they are unique:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-ruby" data-lang="ruby">ages = { :bob =&gt; 23, :john =&gt; 35 }
+ages = { bob: 23, john: 35}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Since Ruby 2, the two above hashes are identical.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_modules">Modules</h3>
+<div class="paragraph">
+<p>Modules are a bit like Java packages, they are used as namespaces.</p>
+</div>
+<div class="paragraph">
+<p>The weird part, is that a module can contain classes and a class can contain modules:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-ruby" data-lang="ruby">module Demo <i class="conum" data-value="1"></i><b>(1)</b>
+  class Thing
+    module Nameable <i class="conum" data-value="2"></i><b>(2)</b>
+      def set_name(name)
+        @name = name
+      end
+    end
+  end
+  class Pet &lt; Thing
+    include Thing::Nameable
+  end
+end
+
+medor = Demo::Pet.new
+medor.set_name("Médor") <i class="conum" data-value="3"></i><b>(3)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The <code>Demo</code> module is used as a <em>container</em> for <code>Thing</code> and <code>Pet</code> classes.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The <code>Nameable</code> module is used as a <em>mixin</em>.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>The <code>Pet</code> class as <code>set_name</code> method.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>In fact a module and a class are close concepts, a class is a module which can be instiated.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Ruby is close to Java because has the same OOP roots, both are inspired by Smalltalk.</p>
+</div>
+<div class="paragraph">
+<p>I don&#8217;t pretend to be a Ruby expert at all, if I wrote something wrong, tell me.</p>
+</div>
+</div>
+</div>
+        </div>
+
+        <menu>
+            <a href="" id="btn_share" class="btn" title="Share">
+                <span aria-hidden="true" data-icon="S"></span>
+                <strong>Share</strong>
+            </a>
+            <a href="http://twitter.com/share?text=From%20Java%20to%20Ruby&url=https://gquintana.github.io/2017/01/08/From-Java-to-Ruby.html" onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;" id="btn_comment" class="btn" target="_blank">
+                <span aria-hidden="true" data-icon="C"></span> Comment on Twitter
+            </a>
+        </menu>
+
+
+        <footer class="post-footer" role="contentinfo">
+
+            <div class="vcard">
+                <a href="https://gquintana.github.io/rss" id="btn_feed" class="btn" title="Feed" target="_blank">
+                    <span aria-hidden="true" data-icon=")"></span>
+                    <strong>Feed</strong>
+                </a>
+
+                <a href="https://gquintana.github.io/author/gquintana/" class="photo">
+                    <span style="background-image: url('https://avatars.githubusercontent.com/u/755587?v&#x3D;3');">
+                        <img src="https://avatars.githubusercontent.com/u/755587?v&#x3D;3" alt="Gerald Quintana">
+                    </span>
+                </a>
+
+                <div class="details">
+                    <h4><a href="https://gquintana.github.io/author/gquintana/" class="url n">Gerald Quintana</a></h4>
+                    Lyon, France<br>
+                    
+                </div>
+            </div>
+
+            <div id="user_bio">
+                <div class="inner">
+                    
+                </div>
+            </div>
+
+        </footer>
+
+
+
+
+    </article>
+
+    <div id="share_modal">
+        <div class="wrap">
+            <div class="inner">
+                <header>
+                    Share
+                    <a href="" class="close" title="Close">&times;</a>
+                </header>
+
+                <div class="roon-share-links">
+                    <a href="https://twitter.com/share" class="twitter-share-button" data-dnt="true">Tweet</a>
+                    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+                    <div id="fb-elems">
+                        <div id="fb-root"></div>
+                        <script>(function(d, s, id) {
+                        var js, fjs = d.getElementsByTagName(s)[0];
+                        if (d.getElementById(id)) return;
+                        js = d.createElement(s); js.id = id;
+                        js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=463438580397968";
+                        fjs.parentNode.insertBefore(js, fjs);
+                        }(document, 'script', 'facebook-jssdk'));</script>
+                        <div class="fb-like" data-send="false" data-layout="button_count" data-width="110" data-show-faces="false" data-font="arial"></div>
+                    </div>
+
+                    <div id="pinit-btn">
+                        <a href="//pinterest.com/pin/create/button/?url=https://gquintana.github.io/2017/01/08/From-Java-to-Ruby.html&amp;description=From%20Java%20to%20Ruby-JRald " data-pin-do="buttonPin" data-pin-config="beside"><img src="//assets.pinterest.com/images/pidgets/pin_it_button.png"></a>
+                        <script type="text/javascript" src="//assets.pinterest.com/js/pinit.js"></script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+    <script>
+
+            function get_text(el) {
+                ret = "";
+                var length = el.childNodes.length;
+                for(var i = 0; i < length; i++) {
+                    var node = el.childNodes[i];
+                    if(node.nodeType != 8) {
+                        ret += node.nodeType != 1 ? node.nodeValue : get_text(node);
+                    }
+                }
+                return ret;
+            }
+            function reading_time () {
+                var post_content = document.getElementById('js-post-content');
+                if (post_content) {
+                    var words = get_text(post_content),
+                        count = words.split(/\s+/).length,
+                        read_time = Math.ceil((count / 150)),
+                        read_time_node = document.createTextNode(read_time + ' min read');
+                    document.getElementById('js-reading-time').appendChild(read_time_node);
+                }
+            }
+
+        function no_schema_links () {
+            var links = document.querySelectorAll('.js-remove-domain-schema');
+            if (links) {
+                for (i = 0; i < links.length; ++i) {
+                    var link = links[i],
+                        text = link.innerHTML,
+                        no_schema = text.replace(/.*?:\/\//g, "");
+                    link.innerHTML = no_schema;
+                }
+            }
+        }
+
+        window.onload = function () {
+            no_schema_links();
+
+            reading_time();
+        }
+    </script>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js?v="></script> <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment-with-locales.min.js?v="></script> <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js?v="></script> 
+      <script type="text/javascript">
+        jQuery( document ).ready(function() {
+          // change date with ago
+          jQuery('ago.ago').each(function(){
+            var element = jQuery(this).parent();
+            element.html( moment(element.text()).fromNow());
+          });
+        });
+
+        hljs.initHighlightingOnLoad();
+      </script>
+
+        <script>
+            $(function(){
+                var share_modal = $("#share_modal"),
+                    update_social_links = true;
+
+                $("#btn_share").click(function(){
+                    var that = $(this);
+                    share_modal.fadeIn(200);
+                    return false;
+                });
+
+                share_modal.click(function(e){
+                    if (e.target.className == "wrap" || e.target.id == "share_modal") {
+                        share_modal.fadeOut(200);
+                    }
+                    return false;
+                });
+
+                share_modal.find("div.inner > header > a.close").click(function(){
+                    share_modal.fadeOut(200);
+                    return false;
+                });
+            });
+        </script>
+
+
+    <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-85700184-1', 'auto');
+    ga('send', 'pageview');
+
+    </script>
+
+</body>
+</html>
