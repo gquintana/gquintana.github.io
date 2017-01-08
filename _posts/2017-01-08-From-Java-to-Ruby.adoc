@@ -1,18 +1,18 @@
 # From Java to Ruby
 
 :hp-tags: 7li7w, ruby
-:source_dir: ../sources/2017-01-01-From-Java-to-Ruby
+:source_dir: ../sources/2017-01-08-From-Java-to-Ruby
 :hp-image: /images/logos/ruby.png
 :published_at: 2017-01-08
 
 One of my 2017 resolutions is to try different languages and see how they compare to Java.
 This is inspired by the https://pragprog.com/book/btlang/seven-languages-in-seven-weeks[7 languages in 7 weeks] book by Bruce A. Tate.
-I don't expect to learn a new language each week though, since it took me several weeks for Ruby.
+I don't expect to learn a new language each week though, since it took me several weeks only for the first one.
 
-So the first language I've tried is Ruby.
-Ruby was created by Yukihiro Matsumoto in the nineties (like Java).
-I've already seen and used Ruby many times: Vagrant configuration, Logstash plugins, FluentD plugins, Rails applications...
-I used the http://rubykoans.com/[Ruby Koans] to teach myself Ruby.
+The first language I've tried is Ruby.
+I've already seen Ruby used many times: Vagrant configuration, Logstash plugins, FluentD plugins, web applications like Kibana 2...
+But I don't have any experience in Ruby development.
+So I used the http://rubykoans.com/[Ruby Koans] to teach myself Ruby.
 
 ## The good
 
@@ -43,18 +43,7 @@ Now let's see getters and setters.
 By default attributes a private, while methods are public:
 [source,ruby]
 ----
-class Person
-  def name            # <1>
-    @name
-  end
-  def name=(new_name) # <2>
-    @name=new_name
-  end
-end
-
-p=Person.new
-p.name="John Doe"     # <3>
-puts p.name           # <4>
+include::{source_dir}/getter_setter.rb[]
 ----
 <1> Declare a getter, `return` is optional
 <2> Declare a setter, notice this funny method name `name=`
@@ -70,6 +59,8 @@ Ruby has a powerful API similar to Java reflection:
 ----
 include::{source_dir}/reflect.rb[]
 ----
+As the `say` method is not implemented, the `method_missing` is called.
+You will notice that a method call is made of a `method_name`, an array of `arguments`, and a code `block` (I'll tell more on that later).
 ----
 Hello
 Call say with ["Goodbye"]
@@ -80,6 +71,9 @@ With this API, creating a proxy to wrap an object and do some kind of AOP is sim
 ----
 include::{source_dir}/proxy.rb[]
 ----
+<1> Check whether the target object has the method or not
+<2> Call the method on the target object.
+<3> Wrap the string in a proxy
 ----
 Before upcase []
 After upcase: HELLO WORLD!
@@ -112,7 +106,7 @@ Second line
 
 ### Unless
 
-I am not a big fan of this `unless` keyword which does the contrary of `if`
+I am not a big fan of the `unless` keyword which does the contrary of `if`
 [source,ruby]
 ----
 include::{source_dir}/control.rb[tags=unless1]
@@ -211,6 +205,7 @@ To start a Ruby project, 4 tools are needed:
 * *Gem* is the tool to download gems from http://rubygems.org
   (which is a sort of Maven Central repository)
   and unzip them in the local repository.
+  It's a package manager like Yum, NPM...
 * *http://bundler.io[Bundler]* takes a bill of materials,
   the list of dependencies for the project,
   and runs Gem to download and install them.
@@ -219,19 +214,20 @@ To start a Ruby project, 4 tools are needed:
 
 And 2 files are need to describe a project:
 
-* *Gemfile* contains the list of Gems needed to build and run the project
+* *Gemfile* contains the list of Gems needed to build and run the project. It's used by Bundler.
 [source,ruby]
 ----
 include::{source_dir}/fizzbuzz/Gemfile[]
 ----
-* *Rakefile* describes how to build the project
+* *Rakefile* describes how to build the project. It's Rake configuration file.
 [source,ruby]
 ----
 include::{source_dir}/fizzbuzz/Rakefile[]
 ----
 
 For the newcomer, starting a project is not a trivial task.
-I had to read each tool documentation, look for an example of each config file and assemble the whole.
+I had to read each tool documentation independently,
+look for an example of each config file and assemble the whole.
 
 ## The odd
 
@@ -266,7 +262,7 @@ end
 <1> The `id` attribute is read-only, it has a setter
 <2> The `name` attribute is read/write, it has a getter and a setter
 
-Symbols are often used as hash map keys because they are unique:
+Symbols are also used as hash map keys because they are unique:
 [source, ruby]
 ----
 ages = { :bob => 23, :john => 35 }
@@ -306,6 +302,7 @@ In fact a module and a class are close concepts, a class is a module which can b
 
 ## Conclusion
 
-Ruby is close to Java because has the same OOP roots, both are inspired by Smalltalk.
+Ruby is close to Java because it has the same OOP roots: both are inspired by Smalltalk,
+both were born in the nineties.
 
 I don't pretend to be a Ruby expert at all, if I wrote something wrong, tell me.

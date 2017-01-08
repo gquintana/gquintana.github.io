@@ -3,7 +3,7 @@ class Talkative
     puts "Hello"
   end
   def method_missing(method_name, *arguments, &block)
-    puts "Call #{method_name} with #{arguments}"
+    puts "Call #{method_name} with #{arguments}" # <1>
   end
 end
 
