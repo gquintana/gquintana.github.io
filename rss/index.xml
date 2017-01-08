@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Sun, 08 Jan 2017 09:24:08 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[From Java to Ruby]]></title><description><![CDATA[<div id="preamble">
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Sun, 08 Jan 2017 09:30:14 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[From Java to Ruby]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>One of my 2017 resolutions is to try different languages and see how they compare to Java.
@@ -575,7 +575,7 @@ medor.set_name("Médor") <i class="conum" data-value="3"></i><b>(3)</b></code></
 <p>I don&#8217;t pretend to be a Ruby expert at all, if I wrote something wrong, tell me.</p>
 </div>
 </div>
-</div>]]></description><link>https://gquintana.github.io/2017/01/01/From-Java-to-Ruby.html</link><guid isPermaLink="true">https://gquintana.github.io/2017/01/01/From-Java-to-Ruby.html</guid><category><![CDATA[7li7w]]></category><category><![CDATA[ ruby]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Sun, 01 Jan 2017 00:00:00 GMT</pubDate></item><item><title><![CDATA[Testing a Java and Elasticsearch 5.0 application]]></title><description><![CDATA[<div id="preamble">
+</div>]]></description><link>https://gquintana.github.io/2017/01/08/From-Java-to-Ruby.html</link><guid isPermaLink="true">https://gquintana.github.io/2017/01/08/From-Java-to-Ruby.html</guid><category><![CDATA[7li7w]]></category><category><![CDATA[ ruby]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Sun, 08 Jan 2017 00:00:00 GMT</pubDate></item><item><title><![CDATA[Testing a Java and Elasticsearch 5.0 application]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>A long time ago, I wrote <a href="https://blog.zenika.com/2013/04/29/integrer-elasticsearch-dans-une-application-java/">this article in french</a> explaining
