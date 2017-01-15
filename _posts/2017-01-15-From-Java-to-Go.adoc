@@ -1,0 +1,217 @@
+= From Java to Go
+
+:hp-tags: 7li7w, go
+:hp-image: /images/logos/go.png
+:source_dir: ../sources/2017-01-15-From-Java-to-Go
+:published_at: 2017-01-08
+
+This is the second episode of my _7 languages in 7 weeks_ series of blog posts.
+After ./2017-01-08-From-Java-to-Ruby.adoc[Ruby] a language which is more than 20 years old,
+I tried Go the new kid on the block.
+
+== The good
+
+=== Simple to learn
+
+Even if the language is pretty recent, there are many resources to learn Go.
+The first one I stumbled upon was https://tour.golang.org/[Tour of Go],
+it allows to discover the Go features and test them online.
+You can run the web server locally if you want to learn Go in a train or in a plane.
+It has been translated in many languages.
+
+I also tried the https://github.com/cdarwin/go-koans[Go Koans],
+but the tests are less detailed and progressive than Ruby Koans.
+It took me an evening to complete these exercises.
+
+Go is mostly simple to grasp because there are few concepts.
+The Go Lang spec is less 100 pages long.
+
+However the "Go" name is not SEO friendly, you'd better google "GoLang" instead.
+
+=== Extensive tooling
+
+As soon as you've installed Go and without extra steps, you can:
+
+* *Get* libraries (Go packages) with a sort of package manager
+* *Format* code to stick to Go formatting rules
+* *Compile* code and link dependencies.
+  Go doesn't allow dynamic linking.
+  I was amazed to see how fast it was to compile a simple app and run it.
+* *Run* unit tests.
+  Go provides a unit testing package, sadly it's not has powerful as other XUnit libraries.
+* *Analyze* code and detect suspicious constructs.
+* *Search and Read* the base API documentation while being offline.
+
+
+
+=== Switch, case, fallthrough
+
+Compare Go's switch statement
+[source,go]
+----
+include::{source_dir}/demo/switch.go[tags=main]
+----
+With Java's
+[source,go]
+----
+include::{source_dir}/demo/Switch.java[tags=main]
+----
+The `fallthrough` keyword does the exact opposite of `break`.
+This looks like a better default than Java to me,
+because most of the time you don't want to run multiple cases.
+A missing `break` can raise subtle bugs.
+
+=== Concurrency with channels and routines
+
+
+
+== The bad
+
+=== Error handling
+
+There has been debate about how errors are handled.
+I hope not to start a troll with this paragraph.
+
+In Go there is no Exception concept, you must use multiple return values:
+
+[source,go]
+----
+include::{source_dir}/demo/error_handling.go[tags=main]
+----
+<1> Function can raise an error
+<2> Raise an error
+<3> Return normal result
+<4> Propagate the error
+<5> Handle normal flow
+<6> Handle error flow
+
+To me, this means multiple things
+
+* In the function, I must always return 2 things: `nil+error` (1) or `result+nil` (2).
+  I can even return both `result+error`.
+* I need to manually propagate the error when it occurs (3).
+  Yet the function signature warns me that I may have to do something, and I can't hardly forget it.
+* Even if I forward the error, the error doesn't contain any call stack.
+  As a result, it's probably harder to debug since you don't know who
+  first returned the error (5).
+  Hopefully the https://github.com/go-errors/error[go-errors] library may help.
+* I can not easily chain function calls (4)
+  because I can not write `Order(3).Print()` where `Print` is a function on the type `*Article`.
+  I would have to create a function on the multiple type `*Article, error` but
+  it's not possible.
+
+
+=== Pointers
+
+Pointers are not a bad thing per se.
+But my C/C++ lectures are far away in my memory, it's not easy to remember the traps and tricks.
+Should I pass this variable by reference or by value?
+
+[source,go]
+----
+include::{source_dir}/demo/pointer.go[tags=main]
+----
+<1> Happily, I don't have to convert the pointer into value to access the `Price` field.
+   I don't have to write `*a.Price` or `a->Price` like in C++
+<2> The article price is still 25 because it was passed by value
+<3> Here I have to convert the value into a pointer
+<4> The article price is now 27 because it was passed by reference
+
+=== `make`, `new` and `New`
+
+To create, I mean allocate, something there are several operators depending on the type
+and whether you are expecting a pointer or not.
+[source,go]
+----
+include::{source_dir}/demo/make_new.go[tags=main]
+----
+<1> Create a new struct and initialize its fields
+<2> Create a new struct and return a pointer
+<3> Create a new array and initialize its elements
+<4> Create a new array and return an pointer
+<5> Create a new slice
+<6> Create a new map and initialize its elements
+<7> Create a new map
+<8> Create a new struct `Error` and initialize it
+
+The `new` operator always return a pointer, it's like a `malloc` operator in C.
+The `make` operator is used to create data structures like slices, maps...
+Neither the `new` nor the `make` operators can be passed values,
+they are initialized with zeros and empty strings.
+The `New` function can contain code to initialize or build something.
+
+I find it a bit disturbing to have different syntaxes to do mostly the same thing.
+
+=== Unused
+
+The Go compiler is very strict, this can be good thing at times as it may prevent bugs.
+But it can be bit too picky and annoying at times.
+In particular, it doesn't accept unused variables and unused imports.
+This is a rather common scenario when you are refactoring or trying something.
+
+Yet I didn't use an IDE (like Jetbrains Gogland) with an intelligent coding assistant
+which would fix imports for me.
+
+== The odd
+
+Characters are called *Runes* in the Go terminology.
+But they don't hide any secret magic ;-) .
+
+=== Declare in `if`
+
+The `for` statement uses the usual syntax minus the parenthesis:
+[source,go]
+----
+include::{source_dir}/demo/decl_if.go[tags=for]
+----
+
+Like in the above `for` construct, the `if` can declare a variable before the mandatory condition:
+[source,go]
+----
+include::{source_dir}/demo/decl_if.go[tags=main]
+----
+<1> The `dice` variable is visible in the while `if`/`else` bloc.
+
+In the above example, I find the `if` statement to be less readable because
+the eye has to remove the `dice` declaration noise.
+
+=== The `:=` symbol
+
+The `:=` symbol is called _short variable declaration_,
+it triggers type inference so you don't have to declare the type of your local variable.
+[source,go]
+----
+var i int = 12
+i := 12
+----
+Both variable declaration are the same.
+
+I just wonder why there is a special symbol for that.
+At first, I thought it was to tell apart assignment from comparison (`==`) like in Pascal.
+
+=== Packages and imports
+
+I wonder why imported packages are strings wrapped by double quotes:
+[source,go]
+----
+import "fmt"
+----
+
+Then, when there are subpackages, only the last part of the package is used in the code:
+[source,go]
+----
+include::{source_dir}/demo/subpackage.go[tags=main]
+----
+<1> Notice that the imported package is named `io/ioutil` not `io/util`.
+<2> To use a function in this package, I use `ioutil.Readfile` not `io/ioutil.Readfile`.
+
+Naming a package `util`( or `common` or ...) in Go is a poor idea, for instance `string/util` is conflicting with `date/util`.
+Unless you give an alias to the import, but it looks less convenient:
+[source,go]
+----
+import stringutil "string/util"
+----
+
+
+
+
