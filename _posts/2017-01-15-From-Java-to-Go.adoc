@@ -1,7 +1,7 @@
 = From Java to Go
 
 :hp-tags: 7li7w, go
-:hp-image: /images/logos/go.png
+:hp-image: /images/logos/golang.png
 :source_dir: ../sources/2017-01-15-From-Java-to-Go
 :published_at: 2017-01-08
 
