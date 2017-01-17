@@ -6,8 +6,10 @@
 :published_at: 2017-01-08
 
 This is the second episode of my _7 languages in 7 weeks_ series of blog posts.
-After ./2017-01-08-From-Java-to-Ruby.adoc[Ruby] a language which is more than 20 years old,
-I tried Go the new kid on the block.
+After link:2017-01-08-From-Java-to-Ruby.html[Ruby] a language which is more than 20 years old,
+I tried Go a more recent language: it was created in 2009.
+Go gained in traction thanks to the Docker ecosystem:
+Docker daemon, Kubernetes, Traefik are mostly developed in Go.
 
 == The good
 
@@ -72,7 +74,16 @@ A missing `break` can raise subtle bugs.
 There has been debate about how errors are handled.
 I hope not to start a troll with this paragraph.
 
-In Go there is no Exception concept, you must use multiple return values:
+Prior to explaining my pet peeve with error handling, let me talk about multiple values.
+A function can return multiple values but there is no _tuple_ type like Python, Scala...
+[source,go]
+----
+file, err := ioutil.ReadFile("file.txt") // Correct
+tuple :=     ioutil.ReadFile("file.txt") // Incorrect
+----
+I can not assign both values to a single variable.
+
+Now, error handling, in Go there is no Exception concept, you must use multiple return values:
 
 [source,go]
 ----
@@ -90,7 +101,8 @@ To me, this means multiple things
 * In the function, I must always return 2 things: `nil+error` (1) or `result+nil` (2).
   I can even return both `result+error`.
 * I need to manually propagate the error when it occurs (3).
-  Yet the function signature warns me that I may have to do something, and I can't hardly forget it.
+  Yet the function signature warns me that I may have to do something,
+  and I can't hardly forget to deal with it.
 * Even if I forward the error, the error doesn't contain any call stack.
   As a result, it's probably harder to debug since you don't know who
   first returned the error (5).
@@ -99,7 +111,6 @@ To me, this means multiple things
   because I can not write `Order(3).Print()` where `Print` is a function on the type `*Article`.
   I would have to create a function on the multiple type `*Article, error` but
   it's not possible.
-
 
 === Pointers
 
@@ -116,6 +127,8 @@ include::{source_dir}/demo/pointer.go[tags=main]
 <2> The article price is still 25 because it was passed by value
 <3> Here I have to convert the value into a pointer
 <4> The article price is now 27 because it was passed by reference
+<5> Thanks to the garbage collector, the function can return a pointer to the created article
+<6> `p` is a pointer to the created article
 
 === `make`, `new` and `New`
 
@@ -141,23 +154,25 @@ they are initialized with zeros and empty strings.
 The `New` function can contain code to initialize or build something.
 
 I find it a bit disturbing to have different syntaxes to do mostly the same thing.
+For a language which aims at simplicity, this is baffling.
 
-=== Unused
+=== Harsh compiler
 
 The Go compiler is very strict, this can be good thing at times as it may prevent bugs.
-But it can be bit too picky and annoying at times.
+But it can also be bit too picky and annoying at times.
 In particular, it doesn't accept unused variables and unused imports.
 This is a rather common scenario when you are refactoring or trying something.
+The compiler could just warn and skip unused declarations.
 
-Yet I didn't use an IDE (like Jetbrains Gogland) with an intelligent coding assistant
-which would fix imports for me.
+Using an IDE (like Jetbrains Gogland) with an intelligent coding assistant
+which would fix automatically imports may help.
 
 == The odd
 
 Characters are called *Runes* in the Go terminology.
 But they don't hide any secret magic ;-) .
 
-=== Declare in `if`
+=== `if` and `for` statements
 
 The `for` statement uses the usual syntax minus the parenthesis:
 [source,go]
@@ -175,6 +190,15 @@ include::{source_dir}/demo/decl_if.go[tags=main]
 In the above example, I find the `if` statement to be less readable because
 the eye has to remove the `dice` declaration noise.
 
+There is no `while` statement, `for` is the only loop keyword
+[source,go]
+----
+include::{source_dir}/demo/loops.go[tags=main]
+----
+<1> The `for` with a condition acts as a `while` in most languages
+<2> I can not chain `ReadString` and `TrimSpace` functions in single line
+    because the read can return an error I should have handled
+
 === The `:=` symbol
 
 The `:=` symbol is called _short variable declaration_,
@@ -186,7 +210,7 @@ i := 12
 ----
 Both variable declaration are the same.
 
-I just wonder why there is a special symbol for that.
+I just wonder why there is a special symbol for that, even if I found it very practical.
 At first, I thought it was to tell apart assignment from comparison (`==`) like in Pascal.
 
 === Packages and imports
@@ -205,13 +229,19 @@ include::{source_dir}/demo/subpackage.go[tags=main]
 <1> Notice that the imported package is named `io/ioutil` not `io/util`.
 <2> To use a function in this package, I use `ioutil.Readfile` not `io/ioutil.Readfile`.
 
-Naming a package `util`( or `common` or ...) in Go is a poor idea, for instance `string/util` is conflicting with `date/util`.
-Unless you give an alias to the import, but it looks less convenient:
+Naming a package `util`( or `common` or ...) in Go is probably a poor idea.
+For instance `string/util` is conflicting with `date/util`,
+unless you give an alias to the import, but it looks less convenient:
 [source,go]
 ----
 import stringutil "string/util"
 ----
 
+== Conclusion
 
+To me, the Go language is well suited for low level tools
+(container orchestrators, databases, proxies...), command line utilities
+as well as embedded and mobile applications.
+But it is not has expressive as other languages for business applications.
 
 

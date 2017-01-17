@@ -23,24 +23,24 @@ func (self *Article, err error) Print2() error {
 }
 */
 // tag::main[]
-func Order(quantity int) (*Article, error) {                 // <1>
+func Order(quantity int) (*Article, error) {    // <1>
 	if quantity <= 0 {
-		return nil, errors.New("Invalid quantity")               // <2>
+		return nil, errors.New("Invalid quantity")  // <2>
 	}
-  return &Article{quantity, 10 * quantity}, nil              // <3>
+	return &Article{quantity, 10 * quantity}, nil // <3>
 }
 func OrderAndPrint(quantity int) error {
-	article, err := Order(3)
+	article, err := Order(quantity)
 	if err != nil {
-		return err                                               // <4>
+		return err                                  // <4>
 	}
-	article.Print()                                            // <5>
+	article.Print()                               // <5>
 	return nil
 }
 func main() {
-	err := OrderAndPrint(3)
+	err := OrderAndPrint(-3)
 	if err != nil {
-		fmt.Printf("Error %s", err)                              // <5>
+		fmt.Errorf("Error %s", err)                 // <5>
 	}
 }
 
