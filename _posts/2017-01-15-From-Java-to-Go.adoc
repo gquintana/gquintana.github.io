@@ -25,6 +25,12 @@ I also tried the https://github.com/cdarwin/go-koans[Go Koans],
 but the tests are less detailed and progressive than Ruby Koans.
 It took me an evening to complete these exercises.
 
+There are several free e-books to get started with Go:
+
+* http://www.golang-book.com/books/intro[Introduction to Programming in Go] by Caleb Doxsey
+* http://openmymind.net/The-Little-Go-Book/[The Little Go Book] by Karl Seguin
+* http://www.golangbootcamp.com/[Go BootCamp] by Matt Aimonetti
+
 Go is mostly simple to grasp because there are few concepts.
 The Go Lang spec is less 100 pages long.
 
@@ -44,7 +50,8 @@ As soon as you've installed Go and without extra steps, you can:
 * *Analyze* code and detect suspicious constructs.
 * *Search and Read* the base API documentation while being offline.
 
-
+Sadly, I couldn't find any https://github.com/blindpirate/report-of-go-package-management-tool[official tool] to manage project dependencies
+and download them with Go Get.
 
 === Switch, case, fallthrough
 
@@ -65,7 +72,41 @@ A missing `break` can raise subtle bugs.
 
 === Concurrency with channels and routines
 
+First of all, *channels* is a concept used for inter-thread communications.
+There are 2 types of channels:
 
+* *Sync channels* are similar to Java's `SynchronousQueue` ,
+the producer for the consumer to be ready:
++
+[source,go]
+----
+ch := make(chan string)
+----
+* *Async channels*: are similar to Java's `ArrayBlockingQueue` ,
+the producer waits for a free location to place data,
+while the consumer waits for a place filled with data:
++
+[source,go]
+----
+ch := make(chan string, 10)
+----
+
+Goroutines are lightweight threads:
+[source,go]
+----
+go doit() // <1>
+----
+<1> The `doit` function is ran in background
+
+[source,go]
+----
+include::{source_dir}/demo/concurrency.go[tags=main]
+----
+<1> Generate and append data in the channel
+<2> Pull data from the channel and process it
+<3> Run the `multiply` function in a background thread
+<4> Run the `generate` function in the main thread.
+   I could have placed it in a separate thread as well.
 
 == The bad
 
@@ -164,8 +205,16 @@ In particular, it doesn't accept unused variables and unused imports.
 This is a rather common scenario when you are refactoring or trying something.
 The compiler could just warn and skip unused declarations.
 
+To skip a useless import, one can write (notice the underscore):
+[source,go]
+----
+import _ "fmt"
+----
+
 Using an IDE (like Jetbrains Gogland) with an intelligent coding assistant
 which would fix automatically imports may help.
+I also found the https://godoc.org/golang.org/x/tools/cmd/goimports[goimports] command line tool,
+but I didn't try it.
 
 == The odd
 
