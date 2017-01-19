@@ -8,8 +8,9 @@
 This is the second episode of my _7 languages in 7 weeks_ series of blog posts.
 After link:2017-01-08-From-Java-to-Ruby.html[Ruby] a language which is more than 20 years old,
 I tried Go a more recent language: it was created in 2009.
+
 Go gained in traction thanks to the Docker ecosystem:
-Docker daemon, Kubernetes, Traefik are mostly developed in Go.
+Docker container engine, Kubernetes, https://traefik.io/[Traefik] are mostly developed in Go.
 
 == The good
 
@@ -19,7 +20,7 @@ Even if the language is pretty recent, there are many resources to learn Go.
 The first one I stumbled upon was https://tour.golang.org/[Tour of Go],
 it allows to discover the Go features and test them online.
 You can run the web server locally if you want to learn Go in a train or in a plane.
-It has been translated in many languages.
+It has been translated in many languages. In a word, awesome!
 
 I also tried the https://github.com/cdarwin/go-koans[Go Koans],
 but the tests are less detailed and progressive than Ruby Koans.
@@ -38,7 +39,7 @@ However the "Go" name is not SEO friendly, you'd better google "GoLang" instead.
 
 === Extensive tooling
 
-As soon as you've installed Go and without extra steps, you can:
+As soon as you've installed Go and without any extra step, you can:
 
 * *Get* libraries (Go packages) with a sort of package manager
 * *Format* code to stick to Go formatting rules
@@ -91,7 +92,7 @@ while the consumer waits for a place filled with data:
 ch := make(chan string, 10)
 ----
 
-Goroutines are lightweight threads:
+*Goroutines* are lightweight threads:
 [source,go]
 ----
 go doit() // <1>
@@ -112,7 +113,7 @@ include::{source_dir}/demo/concurrency.go[tags=main]
 
 === Error handling
 
-There has been debate about how errors are handled.
+There has been http://openmymind.net/Golangs-Error-Handling-Good-And-Bad/[debate] about how errors are handled.
 I hope not to start a troll with this paragraph.
 
 Prior to explaining my pet peeve with error handling, let me talk about multiple values.
@@ -145,13 +146,12 @@ To me, this means multiple things
   Yet the function signature warns me that I may have to do something,
   and I can't hardly forget to deal with it.
 * Even if I forward the error, the error doesn't contain any call stack.
-  As a result, it's probably harder to debug since you don't know who
+  As a result, it's probably harder to debug since you don't know at first sight who
   first returned the error (5).
   Hopefully the https://github.com/go-errors/error[go-errors] library may help.
 * I can not easily chain function calls (4)
-  because I can not write `Order(3).Print()` where `Print` is a function on the type `*Article`.
-  I would have to create a function on the multiple type `*Article, error` but
-  it's not possible.
+  because I can not write `Order(3).Print()` or `Print(Order(3))` where `Print` is a function to display the result of `Order`.
+  I would have to creates a function, but with the multiple type `*Article, error` it's not possible.
 
 === Pointers
 
@@ -202,7 +202,7 @@ For a language which aims at simplicity, this is baffling.
 The Go compiler is very strict, this can be good thing at times as it may prevent bugs.
 But it can also be bit too picky and annoying at times.
 In particular, it doesn't accept unused variables and unused imports.
-This is a rather common scenario when you are refactoring or trying something.
+This is a rather common scenario when you are refactoring or trying to implement an idea.
 The compiler could just warn and skip unused declarations.
 
 To skip a useless import, one can write (notice the underscore):
@@ -259,7 +259,7 @@ i := 12
 ----
 Both variable declaration are the same.
 
-I just wonder why there is a special symbol for that, even if I found it very practical.
+I just wonder why there is a special symbol for that, even if I found it very efficient in practice.
 At first, I thought it was to tell apart assignment from comparison (`==`) like in Pascal.
 
 === Packages and imports
@@ -293,4 +293,4 @@ To me, the Go language is well suited for low level tools
 as well as embedded and mobile applications.
 But it is not has expressive as other languages for business applications.
 
-
+I don’t pretend to be a Go expert at all, if I wrote something wrong, tell me.
