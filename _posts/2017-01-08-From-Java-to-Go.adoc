@@ -116,7 +116,7 @@ include::{source_dir}/demo/concurrency.go[tags=main]
 === Error handling
 
 There has been http://openmymind.net/Golangs-Error-Handling-Good-And-Bad/[debate] about how errors are handled.
-I hope not to start a troll with this paragraph.
+I hope not to start a new troll with this paragraph.
 
 Prior to explaining my pet peeve with error handling, let me talk about multiple values.
 A function can return multiple values but there is no _tuple_ type like Python, Scala...
@@ -128,7 +128,6 @@ tuple :=     ioutil.ReadFile("file.txt") // Incorrect
 I can not assign both values to a single variable.
 
 Now, error handling, in Go there is no Exception concept, you must use multiple return values:
-
 [source,go]
 ----
 include::{source_dir}/demo/error_handling.go[tags=main]
@@ -142,7 +141,7 @@ include::{source_dir}/demo/error_handling.go[tags=main]
 
 To me, this means multiple things
 
-* In the function, I must always return 2 things: `nil+error` (1) or `result+nil` (2).
+* In the `Order` function, I must always return 2 things: `nil+error` (1) or `result+nil` (2).
   I can even return both `result+error`.
 * I need to manually propagate the error when it occurs (3).
   Yet the function signature warns me that I may have to do something,
@@ -151,9 +150,9 @@ To me, this means multiple things
   As a result, it's probably harder to debug since you don't know at first sight who
   first returned the error (5).
   Hopefully the https://github.com/go-errors/error[go-errors] library may help.
-* I can not easily chain function calls (4)
+* I can not easily chain function calls
   because I can not write `Order(3).Print()` or `Print(Order(3))` where `Print` is a function to display the result of `Order`.
-  I would have to creates a function, but with the multiple type `*Article, error` it's not possible.
+  I would have to creates a function, but with the multiple type `*Article, error`, but it's not possible.
 
 === Pointers
 
@@ -190,7 +189,7 @@ include::{source_dir}/demo/make_new.go[tags=main]
 <7> Create a new map
 <8> Create a new struct `Error` and initialize it
 
-The `new` operator always return a pointer, it's like a `malloc` operator in C.
+The `new` operator always returns a pointer, it's like a `malloc` operator in C.
 The `make` operator is used to create data structures like slices, maps...
 Neither the `new` nor the `make` operators can be passed values,
 they are initialized with zeros and empty strings.

@@ -40,7 +40,7 @@ func OrderAndPrint(quantity int) error {
 func main() {
 	err := OrderAndPrint(-3)
 	if err != nil {
-		fmt.Errorf("Error %s", err)                 // <5>
+		fmt.Errorf("Error %s", err)                 // <6>
 	}
 }
 // end::main[]
