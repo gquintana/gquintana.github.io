@@ -3,6 +3,7 @@
 :hp-tags: 7li7w, go
 :hp-image: /images/logos/golang.png
 :source_dir: ../sources/2017-01-15-From-Java-to-Go
+:image_dir: ../images/2017-01-15-From-Java-to-Go
 :published_at: 2017-01-08
 
 This is the second episode of my _7 languages in 7 weeks_ series of blog posts.
@@ -51,7 +52,7 @@ As soon as you've installed Go and without any extra step, you can:
 * *Analyze* code and detect suspicious constructs.
 * *Search and Read* the base API documentation while being offline.
 
-Sadly, I couldn't find any https://github.com/blindpirate/report-of-go-package-management-tool[official tool] to manage project dependencies
+Sadly, there is no https://github.com/blindpirate/report-of-go-package-management-tool[official tool] to manage project dependencies
 and download them with Go Get.
 
 === Switch, case, fallthrough
@@ -77,7 +78,7 @@ First of all, *channels* is a concept used for inter-thread communications.
 There are 2 types of channels:
 
 * *Sync channels* are similar to Java's `SynchronousQueue` ,
-the producer for the consumer to be ready:
+the producer waits for the consumer to be ready:
 +
 [source,go]
 ----
@@ -95,10 +96,11 @@ ch := make(chan string, 10)
 *Goroutines* are lightweight threads:
 [source,go]
 ----
-go doit() // <1>
+go doit()
 ----
-<1> The `doit` function is ran in background
+The `doit` function is ran in background
 
+image::{image_dir}/concurrency.svg[title=Channels & Goroutines,role=right]
 [source,go]
 ----
 include::{source_dir}/demo/concurrency.go[tags=main]
@@ -197,6 +199,14 @@ The `New` function can contain code to initialize or build something.
 I find it a bit disturbing to have different syntaxes to do mostly the same thing.
 For a language which aims at simplicity, this is baffling.
 
+Most of the time, when creating a struct, you will initialize its fields
+and get a pointer to avoid copying the value.
+As a result, the main syntax is:
+[source,go]
+----
+struct := &Language{"go", "Go Lang"}
+----
+
 === Harsh compiler
 
 The Go compiler is very strict, this can be good thing at times as it may prevent bugs.
@@ -285,6 +295,8 @@ unless you give an alias to the import, but it looks less convenient:
 ----
 import stringutil "string/util"
 ----
+
+The Go compiler doesn't allow circular dependencies in packages which sounds like a good idea.
 
 == Conclusion
 
