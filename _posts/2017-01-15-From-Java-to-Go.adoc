@@ -4,7 +4,7 @@
 :hp-image: /images/logos/golang.png
 :source_dir: ../sources/2017-01-15-From-Java-to-Go
 :image_dir: ../images/2017-01-15-From-Java-to-Go
-:published_at: 2017-01-08
+:published_at: 2017-01-15
 
 This is the second episode of my _7 languages in 7 weeks_ series of blog posts.
 After link:2017-01-08-From-Java-to-Ruby.html[Ruby] a language which is more than 20 years old,
@@ -74,7 +74,7 @@ A missing `break` can raise subtle bugs.
 
 === Concurrency with channels and routines
 
-First of all, *channels* is a concept used for inter-thread communications.
+First of all, a *channel* is a concept used for inter-thread communications.
 There are 2 types of channels:
 
 * *Sync channels* are similar to Java's `SynchronousQueue` ,
