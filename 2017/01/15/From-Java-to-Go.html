@@ -13,7 +13,7 @@
     <link rel="shortcut icon" href="https://gquintana.github.io/favicon.ico">
 
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:400,700,400italic,700italic|Open+Sans:400italic,700italic,700,400">
-    <link rel="stylesheet" type="text/css" href="//gquintana.github.io/themes/roon/assets/css/screen.css?v=1485007008921" />
+    <link rel="stylesheet" type="text/css" href="//gquintana.github.io/themes/roon/assets/css/screen.css?v=1485015575342" />
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/idea.min.css" />
 
     <link rel="canonical" href="https://gquintana.github.io/2017/01/15/From-Java-to-Go.html" />
@@ -244,11 +244,10 @@ while the consumer waits for a place filled with data:</p>
 <pre class="highlight"><code class="language-go" data-lang="go">go doit()</code></pre>
 </div>
 </div>
-<div class="imageblock right">
-<div class="content">
-<img src="https://gquintana.github.io/images/2017-01-15-From-Java-to-Go/concurrency.svg" alt="concurrency.svg">
-</div>
-<div class="title">Figure 1. Channels &amp; Goroutines</div>
+<div class="paragraph">
+<p>In the following example, a thread will generate and send numbers to another thread.
+The receiver thread will multiply the numbers and print them:
+image::../images/2017-01-15-From-Java-to-Go/concurrency.svg[Channels &amp; Goroutines]</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -299,6 +298,10 @@ func main() {
 I could have placed it in a separate thread as well.</td>
 </tr>
 </table>
+</div>
+<div class="paragraph">
+<p>This multi-threading pattern, called CSP (communicating sequential processes) looks bit like Actor model (Akka and the like).
+An actor is more or less an async channel with a goroute polling from this channel, like the <code>multiply</code> function.</p>
 </div>
 </div>
 </div>
