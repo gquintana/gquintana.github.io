@@ -13,7 +13,7 @@
     <link rel="shortcut icon" href="https://gquintana.github.io/favicon.ico">
 
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:400,700,400italic,700italic|Open+Sans:400italic,700italic,700,400">
-    <link rel="stylesheet" type="text/css" href="//gquintana.github.io/themes/roon/assets/css/screen.css?v=1485015575342" />
+    <link rel="stylesheet" type="text/css" href="//gquintana.github.io/themes/roon/assets/css/screen.css?v=1485015918009" />
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/idea.min.css" />
 
     <link rel="canonical" href="https://gquintana.github.io/2017/01/15/From-Java-to-Go.html" />
@@ -785,7 +785,7 @@ func main() {
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>I wonder why the <code>NewPerson</code> constructor and the <code>GetName</code> function are not declared inside the struct.
+<td>I wonder why the <code>NewPerson</code> constructor and the <code>GetName</code> function can not declared inside the struct.
 In the <code>GetName</code> function, the Go Linter warns that the <code>Person</code> argument shouldn&#8217;t be named <code>this</code> or <code>self</code>, this is why I named it <code>p</code>.</td>
 </tr>
 <tr>
@@ -794,7 +794,7 @@ In the <code>GetName</code> function, the Go Linter warns that the <code>Person<
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Function should never take a pointer to an interface,
+<td>A function should never take a pointer to an interface,
 because an interface is already a <a href="https://research.swtch.com/interfaces">kind of pointer</a> delegating to the original struct.</td>
 </tr>
 <tr>
