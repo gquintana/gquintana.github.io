@@ -10,7 +10,7 @@ func main() {
 	for i := 0; i < 10; i++ {
   // end::for[]
 		// tag::main[]
-		if dice := rand.Int31n(6) + 1; dice > 4 { // <1>
+		if dice := rand.Int31n(6) + 1; dice > 4 {
 			fmt.Printf("%d You won!", dice)
 		} else {
 			fmt.Printf("%d You lost!", dice)

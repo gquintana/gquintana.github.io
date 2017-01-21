@@ -36,9 +36,9 @@ There are several free e-books to get started with Go:
 Go is mostly simple to grasp because there are few concepts.
 The Go Lang spec is less 100 pages long.
 
-However the "Go" name is not SEO friendly, you'd better google "GoLang" instead.
+Obviously the "Go" name is not SEO friendly, you'd better google "GoLang" instead.
 
-=== Extensive tooling
+=== Rich tooling
 
 As soon as you've installed Go and without any extra step, you can:
 
@@ -92,7 +92,7 @@ the producer waits for the consumer to be ready:
 ----
 ch := make(chan string)
 ----
-* *Async channels*: are similar to Java's `ArrayBlockingQueue` ,
+* *Async channels* are similar to Java's `ArrayBlockingQueue` ,
 the producer waits for a free location to place data,
 while the consumer waits for a place filled with data:
 +
@@ -101,20 +101,19 @@ while the consumer waits for a place filled with data:
 ch := make(chan string, 10)
 ----
 
-*Goroutines* are lightweight threads:
+*Goroutines* are lightweight threads, to run the `doit` function in background:
 [source,go]
 ----
 go doit()
 ----
-The `doit` function is ran in background
 
 image::{image_dir}/concurrency.svg[title=Channels & Goroutines,role=right]
 [source,go]
 ----
 include::{source_dir}/demo/concurrency.go[tags=main]
 ----
-<1> Generate and append data in the channel
-<2> Pull data from the channel and process it
+<1> Generate and append data in the channel. This function will run in a first thread.
+<2> Pull data from the channel and process it. This function will run in a second thread.
 <3> Run the `multiply` function in a background thread
 <4> Run the `generate` function in the main thread.
    I could have placed it in a separate thread as well.
@@ -126,7 +125,7 @@ include::{source_dir}/demo/concurrency.go[tags=main]
 There has been http://openmymind.net/Golangs-Error-Handling-Good-And-Bad/[debate] about how errors are handled.
 I hope not to start a new troll with this paragraph.
 
-Prior to explaining my pet peeve with error handling, let me talk about multiple values.
+Prior to explaining my grief with error handling, let me talk about multiple values.
 A function can return multiple values, however there are no tuples like in Python, Scala...
 [source,go]
 ----
@@ -135,7 +134,7 @@ tuple :=     ioutil.ReadFile("file.txt") // Incorrect
 ----
 I can not assign both values to a single variable.
 
-Now, error handling, in Go there is no Exception concept, you must use multiple return values:
+Now, let's come back to error handling. In Go there is no Exception concept, you must use multiple return values:
 [source,go]
 ----
 include::{source_dir}/demo/error_handling.go[tags=main]
@@ -149,12 +148,12 @@ include::{source_dir}/demo/error_handling.go[tags=main]
 
 To me, this means multiple things
 
-* In the `Order` function, I must always return 2 things: `nil+error` (1) or `result+nil` (2).
+* In the `Order` function, I must *always* return 2 things: `nil+error` (1) or `result+nil` (2).
   I can even return both `result+error`.
-* I need to manually propagate the error when it occurs (3).
+* I need to *manually* propagate the error when it occurs (3).
   Yet the function signature warns me that I may have to do something,
   and I can't hardly forget to deal with it.
-* Even if I forward the error, the error doesn't contain any call stack.
+* Even if I forward the error, the error doesn't contain *any call stack*.
   As a result, it's probably harder to debug since you don't know at first sight who
   first returned the error (5).
   Hopefully the https://github.com/go-errors/error[go-errors] library may help.
@@ -180,6 +179,8 @@ include::{source_dir}/demo/pointer.go[tags=main]
 <5> Unlike C, the function can return a pointer to the created article
 <6> `p` is a pointer to the created article
 
+Having to deal with pointers, I felt like doing a step backward.
+
 === `make`, `new` and `New`
 
 To create, I mean allocate, something there are several operators depending on the type
@@ -201,7 +202,7 @@ The `new` operator always returns a pointer, it's like a `malloc` operator in C.
 The `make` operator is used to create data structures like slices, maps...
 Neither the `new` nor the `make` operators can be passed values,
 they are initialized with zeros and empty strings.
-The `New` function can contain code to initialize or build something.
+The `New` function is a factory, it can contain code to initialize or build something.
 
 I find it a bit disturbing to have different syntaxes to do mostly the same thing.
 For a language which aims at simplicity, this is baffling.
@@ -251,9 +252,8 @@ Like in the above `for` construct, the `if` can declare a variable before the ma
 ----
 include::{source_dir}/demo/decl_if.go[tags=main]
 ----
-<1> The `dice` variable is visible in the while `if`/`else` bloc.
-
-In the above example, I find the `if` statement to be less readable because
+The `dice` variable is visible in the while `if`/`else` bloc.
+I find the `if` statement to be less readable because
 the `dice` declaration adds noise, and the condition doesn't catch my eye.
 
 There is no `while` statement, `for` is the only loop keyword
@@ -326,7 +326,7 @@ include::{source_dir}/demo/objects.go[tags=main]
 <2> Function should never take a pointer to an interface,
     because an interface is already a https://research.swtch.com/interfaces[kind of pointer] delegating to the original struct.
 <3> The variable `p` of type `*Person` is automatically converted into `Nameable` interface.
-    Go is doing duck typing, if it has a `GetName` person, then it is a `Nameable` thing.
+    Go is doing duck typing, if it has a `GetName` function, then it is a `Nameable` thing.
 
 
 
