@@ -325,10 +325,10 @@ structs are powerful and can have interfaces.
 ----
 include::{source_dir}/demo/objects.go[tags=main]
 ----
-<1> I wonder why the `NewPerson` constructor and the `GetName` function are not declared inside the struct.
+<1> I wonder why the `NewPerson` constructor and the `GetName` function can not declared inside the struct.
     In the `GetName` function, the Go Linter warns that the `Person` argument shouldn't be named `this` or `self`, this is why I named it `p`.
 <1> Notice the `Person` struct doesn't tell it implements the `Nameable` interface.
-<2> Function should never take a pointer to an interface,
+<2> A function should never take a pointer to an interface,
     because an interface is already a https://research.swtch.com/interfaces[kind of pointer] delegating to the original struct.
 <3> The variable `p` of type `*Person` is automatically converted into `Nameable` interface.
     Go is doing duck typing, if it has a `GetName` function, then it is a `Nameable` thing.
