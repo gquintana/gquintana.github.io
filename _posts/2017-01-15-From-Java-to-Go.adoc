@@ -8,7 +8,7 @@
 
 This is the second episode of my _7 languages in 7 weeks_ series of blog posts.
 After link:2017-01-08-From-Java-to-Ruby.html[Ruby] a language which is more than 20 years old,
-I tried Go a more recent language: it was created in 2009.
+I tried a more recent language, Go which was created in 2009.
 
 Go gained in traction thanks to the Docker ecosystem:
 Docker container engine, Kubernetes, https://traefik.io/[Traefik] are mostly developed in Go.
@@ -20,8 +20,8 @@ Docker container engine, Kubernetes, https://traefik.io/[Traefik] are mostly dev
 Even if the language is pretty recent, there are many resources to learn Go.
 The first one I stumbled upon was https://tour.golang.org/[Tour of Go],
 it allows to discover the Go features and test them online.
-You can run the web server locally if you want to learn Go in a train or in a plane.
-It has been translated in many languages. In a word, awesome!
+You can event run the web server locally if you want to learn Go while traveling,
+it has even been translated in many languages. In a word, awesome!
 
 I also tried the https://github.com/cdarwin/go-koans[Go Koans],
 but the tests are less detailed and progressive than Ruby Koans.
@@ -45,17 +45,18 @@ As soon as you've installed Go and without any extra step, you can:
 * *Get* libraries (Go packages) with a sort of package manager
 * *Format* code to stick to Go formatting rules
 * *Compile* code and link dependencies.
-  Go doesn't allow dynamic linking.
   I was amazed to see how fast it was to compile a simple app and run it.
 * *Run* unit tests.
   Go provides a unit testing package, sadly it's not has powerful as other XUnit libraries.
 * *Analyze* code and detect suspicious constructs.
 * *Search and Read* the base API documentation while being offline.
 
+Go doesn't allow dynamic linking, this forces Go libraries to be open-source.
+
 Sadly, there is no https://github.com/blindpirate/report-of-go-package-management-tool[official tool] to manage project dependencies
 and download them with Go Get.
 
-=== Switch, case, fallthrough
+=== `switch` statement
 
 Compare Go's switch statement
 [source,go]
@@ -71,6 +72,13 @@ The `fallthrough` keyword does the exact opposite of `break`.
 This looks like a better default than Java to me,
 because most of the time you don't want to run multiple cases.
 A missing `break` can raise subtle bugs.
+
+This `switch` statement, can also replace a bunch of `if`/`else if` statements:
+[source,go]
+----
+include::{source_dir}/demo/switch.go[tags=pattern]
+----
+This looks like pattern matching, but simpler and less powerful.
 
 === Concurrency with channels and routines
 
@@ -119,7 +127,7 @@ There has been http://openmymind.net/Golangs-Error-Handling-Good-And-Bad/[debate
 I hope not to start a new troll with this paragraph.
 
 Prior to explaining my pet peeve with error handling, let me talk about multiple values.
-A function can return multiple values but there is no _tuple_ type like Python, Scala...
+A function can return multiple values, however there are no tuples like in Python, Scala...
 [source,go]
 ----
 file, err := ioutil.ReadFile("file.txt") // Correct
@@ -152,12 +160,12 @@ To me, this means multiple things
   Hopefully the https://github.com/go-errors/error[go-errors] library may help.
 * I can not easily chain function calls
   because I can not write `Order(3).Print()` or `Print(Order(3))` where `Print` is a function to display the result of `Order`.
-  I would have to creates a function, but with the multiple type `*Article, error`, but it's not possible.
 
 === Pointers
 
 Pointers are not a bad thing per se.
-But my C/C++ lectures are far away in my memory, it's not easy to remember the traps and tricks.
+In my case, C/C++ lectures were far away in my memory.
+It was not easy to remember the traps and tricks:
 Should I pass this variable by reference or by value?
 
 [source,go]
@@ -169,7 +177,7 @@ include::{source_dir}/demo/pointer.go[tags=main]
 <2> The article price is still 25 because it was passed by value
 <3> Here I have to convert the value into a pointer
 <4> The article price is now 27 because it was passed by reference
-<5> Thanks to the garbage collector, the function can return a pointer to the created article
+<5> Unlike C, the function can return a pointer to the created article
 <6> `p` is a pointer to the created article
 
 === `make`, `new` and `New`
@@ -209,9 +217,9 @@ struct := &Language{"go", "Go Lang"}
 === Harsh compiler
 
 The Go compiler is very strict, this can be good thing at times as it may prevent bugs.
-But it can also be bit too picky and annoying at times.
+But it can also be a bit too picky and annoying at times.
 In particular, it doesn't accept unused variables and unused imports.
-This is a rather common scenario when you are refactoring or trying to implement an idea.
+This is a rather common scenario when you are refactoring, looking for the cleanest code design or trying to implement an idea.
 The compiler could just warn and skip unused declarations.
 
 To skip a useless import, one can write (notice the underscore):
@@ -246,16 +254,17 @@ include::{source_dir}/demo/decl_if.go[tags=main]
 <1> The `dice` variable is visible in the while `if`/`else` bloc.
 
 In the above example, I find the `if` statement to be less readable because
-the eye has to remove the `dice` declaration noise.
+the `dice` declaration adds noise, and the condition doesn't catch my eye.
 
 There is no `while` statement, `for` is the only loop keyword
 [source,go]
 ----
 include::{source_dir}/demo/loops.go[tags=main]
 ----
-<1> The `for` with a condition acts as a `while` in most languages
+<1> The `for` with a condition acts as like the `while` in most languages
 <2> I can not chain `ReadString` and `TrimSpace` functions in single line
-    because the read can return an error I should have handled
+    because the read can return an error I should have handled.
+    This is the problem I explained with error handling and method chaining.
 
 === The `:=` symbol
 
@@ -279,16 +288,22 @@ I wonder why imported packages are strings wrapped by double quotes:
 import "fmt"
 ----
 
-Then, when there are subpackages, only the last part of the package is used in the code:
+Like Java, Go's package naming convention reflects domain names and folder paths:
+[source,go]
+----
+import "github.com/go-errors/errors"
+----
+
+Moreover, when there are subpackages, only the last part of the package is used in the code:
 [source,go]
 ----
 include::{source_dir}/demo/subpackage.go[tags=main]
 ----
 <1> Notice that the imported package is named `io/ioutil` not `io/util`.
-<2> To use a function in this package, I use `ioutil.Readfile` not `io/ioutil.Readfile`.
+<2> To use a function in this package, I use `ioutil.Readfile` and skip the `io` prefix.
 
 Naming a package `util`( or `common` or ...) in Go is probably a poor idea.
-For instance `string/util` is conflicting with `date/util`,
+For instance `string/util` would be conflicting with `date/util`,
 unless you give an alias to the import, but it looks less convenient:
 [source,go]
 ----
@@ -297,11 +312,29 @@ import stringutil "string/util"
 
 The Go compiler doesn't allow circular dependencies in packages which sounds like a good idea.
 
+=== Structs and interfaces
+
+Go doesn't have classes, inheritance and OOP concepts, but it doesn't matter,
+structs are powerful and can have interfaces.
+[source,go]
+----
+include::{source_dir}/demo/objects.go[tags=main]
+----
+<1> I wonder why the `NewPerson` constructor and the `GetName` function are not declared inside the struct.
+    In the `GetName` function, the Go Linter warns that the `Person` argument shouldn't be named `this` or `self`, this is why I named it `p`.
+<1> Notice the `Person` struct doesn't tell it implements the `Nameable` interface.
+<2> Function should never take a pointer to an interface,
+    because an interface is already a https://research.swtch.com/interfaces[kind of pointer] delegating to the original struct.
+<3> The variable `p` of type `*Person` is automatically converted into `Nameable` interface.
+    Go is doing duck typing, if it has a `GetName` person, then it is a `Nameable` thing.
+
+
+
 == Conclusion
 
 To me, the Go language is well suited for low level tools
 (container orchestrators, databases, proxies...), command line utilities
 as well as embedded and mobile applications.
-But it is not has expressive as other languages for business applications.
+But it is not has expressive as many other languages for business applications.
 
 I don’t pretend to be a Go expert at all, if I wrote something wrong, tell me.
