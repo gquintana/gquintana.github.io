@@ -1,4 +1,773 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Sun, 08 Jan 2017 20:15:56 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[From Java to Ruby]]></title><description><![CDATA[<div id="preamble">
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Sat, 21 Jan 2017 10:21:21 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[From Java to Go]]></title><description><![CDATA[<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>This is the second episode of my <em>7 languages in 7 weeks</em> series of blog posts.
+After <a href="2017-01-08-From-Java-to-Ruby.html">Ruby</a> a language which is more than 20 years old,
+I tried a more recent language, Go which was created in 2009.</p>
+</div>
+<div class="paragraph">
+<p>Go gained in traction thanks to the Docker ecosystem:
+Docker container engine, Kubernetes, <a href="https://traefik.io/">Traefik</a> are mostly developed in Go.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_good">The good</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_simple_to_learn">Simple to learn</h3>
+<div class="paragraph">
+<p>Even if the language is pretty recent, there are many resources to learn Go.
+The first one I stumbled upon was <a href="https://tour.golang.org/">Tour of Go</a>,
+it allows to discover the Go features and test them online.
+You can event run the web server locally if you want to learn Go while traveling,
+it has even been translated in many languages. In a word, awesome!</p>
+</div>
+<div class="paragraph">
+<p>I also tried the <a href="https://github.com/cdarwin/go-koans">Go Koans</a>,
+but the tests are less detailed and progressive than Ruby Koans.
+It took me an evening to complete these exercises.</p>
+</div>
+<div class="paragraph">
+<p>There are several free e-books to get started with Go:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="http://www.golang-book.com/books/intro">Introduction to Programming in Go</a> by Caleb Doxsey</p>
+</li>
+<li>
+<p><a href="http://openmymind.net/The-Little-Go-Book/">The Little Go Book</a> by Karl Seguin</p>
+</li>
+<li>
+<p><a href="http://www.golangbootcamp.com/">Go BootCamp</a> by Matt Aimonetti</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Go is mostly simple to grasp because there are few concepts.
+The Go Lang spec is less 100 pages long.</p>
+</div>
+<div class="paragraph">
+<p>However the "Go" name is not SEO friendly, you&#8217;d better google "GoLang" instead.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_extensive_tooling">Extensive tooling</h3>
+<div class="paragraph">
+<p>As soon as you&#8217;ve installed Go and without any extra step, you can:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Get</strong> libraries (Go packages) with a sort of package manager</p>
+</li>
+<li>
+<p><strong>Format</strong> code to stick to Go formatting rules</p>
+</li>
+<li>
+<p><strong>Compile</strong> code and link dependencies.
+I was amazed to see how fast it was to compile a simple app and run it.</p>
+</li>
+<li>
+<p><strong>Run</strong> unit tests.
+Go provides a unit testing package, sadly it&#8217;s not has powerful as other XUnit libraries.</p>
+</li>
+<li>
+<p><strong>Analyze</strong> code and detect suspicious constructs.</p>
+</li>
+<li>
+<p><strong>Search and Read</strong> the base API documentation while being offline.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Go doesn&#8217;t allow dynamic linking, this forces Go libraries to be open-source.</p>
+</div>
+<div class="paragraph">
+<p>Sadly, there is no <a href="https://github.com/blindpirate/report-of-go-package-management-tool">official tool</a> to manage project dependencies
+and download them with Go Get.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="__code_switch_code_statement"><code>switch</code> statement</h3>
+<div class="paragraph">
+<p>Compare Go&#8217;s switch statement</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-go" data-lang="go">	switch i {
+	case 0:
+		fmt.Print("None")
+	case 1:
+		fmt.Print("Single ")
+		fallthrough
+	default:
+		fmt.Print("Thing")
+	}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>With Java&#8217;s</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-go" data-lang="go">    switch i {
+    case 0:
+      System.out.print("None");
+      break;
+    case 1:
+      System.out.print("Single ")
+    default:
+      System.out.println("Thing")
+    }</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>fallthrough</code> keyword does the exact opposite of <code>break</code>.
+This looks like a better default than Java to me,
+because most of the time you don&#8217;t want to run multiple cases.
+A missing <code>break</code> can raise subtle bugs.</p>
+</div>
+<div class="paragraph">
+<p>This <code>switch</code> statement, can also replace a bunch of <code>if</code>/<code>else if</code> statements:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-go" data-lang="go">	switch {
+	case i == 0:
+		fmt.Print("None")
+	case i == 1:
+		fmt.Print("One ")
+	case i &gt; 1:
+		fmt.Print("Many ")
+	default:
+		fmt.Print("Invalid")
+	}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This looks like pattern matching, but simpler and less powerful.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_concurrency_with_channels_and_routines">Concurrency with channels and routines</h3>
+<div class="paragraph">
+<p>First of all, a <strong>channel</strong> is a concept used for inter-thread communications.
+There are 2 types of channels:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Sync channels</strong> are similar to Java&#8217;s <code>SynchronousQueue</code> ,
+the producer waits for the consumer to be ready:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-go" data-lang="go">ch := make(chan string)</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Async channels</strong>: are similar to Java&#8217;s <code>ArrayBlockingQueue</code> ,
+the producer waits for a free location to place data,
+while the consumer waits for a place filled with data:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-go" data-lang="go">ch := make(chan string, 10)</code></pre>
+</div>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>Goroutines</strong> are lightweight threads:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-go" data-lang="go">go doit()</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>doit</code> function is ran in background</p>
+</div>
+<div class="imageblock right">
+<div class="content">
+<img src="https://gquintana.github.io/images/2017-01-15-From-Java-to-Go/concurrency.svg" alt="concurrency.svg">
+</div>
+<div class="title">Figure 1. Channels &amp; Goroutines</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-go" data-lang="go">func generate(out chan [2]int) {
+	for x := 1; x &lt;= 10; x++ {
+		for y := 1; y &lt;= 10; y++ {
+			t := [2]int{x, y}
+			fmt.Printf("generate %dx%d\n", t[0], t[1])
+			out &lt;- t                                    <i class="conum" data-value="1"></i><b>(1)</b>
+		}
+	}
+	fmt.Println("generate end")
+}
+
+func multiply(in chan [2]int) {
+	for {
+		t := &lt;-in                                           <i class="conum" data-value="2"></i><b>(2)</b>
+		r := [3]int{t[0], t[1], t[0] * t[1]}
+		fmt.Printf("multiply %dx%d=%d\n", r[0], r[1], r[2])
+	}
+}
+
+func main() {
+	in := make(chan [2]int, 10)
+	go multiply(in)                                             <i class="conum" data-value="3"></i><b>(3)</b>
+	generate(in)                                                <i class="conum" data-value="4"></i><b>(4)</b>
+	time.Sleep(10 * time.Second)
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Generate and append data in the channel</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Pull data from the channel and process it</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Run the <code>multiply</code> function in a background thread</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Run the <code>generate</code> function in the main thread.
+I could have placed it in a separate thread as well.</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_bad">The bad</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_error_handling">Error handling</h3>
+<div class="paragraph">
+<p>There has been <a href="http://openmymind.net/Golangs-Error-Handling-Good-And-Bad/">debate</a> about how errors are handled.
+I hope not to start a new troll with this paragraph.</p>
+</div>
+<div class="paragraph">
+<p>Prior to explaining my pet peeve with error handling, let me talk about multiple values.
+A function can return multiple values, however there are no tuples like in Python, Scala&#8230;&#8203;</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-go" data-lang="go">file, err := ioutil.ReadFile("file.txt") // Correct
+tuple :=     ioutil.ReadFile("file.txt") // Incorrect</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>I can not assign both values to a single variable.</p>
+</div>
+<div class="paragraph">
+<p>Now, error handling, in Go there is no Exception concept, you must use multiple return values:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-go" data-lang="go">func Order(quantity int) (*Article, error) {                <i class="conum" data-value="1"></i><b>(1)</b>
+	if quantity &lt;= 0 {
+		return nil, errors.New("Invalid quantity")  <i class="conum" data-value="2"></i><b>(2)</b>
+	}
+	return &amp;Article{quantity, 10 * quantity}, nil       <i class="conum" data-value="3"></i><b>(3)</b>
+}
+func OrderAndPrint(quantity int) error {
+	article, err := Order(quantity)
+	if err != nil {
+		return err                                  <i class="conum" data-value="4"></i><b>(4)</b>
+	}
+	article.Print()                                     <i class="conum" data-value="5"></i><b>(5)</b>
+	return nil
+}
+func main() {
+	err := OrderAndPrint(-3)
+	if err != nil {
+		fmt.Errorf("Error %s", err)                 <i class="conum" data-value="6"></i><b>(6)</b>
+	}
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Function can raise an error</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Raise an error</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Return normal result</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Propagate the error</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Handle normal flow</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Handle error flow</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>To me, this means multiple things</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>In the <code>Order</code> function, I must always return 2 things: <code>nil+error</code> (1) or <code>result+nil</code> (2).
+I can even return both <code>result+error</code>.</p>
+</li>
+<li>
+<p>I need to manually propagate the error when it occurs (3).
+Yet the function signature warns me that I may have to do something,
+and I can&#8217;t hardly forget to deal with it.</p>
+</li>
+<li>
+<p>Even if I forward the error, the error doesn&#8217;t contain any call stack.
+As a result, it&#8217;s probably harder to debug since you don&#8217;t know at first sight who
+first returned the error (5).
+Hopefully the <a href="https://github.com/go-errors/error">go-errors</a> library may help.</p>
+</li>
+<li>
+<p>I can not easily chain function calls
+because I can not write <code>Order(3).Print()</code> or <code>Print(Order(3))</code> where <code>Print</code> is a function to display the result of <code>Order</code>.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_pointers">Pointers</h3>
+<div class="paragraph">
+<p>Pointers are not a bad thing per se.
+In my case, C/C++ lectures were far away in my memory.
+It was not easy to remember the traps and tricks:
+Should I pass this variable by reference or by value?</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-go" data-lang="go">func RaisePriceByVal(a Article) {
+	a.Price = (a.Price * 110) / 100
+}
+
+func RaisePriceByRef(a *Article) {
+	a.Price = (a.Price * 110) / 100                           <i class="conum" data-value="1"></i><b>(1)</b>
+}
+
+func newArticle(name string, price int) *Article {
+	a := Article{name, price}
+	return &amp;a                                                 <i class="conum" data-value="5"></i><b>(5)</b>
+}
+
+func main() {
+	a := Article{"Go in Action", 25}
+	fmt.Printf("Article %s %d\n", a.Name, a.Price)
+	RaisePriceByVal(a)
+	fmt.Printf("By val: Article %s %d\n", a.Name, a.Price)    <i class="conum" data-value="2"></i><b>(2)</b>
+	RaisePriceByRef(&amp;a)                                       <i class="conum" data-value="3"></i><b>(3)</b>
+	fmt.Printf("By ref: Article %s %d\n", a.Name, a.Price)    <i class="conum" data-value="4"></i><b>(4)</b>
+	p := newArticle("The Little Go book", 10)                 <i class="conum" data-value="6"></i><b>(6)</b>
+	RaisePriceByRef(p)
+	fmt.Printf("By ref: Article %s %d\n", p.Name, p.Price)
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Happily, I don&#8217;t have to convert the pointer into value to access the <code>Price</code> field.
+I don&#8217;t have to write <code>*a.Price</code> or <code>a&#8594;Price</code> like in C++</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The article price is still 25 because it was passed by value</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Here I have to convert the value into a pointer</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>The article price is now 27 because it was passed by reference</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Unlike C, the function can return a pointer to the created article</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td><code>p</code> is a pointer to the created article</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="__code_make_code_code_new_code_and_code_new_code"><code>make</code>, <code>new</code> and <code>New</code></h3>
+<div class="paragraph">
+<p>To create, I mean allocate, something there are several operators depending on the type
+and whether you are expecting a pointer or not.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-go" data-lang="go">	// Structs
+	struct1 := Language{"go", "Go Lang"}                      <i class="conum" data-value="1"></i><b>(1)</b>
+	fmt.Println("struct1 ", struct1)
+	struct2 := new(Language)                                  <i class="conum" data-value="2"></i><b>(2)</b>
+	fmt.Println("struct2 ", struct2)
+
+	// Arrays
+	array1 := [5]Language{struct1, *struct2, Language{"java", "Java"}} <i class="conum" data-value="3"></i><b>(3)</b>
+	fmt.Println("array1 ", array1)
+	array2 := new([5]Language)                                <i class="conum" data-value="4"></i><b>(4)</b>
+	fmt.Println("array2 ", array2)
+
+	// Slices
+	slice1 := array1[1:3]
+	fmt.Println("slice1 ", slice1)
+	slice2 := make([]Language, 1, 5)                          <i class="conum" data-value="5"></i><b>(5)</b>
+	fmt.Println("slice2 ", slice2)
+
+	// Maps
+	map1 := map[string]Language{                              <i class="conum" data-value="6"></i><b>(6)</b>
+		"go":   struct1,
+		"java": Language{"java", "Java"},
+	}
+	fmt.Println("map1 ", map1)
+	map2 := make(map[string]Language, 3)                      <i class="conum" data-value="7"></i><b>(7)</b>
+	fmt.Println("map2 ", map2)
+
+	// Other
+	error1 := errors.New("Sample error")                      <i class="conum" data-value="8"></i><b>(8)</b>
+	fmt.Println("error1 ", error1)</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Create a new struct and initialize its fields</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Create a new struct and return a pointer</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Create a new array and initialize its elements</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Create a new array and return an pointer</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Create a new slice</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Create a new map and initialize its elements</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>Create a new map</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td>Create a new struct <code>Error</code> and initialize it</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The <code>new</code> operator always returns a pointer, it&#8217;s like a <code>malloc</code> operator in C.
+The <code>make</code> operator is used to create data structures like slices, maps&#8230;&#8203;
+Neither the <code>new</code> nor the <code>make</code> operators can be passed values,
+they are initialized with zeros and empty strings.
+The <code>New</code> function can contain code to initialize or build something.</p>
+</div>
+<div class="paragraph">
+<p>I find it a bit disturbing to have different syntaxes to do mostly the same thing.
+For a language which aims at simplicity, this is baffling.</p>
+</div>
+<div class="paragraph">
+<p>Most of the time, when creating a struct, you will initialize its fields
+and get a pointer to avoid copying the value.
+As a result, the main syntax is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-go" data-lang="go">struct := &amp;Language{"go", "Go Lang"}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_harsh_compiler">Harsh compiler</h3>
+<div class="paragraph">
+<p>The Go compiler is very strict, this can be good thing at times as it may prevent bugs.
+But it can also be a bit too picky and annoying at times.
+In particular, it doesn&#8217;t accept unused variables and unused imports.
+This is a rather common scenario when you are refactoring, looking for the cleanest code design or trying to implement an idea.
+The compiler could just warn and skip unused declarations.</p>
+</div>
+<div class="paragraph">
+<p>To skip a useless import, one can write (notice the underscore):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-go" data-lang="go">import _ "fmt"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Using an IDE (like Jetbrains Gogland) with an intelligent coding assistant
+which would fix automatically imports may help.
+I also found the <a href="https://godoc.org/golang.org/x/tools/cmd/goimports">goimports</a> command line tool,
+but I didn&#8217;t try it.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_odd">The odd</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Characters are called <strong>Runes</strong> in the Go terminology.
+But they don&#8217;t hide any secret magic ;-) .</p>
+</div>
+<div class="sect2">
+<h3 id="__code_if_code_and_code_for_code_statements"><code>if</code> and <code>for</code> statements</h3>
+<div class="paragraph">
+<p>The <code>for</code> statement uses the usual syntax minus the parenthesis:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-go" data-lang="go">	for i := 0; i &lt; 10; i++ {</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Like in the above <code>for</code> construct, the <code>if</code> can declare a variable before the mandatory condition:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-go" data-lang="go">		if dice := rand.Int31n(6) + 1; dice &gt; 4 { <i class="conum" data-value="1"></i><b>(1)</b>
+			fmt.Printf("%d You won!", dice)
+		} else {
+			fmt.Printf("%d You lost!", dice)
+		}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The <code>dice</code> variable is visible in the while <code>if</code>/<code>else</code> bloc.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>In the above example, I find the <code>if</code> statement to be less readable because
+the <code>dice</code> declaration adds noise, and the condition doesn&#8217;t catch my eye.</p>
+</div>
+<div class="paragraph">
+<p>There is no <code>while</code> statement, <code>for</code> is the only loop keyword</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-go" data-lang="go">	var line = "start"
+	reader := bufio.NewReader(os.Stdin)
+	for line != "quit" {                       <i class="conum" data-value="1"></i><b>(1)</b>
+		fmt.Println(line)
+		line, _ = reader.ReadString('\n')
+		line = strings.TrimSpace(line)     <i class="conum" data-value="2"></i><b>(2)</b>
+	}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The <code>for</code> with a condition acts as like the <code>while</code> in most languages</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>I can not chain <code>ReadString</code> and <code>TrimSpace</code> functions in single line
+because the read can return an error I should have handled.
+This is the problem I explained with error handling and method chaining.</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_the_code_code_symbol">The <code>:=</code> symbol</h3>
+<div class="paragraph">
+<p>The <code>:=</code> symbol is called <em>short variable declaration</em>,
+it triggers type inference so you don&#8217;t have to declare the type of your local variable.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-go" data-lang="go">var i int = 12
+i := 12</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Both variable declaration are the same.</p>
+</div>
+<div class="paragraph">
+<p>I just wonder why there is a special symbol for that, even if I found it very efficient in practice.
+At first, I thought it was to tell apart assignment from comparison (<code>==</code>) like in Pascal.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_packages_and_imports">Packages and imports</h3>
+<div class="paragraph">
+<p>I wonder why imported packages are strings wrapped by double quotes:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-go" data-lang="go">import "fmt"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Like Java, Go&#8217;s package naming convention reflects domain names and folder paths:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-go" data-lang="go">import "github.com/go-errors/errors"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Moreover, when there are subpackages, only the last part of the package is used in the code:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-go" data-lang="go">import 	"io/ioutil"                                        <i class="conum" data-value="1"></i><b>(1)</b>
+
+func main() {
+	data, err := ioutil.ReadFile("subpackage.go")      <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Notice that the imported package is named <code>io/ioutil</code> not <code>io/util</code>.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>To use a function in this package, I use <code>ioutil.Readfile</code> and skip the <code>io</code> prefix.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Naming a package <code>util</code>( or <code>common</code> or &#8230;&#8203;) in Go is probably a poor idea.
+For instance <code>string/util</code> would be conflicting with <code>date/util</code>,
+unless you give an alias to the import, but it looks less convenient:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-go" data-lang="go">import stringutil "string/util"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The Go compiler doesn&#8217;t allow circular dependencies in packages which sounds like a good idea.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_structs_and_interfaces">Structs and interfaces</h3>
+<div class="paragraph">
+<p>Go doesn&#8217;t have classes, inheritance and OOP concepts, but it doesn&#8217;t matter,
+structs are powerful and can have interfaces.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-go" data-lang="go">type Person struct {
+	Name string
+	Age  int
+}
+
+// NewPerson Constructor of Person
+func NewPerson(name string) *Person {              <i class="conum" data-value="1"></i><b>(1)</b>
+	return &amp;Person{name, 0}
+}
+
+// GetName Function on Person
+func (p *Person) GetName() string {                <i class="conum" data-value="1"></i><b>(1)</b>
+	return p.Name
+}
+
+// Nameable interface
+type Nameable interface {                          <i class="conum" data-value="2"></i><b>(2)</b>
+	GetName() string
+}
+
+// SayName Function taking an interface as argument
+func SayName(n Nameable) {                         <i class="conum" data-value="3"></i><b>(3)</b>
+	fmt.Printf("My name is %s\n", n.GetName())
+}
+
+func main() {
+	p := NewPerson("John")
+	p.Age = 12
+	SayName(p)                                 <i class="conum" data-value="4"></i><b>(4)</b>
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>I wonder why the <code>NewPerson</code> constructor and the <code>GetName</code> function are not declared inside the struct.
+In the <code>GetName</code> function, the Go Linter warns that the <code>Person</code> argument shouldn&#8217;t be named <code>this</code> or <code>self</code>, this is why I named it <code>p</code>.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Notice the <code>Person</code> struct doesn&#8217;t tell it implements the <code>Nameable</code> interface.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Function should never take a pointer to an interface,
+because an interface is already a <a href="https://research.swtch.com/interfaces">kind of pointer</a> delegating to the original struct.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>The variable <code>p</code> of type <code>*Person</code> is automatically converted into <code>Nameable</code> interface.
+Go is doing duck typing, if it has a <code>GetName</code> person, then it is a <code>Nameable</code> thing.</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To me, the Go language is well suited for low level tools
+(container orchestrators, databases, proxies&#8230;&#8203;), command line utilities
+as well as embedded and mobile applications.
+But it is not has expressive as many other languages for business applications.</p>
+</div>
+<div class="paragraph">
+<p>I don’t pretend to be a Go expert at all, if I wrote something wrong, tell me.</p>
+</div>
+</div>
+</div>]]></description><link>https://gquintana.github.io/2017/01/15/From-Java-to-Go.html</link><guid isPermaLink="true">https://gquintana.github.io/2017/01/15/From-Java-to-Go.html</guid><category><![CDATA[7li7w]]></category><category><![CDATA[ go]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Sun, 15 Jan 2017 00:00:00 GMT</pubDate></item><item><title><![CDATA[From Java to Ruby]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>One of my 2017 resolutions is to try different languages and see how they compare to Java.
