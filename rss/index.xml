@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Sat, 21 Jan 2017 16:19:35 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[From Java to Go]]></title><description><![CDATA[<div id="preamble">
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Sat, 21 Jan 2017 16:25:18 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[From Java to Go]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>This is the second episode of my <em>7 languages in 7 weeks</em> series of blog posts.
@@ -728,7 +728,7 @@ func main() {
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>I wonder why the <code>NewPerson</code> constructor and the <code>GetName</code> function are not declared inside the struct.
+<td>I wonder why the <code>NewPerson</code> constructor and the <code>GetName</code> function can not declared inside the struct.
 In the <code>GetName</code> function, the Go Linter warns that the <code>Person</code> argument shouldn&#8217;t be named <code>this</code> or <code>self</code>, this is why I named it <code>p</code>.</td>
 </tr>
 <tr>
@@ -737,7 +737,7 @@ In the <code>GetName</code> function, the Go Linter warns that the <code>Person<
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Function should never take a pointer to an interface,
+<td>A function should never take a pointer to an interface,
 because an interface is already a <a href="https://research.swtch.com/interfaces">kind of pointer</a> delegating to the original struct.</td>
 </tr>
 <tr>
