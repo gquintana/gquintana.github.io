@@ -13,7 +13,7 @@
     <link rel="shortcut icon" href="https://gquintana.github.io/favicon.ico">
 
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:400,700,400italic,700italic|Open+Sans:400italic,700italic,700,400">
-    <link rel="stylesheet" type="text/css" href="//gquintana.github.io/themes/roon/assets/css/screen.css?v=1484994081520" />
+    <link rel="stylesheet" type="text/css" href="//gquintana.github.io/themes/roon/assets/css/screen.css?v=1484997123941" />
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/idea.min.css" />
 
     <link rel="canonical" href="https://gquintana.github.io/2017/01/15/From-Java-to-Go.html" />
@@ -106,11 +106,11 @@ It took me an evening to complete these exercises.</p>
 The Go Lang spec is less 100 pages long.</p>
 </div>
 <div class="paragraph">
-<p>However the "Go" name is not SEO friendly, you&#8217;d better google "GoLang" instead.</p>
+<p>Obviously the "Go" name is not SEO friendly, you&#8217;d better google "GoLang" instead.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_extensive_tooling">Extensive tooling</h3>
+<h3 id="_rich_tooling">Rich tooling</h3>
 <div class="paragraph">
 <p>As soon as you&#8217;ve installed Go and without any extra step, you can:</p>
 </div>
@@ -225,7 +225,7 @@ the producer waits for the consumer to be ready:</p>
 </div>
 </li>
 <li>
-<p><strong>Async channels</strong>: are similar to Java&#8217;s <code>ArrayBlockingQueue</code> ,
+<p><strong>Async channels</strong> are similar to Java&#8217;s <code>ArrayBlockingQueue</code> ,
 the producer waits for a free location to place data,
 while the consumer waits for a place filled with data:</p>
 <div class="listingblock">
@@ -237,15 +237,12 @@ while the consumer waits for a place filled with data:</p>
 </ul>
 </div>
 <div class="paragraph">
-<p><strong>Goroutines</strong> are lightweight threads:</p>
+<p><strong>Goroutines</strong> are lightweight threads, to run the <code>doit</code> function in background:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-go" data-lang="go">go doit()</code></pre>
 </div>
-</div>
-<div class="paragraph">
-<p>The <code>doit</code> function is ran in background</p>
 </div>
 <div class="imageblock right">
 <div class="content">
@@ -286,11 +283,11 @@ func main() {
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Generate and append data in the channel</td>
+<td>Generate and append data in the channel. This function will run in a first thread.</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Pull data from the channel and process it</td>
+<td>Pull data from the channel and process it. This function will run in a second thread.</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
@@ -316,7 +313,7 @@ I could have placed it in a separate thread as well.</td>
 I hope not to start a new troll with this paragraph.</p>
 </div>
 <div class="paragraph">
-<p>Prior to explaining my pet peeve with error handling, let me talk about multiple values.
+<p>Prior to explaining my grief with error handling, let me talk about multiple values.
 A function can return multiple values, however there are no tuples like in Python, Scala&#8230;&#8203;</p>
 </div>
 <div class="listingblock">
@@ -329,7 +326,7 @@ tuple :=     ioutil.ReadFile("file.txt") // Incorrect</code></pre>
 <p>I can not assign both values to a single variable.</p>
 </div>
 <div class="paragraph">
-<p>Now, error handling, in Go there is no Exception concept, you must use multiple return values:</p>
+<p>Now, let&#8217;s come back to error handling. In Go there is no Exception concept, you must use multiple return values:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -389,16 +386,16 @@ func main() {
 <div class="ulist">
 <ul>
 <li>
-<p>In the <code>Order</code> function, I must always return 2 things: <code>nil+error</code> (1) or <code>result+nil</code> (2).
+<p>In the <code>Order</code> function, I must <strong>always</strong> return 2 things: <code>nil+error</code> (1) or <code>result+nil</code> (2).
 I can even return both <code>result+error</code>.</p>
 </li>
 <li>
-<p>I need to manually propagate the error when it occurs (3).
+<p>I need to <strong>manually</strong> propagate the error when it occurs (3).
 Yet the function signature warns me that I may have to do something,
 and I can&#8217;t hardly forget to deal with it.</p>
 </li>
 <li>
-<p>Even if I forward the error, the error doesn&#8217;t contain any call stack.
+<p>Even if I forward the error, the error doesn&#8217;t contain <strong>any call stack</strong>.
 As a result, it&#8217;s probably harder to debug since you don&#8217;t know at first sight who
 first returned the error (5).
 Hopefully the <a href="https://github.com/go-errors/error">go-errors</a> library may help.</p>
@@ -474,6 +471,9 @@ I don&#8217;t have to write <code>*a.Price</code> or <code>a&#8594;Price</code> 
 <td><code>p</code> is a pointer to the created article</td>
 </tr>
 </table>
+</div>
+<div class="paragraph">
+<p>Having to deal with pointers, I felt like doing a step backward.</p>
 </div>
 </div>
 <div class="sect2">
@@ -557,7 +557,7 @@ and whether you are expecting a pointer or not.</p>
 The <code>make</code> operator is used to create data structures like slices, maps&#8230;&#8203;
 Neither the <code>new</code> nor the <code>make</code> operators can be passed values,
 they are initialized with zeros and empty strings.
-The <code>New</code> function can contain code to initialize or build something.</p>
+The <code>New</code> function is a factory, it can contain code to initialize or build something.</p>
 </div>
 <div class="paragraph">
 <p>I find it a bit disturbing to have different syntaxes to do mostly the same thing.
@@ -622,23 +622,16 @@ But they don&#8217;t hide any secret magic ;-) .</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-go" data-lang="go">		if dice := rand.Int31n(6) + 1; dice &gt; 4 { <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="highlight"><code class="language-go" data-lang="go">		if dice := rand.Int31n(6) + 1; dice &gt; 4 {
 			fmt.Printf("%d You won!", dice)
 		} else {
 			fmt.Printf("%d You lost!", dice)
 		}</code></pre>
 </div>
 </div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>The <code>dice</code> variable is visible in the while <code>if</code>/<code>else</code> bloc.</td>
-</tr>
-</table>
-</div>
 <div class="paragraph">
-<p>In the above example, I find the <code>if</code> statement to be less readable because
+<p>The <code>dice</code> variable is visible in the while <code>if</code>/<code>else</code> bloc.
+I find the <code>if</code> statement to be less readable because
 the <code>dice</code> declaration adds noise, and the condition doesn&#8217;t catch my eye.</p>
 </div>
 <div class="paragraph">
@@ -804,7 +797,7 @@ because an interface is already a <a href="https://research.swtch.com/interfaces
 <tr>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
 <td>The variable <code>p</code> of type <code>*Person</code> is automatically converted into <code>Nameable</code> interface.
-Go is doing duck typing, if it has a <code>GetName</code> person, then it is a <code>Nameable</code> thing.</td>
+Go is doing duck typing, if it has a <code>GetName</code> function, then it is a <code>Nameable</code> thing.</td>
 </tr>
 </table>
 </div>
