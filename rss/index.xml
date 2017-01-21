@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Sat, 21 Jan 2017 13:56:48 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[From Java to Go]]></title><description><![CDATA[<div id="preamble">
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Sat, 21 Jan 2017 16:19:35 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[From Java to Go]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>This is the second episode of my <em>7 languages in 7 weeks</em> series of blog posts.
@@ -187,11 +187,10 @@ while the consumer waits for a place filled with data:</p>
 <pre class="highlight"><code class="language-go" data-lang="go">go doit()</code></pre>
 </div>
 </div>
-<div class="imageblock right">
-<div class="content">
-<img src="https://gquintana.github.io/images/2017-01-15-From-Java-to-Go/concurrency.svg" alt="concurrency.svg">
-</div>
-<div class="title">Figure 1. Channels &amp; Goroutines</div>
+<div class="paragraph">
+<p>In the following example, a thread will generate and send numbers to another thread.
+The receiver thread will multiply the numbers and print them:
+image::../images/2017-01-15-From-Java-to-Go/concurrency.svg[Channels &amp; Goroutines]</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -242,6 +241,10 @@ func main() {
 I could have placed it in a separate thread as well.</td>
 </tr>
 </table>
+</div>
+<div class="paragraph">
+<p>This multi-threading pattern, called CSP (communicating sequential processes) looks bit like Actor model (Akka and the like).
+An actor is more or less an async channel with a goroute polling from this channel, like the <code>multiply</code> function.</p>
 </div>
 </div>
 </div>
