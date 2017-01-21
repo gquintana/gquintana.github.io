@@ -107,9 +107,7 @@ ch := make(chan string, 10)
 go doit()
 ----
 
-In the following exemple, a thread will generate and send numbers to another thread.
-The receiver thread will multiply the numbers and print them:
-image::{image_dir}/concurrency.svg[Channels & Goroutines]
+image::{image_dir}/concurrency.svg[title=Channels & Goroutines,role=right]
 [source,go]
 ----
 include::{source_dir}/demo/concurrency.go[tags=main]
@@ -119,8 +117,6 @@ include::{source_dir}/demo/concurrency.go[tags=main]
 <3> Run the `multiply` function in a background thread
 <4> Run the `generate` function in the main thread.
    I could have placed it in a separate thread as well.
-
-This multi-threading pattern, called CSP (communicating sequential processes) looks bit like Actor model (Akka and the like).
 
 == The bad
 
