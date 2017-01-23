@@ -3,7 +3,7 @@
 :hp-tags: 7li7w, go
 :hp-image: /images/logos/golang.png
 :source_dir: ../sources/2017-01-15-From-Java-to-Go
-:image_dir: /images/2017-01-15-From-Java-to-Go
+:image_dir: 2017-01-15-From-Java-to-Go
 :published_at: 2017-01-15
 
 This is the second episode of my _7 languages in 7 weeks_ series of blog posts.
@@ -50,8 +50,6 @@ As soon as you've installed Go and without any extra step, you can:
   Go provides a unit testing package, sadly it's not as powerful as others XUnit libraries.
 * *Analyze* code and detect suspicious constructs.
 * *Search and Read* the base API documentation while being offline.
-
-Go doesn't allow dynamic linking, this forces Go libraries to be open-source.
 
 Sadly, there is no https://github.com/blindpirate/report-of-go-package-management-tool[official tool] to manage project dependencies
 and download them with Go Get.
@@ -109,7 +107,8 @@ go doit()
 
 In the following example, a thread will generate and send numbers to another thread.
 The receiver thread will multiply the numbers and print them:
-image::{image_dir}/concurrency.svg[]
+
+image::{image_dir}/concurrency.svg[Channels and Goroutines]
 
 [source,go]
 ----
