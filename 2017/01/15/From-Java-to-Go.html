@@ -13,7 +13,7 @@
     <link rel="shortcut icon" href="https://gquintana.github.io/favicon.ico">
 
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:400,700,400italic,700italic|Open+Sans:400italic,700italic,700,400">
-    <link rel="stylesheet" type="text/css" href="//gquintana.github.io/themes/roon/assets/css/screen.css?v=1485175825792" />
+    <link rel="stylesheet" type="text/css" href="//gquintana.github.io/themes/roon/assets/css/screen.css?v=1485199184947" />
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/idea.min.css" />
 
     <link rel="canonical" href="https://gquintana.github.io/2017/01/15/From-Java-to-Go.html" />
@@ -139,9 +139,6 @@ Go provides a unit testing package, sadly it&#8217;s not as powerful as others X
 </ul>
 </div>
 <div class="paragraph">
-<p>Go doesn&#8217;t allow dynamic linking, this forces Go libraries to be open-source.</p>
-</div>
-<div class="paragraph">
 <p>Sadly, there is no <a href="https://github.com/blindpirate/report-of-go-package-management-tool">official tool</a> to manage project dependencies
 and download them with Go Get.</p>
 </div>
@@ -246,8 +243,12 @@ while the consumer waits for a place filled with data:</p>
 </div>
 <div class="paragraph">
 <p>In the following example, a thread will generate and send numbers to another thread.
-The receiver thread will multiply the numbers and print them:
-image::/images/2017-01-15-From-Java-to-Go/concurrency.svg[]</p>
+The receiver thread will multiply the numbers and print them:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://gquintana.github.io/images/2017-01-15-From-Java-to-Go/concurrency.svg" alt="Channels and Goroutines">
+</div>
 </div>
 <div class="listingblock">
 <div class="content">
