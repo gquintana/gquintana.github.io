@@ -109,7 +109,8 @@ go doit()
 
 In the following example, a thread will generate and send numbers to another thread.
 The receiver thread will multiply the numbers and print them:
-image::{image_dir}/concurrency.svg[Channels & Goroutines]
+image::{image_dir}/concurrency.svg[title=Channels & Goroutines]
+
 [source,go]
 ----
 include::{source_dir}/demo/concurrency.go[tags=main]
