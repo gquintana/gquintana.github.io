@@ -7,7 +7,7 @@
 :published_at: 2017-01-15
 
 This is the second episode of my _7 languages in 7 weeks_ series of blog posts.
-After link:2017-01-08-From-Java-to-Ruby.html[Ruby] a language which is more than 20 years old,
+After link:2017-01-08-From-Java-to-Ruby.html[Ruby], a language which is more than 20 years old,
 I tried a more recent language, Go which was created in 2009.
 
 Go gained in traction thanks to the Docker ecosystem:
@@ -20,7 +20,7 @@ Docker container engine, Kubernetes, https://traefik.io/[Traefik] are mostly dev
 Even if the language is pretty recent, there are many resources to learn Go.
 The first one I stumbled upon was https://tour.golang.org/[Tour of Go],
 it allows to discover the Go features and test them online.
-You can event run the web server locally if you want to learn Go while traveling,
+You can even run the web server locally if you want to learn Go while traveling,
 it has even been translated in many languages. In a word, awesome!
 
 I also tried the https://github.com/cdarwin/go-koans[Go Koans],
