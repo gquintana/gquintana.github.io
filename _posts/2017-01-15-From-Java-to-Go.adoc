@@ -3,7 +3,7 @@
 :hp-tags: 7li7w, go
 :hp-image: /images/logos/golang.png
 :source_dir: ../sources/2017-01-15-From-Java-to-Go
-:image_dir: ../images/2017-01-15-From-Java-to-Go
+:image_dir: /images/2017-01-15-From-Java-to-Go
 :published_at: 2017-01-15
 
 This is the second episode of my _7 languages in 7 weeks_ series of blog posts.
