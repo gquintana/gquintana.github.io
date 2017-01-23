@@ -47,7 +47,7 @@ As soon as you've installed Go and without any extra step, you can:
 * *Compile* code and link dependencies.
   I was amazed to see how fast it was to compile a simple app and run it.
 * *Run* unit tests.
-  Go provides a unit testing package, sadly it's not has powerful as other XUnit libraries.
+  Go provides a unit testing package, sadly it's not as powerful as others XUnit libraries.
 * *Analyze* code and detect suspicious constructs.
 * *Search and Read* the base API documentation while being offline.
 
@@ -82,7 +82,7 @@ This looks like pattern matching, but simpler and less powerful.
 
 === Concurrency with channels and routines
 
-First of all, a *channel* is a concept used for inter-thread communications.
+First of all, a *channel* is a concept used for inter-thread communication.
 There are 2 types of channels:
 
 * *Sync channels* are similar to Java's `SynchronousQueue` ,
