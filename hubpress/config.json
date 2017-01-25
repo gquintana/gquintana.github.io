@@ -2,7 +2,8 @@
   "meta": {
     "username": "gquintana",
     "repositoryName": "gquintana.github.io",
-    "branch": "master"
+    "branch": "master",
+    "delay": 3000
   },
   "site": {
     "title": "JRald",
