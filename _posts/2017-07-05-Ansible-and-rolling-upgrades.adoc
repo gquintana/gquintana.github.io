@@ -3,3 +3,6 @@
 Ansible is a nice tool to deploy software associated configuration for distributed systems like Elasticsearch, Kafka, Cassandra and the like.
 These distributed systems are built to avoid downtime and allow partial failures.
 Upgrading these softwares or updating their configuration requires restarting each member of the cluster.
+
+The aim of the this article is to explain an Ansible pattern I discovered deploying trying to improve deployment speed 
+and yet being able to guarantee availability during the upgrade process.
