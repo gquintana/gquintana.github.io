@@ -6,3 +6,7 @@ Upgrading these softwares or updating their configuration requires restarting ea
 
 The aim of the this article is to explain an Ansible pattern I discovered deploying trying to improve deployment speed 
 and yet being able to guarantee availability during the upgrade process.
+
+## The role
+
+First I gather 
