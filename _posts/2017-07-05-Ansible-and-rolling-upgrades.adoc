@@ -1,12 +1,128 @@
-# Ansible and rolling upgrades
+= Ansible and rolling upgrades
+
+:hp-tags: ansible, elasticsearch, kafka, cassandra
+:hp-image: /images/logos/ansible.png
+:source_dir: ../sources/2017-07-05-Ansible-and-rolling-upgrades
+:image_dir: 2017-07-05-Ansible-and-rolling-upgrades
+:published_at: 2017-01-15
 
 Ansible is a nice tool to deploy software associated configuration for distributed systems like Elasticsearch, Kafka, Cassandra and the like.
 These distributed systems are built to avoid downtime and allow partial failures.
 Upgrading these softwares or updating their configuration requires restarting each member of the cluster.
 
-The aim of the this article is to explain an Ansible pattern I discovered deploying trying to improve deployment speed 
+The aim of the this article is to explain an Ansible pattern I discovered deploying trying to improve deployment speed
 and yet being able to guarantee availability during the upgrade process.
+To improve deployment, you need to deploy all hosts in parallel.
+To guarantee availability, you can't stop all host at the same: you must deploy each host one after the other.
 
-## The role
+== The problem
 
-First I gather 
+Let's take the Elasticsearch example.
+The tasks required to deploy Elasticsearch on each host of the cluster are gather in an `elasticsearch` role.
+Then this role is applied to all hosts belonging to the `elasticsearch` group in the Ansible playbook.
+
+.playbook.yml
+[source,yaml]
+----
+- hosts: elasticsearch
+  any_errors_fatal: true
+  roles:
+    - role: elasticsearch
+----
+
+The `elasticsearch` role probably contains something to stop Elasticsearch in order to apply changes:
+
+.roles/elasticsearch/tasks/main.yml
+[source,yaml]
+----
+...
+- name: Stop service
+  become: true
+  service:
+    name: elasticsearch
+    state: stopped
+    enabled: true
+...
+----
+If we do that, all Elasticsearch nodes will be stopped at the same time and users will cry all their tears.
+To fix this problem, the role can be ran in serial instead of parallel:
+
+.deploy.yml
+[source,yaml]
+----
+- hosts: es
+  serial: 1 # Force serial execution
+  roles:
+    - role: elasticsearch
+----
+But deploying every host in serial makes deployment endless.
+
+== Refactoring the role
+
+The main idea is to split the role into multiple steps:
+
+1. *In Parrallel*: deploy as much things as possible: system settings, software settings, software binaries.
+  But don't stop anything and don't remove anything.
+2. *In Serial*:
+  * Stop the node
+  * Install or upgrade the node as quickly as possible
+  * Start the node
+3. *In Parallel*: finish applying settings on running cluster and remove old files and binaries.
+
+Each step is described in its own YAML file: `before.yml`, `stop_start.yml` and `after.yml`.
+The role entry point routes to the appropriate step using role variable named `elasticsearch_step`:
+
+.roles/elasticsearch/tasks/main.yml
+[source,yaml]
+----
+  - name: "Running step {{ elasticsearch_step }}"
+    include: "{{ elasticsearch_step }}.yml"
+----
+
+== Refactoring the playbook
+
+Now in the playbook we will call the role 3 times, each step being called independently.
+
+.playbook.yml
+[source,yaml]
+----
+# In parallel
+- hosts: elasticsearch
+  any_errors_fatal: true
+  roles:
+    - role: elasticsearch
+      elasticsearch_step: "before"
+
+# In serial
+- hosts: elasticsearch
+  any_errors_fatal: true
+  serial: 1
+  roles:
+    - role: elasticsearch
+      elasticsearch_step: "stop_start"
+
+# In parallel
+- hosts: elasticsearch
+  any_errors_fatal: true
+  roles:
+    - role: elasticsearch
+      elasticsearch_step: "after"
+----
+
+To install a brand new cluster, there is nothing to stop, and we don't fear anything.
+This role can still be used, and the `stop_start` step can be called in parallel:
+
+.playbook.yml
+[source,yaml]
+----
+# New cluster
+- hosts: elasticsearch
+  any_errors_fatal: true
+  roles:
+    - role: elasticsearch
+      elasticsearch_step: "before"
+    - role: elasticsearch
+      elasticsearch_step: "stop_start"
+    - role: elasticsearch
+      elasticsearch_step: "after"
+----
