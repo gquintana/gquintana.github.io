@@ -6,19 +6,21 @@
 :image_dir: 2017-07-05-Ansible-and-rolling-upgrades
 :published_at: 2017-01-15
 
-Ansible is a nice tool to deploy software associated configuration for distributed systems like Elasticsearch, Kafka, Cassandra and the like.
+Ansible is a nice tool to deploy distributed systems like Elasticsearch, Kafka, Cassandra and the like.
 These distributed systems are built to avoid downtime and allow partial failures.
-Upgrading these softwares or updating their configuration requires restarting each member of the cluster.
+Upgrading these softwares, or updating their configuration, requires restarting each member of the cluster.
 
-The aim of the this article is to explain an Ansible pattern I discovered deploying trying to improve deployment speed
+The aim of the this article is to describe an Ansible pattern I discovered
+trying to improve deployment speed
 and yet being able to guarantee availability during the upgrade process.
 To improve deployment, you need to deploy all hosts in parallel.
-To guarantee availability, you can't stop all host at the same: you must deploy each host one after the other.
+To guarantee availability, you can't stop all host at the same time: you must deploy each host one after the other.
 
 == The problem
 
 Let's take the Elasticsearch example.
-The tasks required to deploy Elasticsearch on each host of the cluster are gather in an `elasticsearch` role.
+
+The tasks required to deploy Elasticsearch on each host of the cluster are gathered in an `elasticsearch` role.
 Then this role is applied to all hosts belonging to the `elasticsearch` group in the Ansible playbook.
 
 .playbook.yml
@@ -30,7 +32,7 @@ Then this role is applied to all hosts belonging to the `elasticsearch` group in
     - role: elasticsearch
 ----
 
-The `elasticsearch` role probably contains something to stop Elasticsearch in order to apply changes:
+At some point, the `elasticsearch` role probably contains something to stop Elasticsearch in order to apply changes:
 
 .roles/elasticsearch/tasks/main.yml
 [source,yaml]
@@ -44,7 +46,7 @@ The `elasticsearch` role probably contains something to stop Elasticsearch in or
     enabled: true
 ...
 ----
-If we do that, all Elasticsearch nodes will be stopped at the same time and users will cry all their tears.
+If we do that, all Elasticsearch nodes will be stopped at the same time, making the whole cluster unavailable.
 To fix this problem, the role can be ran in serial instead of parallel:
 
 .deploy.yml
@@ -55,13 +57,13 @@ To fix this problem, the role can be ran in serial instead of parallel:
   roles:
     - role: elasticsearch
 ----
-But deploying every host in serial makes deployment endless.
+But deploying every host in serial takes a very long time and makes deployment endless.
 
 == Refactoring the role
 
-The main idea is to split the role into multiple steps:
+The main idea is to split the role into multiple steps, and do as much as possible in parallel:
 
-1. *In Parrallel*: deploy as much things as possible: system settings, software settings, software binaries.
+1. *In Parallel*: Deploy system settings, software settings, software binaries.
   But don't stop anything and don't remove anything.
 2. *In Serial*:
   * Stop the node
@@ -69,19 +71,29 @@ The main idea is to split the role into multiple steps:
   * Start the node
 3. *In Parallel*: finish applying settings on running cluster and remove old files and binaries.
 
-Each step is described in its own YAML file: `before.yml`, `stop_start.yml` and `after.yml`.
-The role entry point routes to the appropriate step using role variable named `elasticsearch_step`:
+Then descibe each step in its own YAML file: `before.yml`, `stop_start.yml` and `after.yml`.
+Finally, the role entry point `main.yml` will include the appropriate step using a variable named `elasticsearch_step`:
 
 .roles/elasticsearch/tasks/main.yml
 [source,yaml]
 ----
-  - name: "Running step {{ elasticsearch_step }}"
-    include: "{{ elasticsearch_step }}.yml"
+- name: "Running step {{ elasticsearch_step }}"
+  include: "{{ elasticsearch_step }}.yml"
+----
+
+We can also create a fake step including all the steps (more on that later):
+
+.roles/elasticsearch/tasks/all.yml
+[source,yaml]
+----
+- include: "before.yml"
+- include: "stop_start.yml"
+- include: "after.yml"
 ----
 
 == Refactoring the playbook
 
-Now in the playbook we will call the role 3 times, each step being called independently.
+Now in the playbook we will call the role 3 times, each individual step being called independently.
 
 .playbook.yml
 [source,yaml]
@@ -110,7 +122,7 @@ Now in the playbook we will call the role 3 times, each step being called indepe
 ----
 
 To install a brand new cluster, there is nothing to stop, and we don't fear anything.
-This role can still be used, and the `stop_start` step can be called in parallel:
+In this particular case, this role can still be used, and the `stop_start` step can be called in parallel:
 
 .playbook.yml
 [source,yaml]
@@ -126,3 +138,23 @@ This role can still be used, and the `stop_start` step can be called in parallel
     - role: elasticsearch
       elasticsearch_step: "after"
 ----
+
+Or even simpler, we can use `all` step:
+
+.playbook.yml
+[source,yaml]
+----
+# New cluster
+- hosts: elasticsearch
+  any_errors_fatal: true
+  roles:
+    - role: elasticsearch
+      elasticsearch_step: "all"
+----
+
+== Hot configuration
+
+Most of the time, I am running my Ansible playbook only to change settings that don't need nodes to be restarted.
+The trick is here to detect in the `before` step whether nodes should be restarted or not:
+Version upgrade? Configuration that can not be hot reloaded?
+On lucky days, you can skip the expensive `stop_start` step and have a quick deploy.
