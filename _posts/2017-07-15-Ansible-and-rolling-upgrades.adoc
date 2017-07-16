@@ -8,9 +8,9 @@
 
 Ansible is a nice tool to deploy distributed systems like Elasticsearch, Kafka, Cassandra and the like.
 These distributed systems are built to avoid downtime and allow partial failures.
-Upgrading these softwares, or updating their configuration, requires restarting each member of the cluster.
+But upgrading these software, or updating their configuration, requires restarting each member of the cluster.
 
-The aim of the this article is to describe an Ansible pattern I discovered
+The aim of this article is to describe an Ansible pattern I discovered
 trying to improve deployment speed
 and yet being able to guarantee availability during the upgrade process.
 To improve deployment, you need to deploy all hosts in parallel.
@@ -71,7 +71,7 @@ The main idea is to split the role into multiple steps, and do as much as possib
   * Start the node
 3. *In Parallel*: finish applying settings on running cluster and remove old files and binaries.
 
-Then descibe each step in its own YAML file: `before.yml`, `stop_start.yml` and `after.yml`.
+Then describe each step in its own YAML file: `before.yml`, `stop_start.yml` and `after.yml`.
 Finally, the role entry point `main.yml` will include the appropriate step using a variable named `elasticsearch_step`:
 
 .roles/elasticsearch/tasks/main.yml
@@ -170,7 +170,7 @@ The `before` step should mark whether the `stop_start` is required:
 ----
 
 Then on lucky days, you can skip the expensive `stop_start` step and have a quick deploy.
-Other days, vhen upgrading nodes version, or changing configuration which is not hot reloaded, running the Ansible playbook will be slower.
+Other days, when upgrading nodes version, or changing configuration which is not hot reloaded, running the Ansible playbook will be slower.
 
 .playbook.yml
 [source,yaml]
