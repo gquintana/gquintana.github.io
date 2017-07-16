@@ -7,8 +7,9 @@
 :published_at: 2017-07-15
 
 Ansible is a nice tool to deploy distributed systems like Elasticsearch, Kafka, Cassandra and the like.
-These systems are built to avoid downtime and allow partial failures.
-But upgrading these software, or updating their configuration, requires restarting each member of the cluster.
+These systems are built with high availability in mind,
+they can tolerate partial failures.
+Upgrading these software, or updating their configuration, requires restarting each member of the cluster.
 
 The aim of this article is to describe a pattern I discovered
 trying to improve deployment speed of Ansible playbooks
@@ -21,6 +22,7 @@ To guarantee availability, you can't stop all host at the same time: you must de
 Let's take the Elasticsearch example.
 
 The tasks required to deploy Elasticsearch on each host of the cluster are gathered in an `elasticsearch` role.
+In short, a role is a recipe to install and update an Elasticsearch node.
 Once declared, this role is applied to all hosts belonging to the `elasticsearch` group in the Ansible playbook.
 
 .playbook.yml
@@ -32,7 +34,7 @@ Once declared, this role is applied to all hosts belonging to the `elasticsearch
     - role: elasticsearch
 ----
 
-At some point, the `elasticsearch` role will probably contain something to stop Elasticsearch in order to apply changes:
+At some point, the `elasticsearch` role will probably contain something to stop Elasticsearch in order for changes to be reloaded:
 
 .roles/elasticsearch/tasks/main.yml
 [source,yaml]
@@ -46,7 +48,8 @@ At some point, the `elasticsearch` role will probably contain something to stop 
     enabled: true
 ...
 ----
-If we do that, all Elasticsearch nodes will be stopped at the same time, making the whole cluster unavailable.
+
+This naive Ansible playbook will stop all Elasticsearch nodes at the same time, making the whole cluster unavailable until nodes are started again.
 To fix this problem, the role can be ran in serial instead of parallel:
 
 .deploy.yml
@@ -58,19 +61,19 @@ To fix this problem, the role can be ran in serial instead of parallel:
     - role: elasticsearch
 ----
 
-But deploying every host one after the other (in serial) takes a very long time and makes deployment endless.
+But deploying every host, one after the other (in serial), takes a very long time and makes deployment endless.
 
 == Refactoring the role
 
 The main idea to improve speed is to split the role into multiple steps, and do as much as possible in parallel:
 
 1. *In Parallel*: Deploy system settings, software settings, software binaries.
-  But don't stop anything and don't remove anything.
+  But don't stop anything and don't remove anything at this point.
 2. *In Serial*:
   * Stop the node
-  * Install or upgrade the node as quickly as possible
+  * Install or upgrade the node as quickly as possible, do as few things as possible.
   * Start the node
-3. *In Parallel*: finish applying settings on running cluster and remove old files and binaries.
+3. *In Parallel*: finish applying settings on a running cluster and remove old files and binaries.
 
 Then describe each step in its own YAML file: `before.yml`, `stop_start.yml` and `after.yml`.
 Finally, the role entry point `main.yml` will include the appropriate step using a variable named `elasticsearch_step`:
@@ -173,7 +176,7 @@ A a result, the `before` step should mark whether the `stop_start` is required:
 Then on lucky days, you can skip the expensive `stop_start` step and have a quick and fully parallel deployment.
 
 Other days, when upgrading nodes version, or changing configuration which can not be hot reloaded, running the Ansible playbook will be slower.
-Node specific configuration (`elasticsearch.yml`, Kafka `server.properties`...) is usually part of the problem as it required node restart.
+Node specific configuration (`elasticsearch.yml`, Kafka `server.properties`...) is usually part of the problem as it requires node restart.
 
 .playbook.yml
 [source,yaml]
