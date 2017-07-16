@@ -4,7 +4,7 @@
 :hp-image: /images/logos/ansible.png
 :source_dir: ../sources/2017-07-05-Ansible-and-rolling-upgrades
 :image_dir: 2017-07-05-Ansible-and-rolling-upgrades
-:published_at: 2017-01-15
+:published_at: 2017-07-15
 
 Ansible is a nice tool to deploy distributed systems like Elasticsearch, Kafka, Cassandra and the like.
 These distributed systems are built to avoid downtime and allow partial failures.
@@ -152,9 +152,58 @@ Or even simpler, we can use `all` step:
       elasticsearch_step: "all"
 ----
 
+You may have noticed the `serial` attribute is number, I set to 1.
+For big clusters, and provided you have more than one replica of your data,
+you can stop'n'start nodes two by two, three by three...
+
 == Hot configuration
 
-Most of the time, I am running my Ansible playbook only to change settings that don't need nodes to be restarted.
-The trick is here to detect in the `before` step whether nodes should be restarted or not:
-Version upgrade? Configuration that can not be hot reloaded?
-On lucky days, you can skip the expensive `stop_start` step and have a quick deploy.
+Most of the time, I am only running the Ansible playbook to change settings that don't need nodes to be restarted.
+To skip the expensive part, the trick is to detect in the `before` step whether nodes should be restarted or not.
+The `before` step should mark whether the `stop_start` is required:
+
+.roles/elasticsearch/tasks/before.yml
+[source,yaml]
+----
+- set_fact:
+    elasticsearch_restart_needed: True
+----
+
+Then on lucky days, you can skip the expensive `stop_start` step and have a quick deploy.
+Other days, vhen upgrading nodes version, or changing configuration which is not hot reloaded, running the Ansible playbook will be slower.
+
+.playbook.yml
+[source,yaml]
+----
+- hosts: elasticsearch
+  any_errors_fatal: true
+  serial: 1
+  roles:
+    - role: elasticsearch
+      elasticsearch_step: "stop_start"
+  when: elasticsearch_restart_needed defined and elasticsearch_restart_needed
+----
+
+== Cluster wide configuration
+
+In distributed systems, some configuration must be done once for the whole cluster.
+Here are some examples:
+
+* *Elasticsearch*: License, Users and grants, Indices, Mappings, Templates, Cluster settings (allocation awareness, minimum master nodes...)
+* *Kafka*: Users and grants, Topics
+* *Cassandra*: Users and grants, Keyspaces, Tables
+
+Obviously, this kind of configuration must be ran in the `after` once the cluster is started and listening.
+
+.roles/elasticsearch/tasks/after.yml
+[source,yaml]
+----
+- uri:
+    url: "http://{{ ansible_ssh_hostname }}:9200/article"
+    method: PUT
+    body_format: json
+    body: "{{ lookup('file','article_setting.json') }}"
+  run_once: true
+----
+
+The trick here is to use `run_once` to play this task on a single node.
