@@ -7,22 +7,22 @@
 :published_at: 2017-07-15
 
 Ansible is a nice tool to deploy distributed systems like Elasticsearch, Kafka, Cassandra and the like.
-These systems are built with high availability in mind,
-they can tolerate partial failures.
-Upgrading these software, or updating their configuration, requires restarting each member of the cluster.
+These systems are built with high availability in mind and can tolerate partial failures.
+However, upgrading these softwares, or updating their configuration, requires restarting each member of the cluster.
+To avoid unavailability during deployment, a rolling restart is required.
 
 The aim of this article is to describe a pattern I discovered
 trying to improve deployment speed of Ansible playbooks
 and yet being able to guarantee availability during this upgrade process.
-To improve deployment, you need to deploy all hosts in parallel.
-To guarantee availability, you can't stop all host at the same time: you must deploy each host one after the other.
+To improve deployment speed, you need to deploy all hosts in parallel.
+To guarantee availability, you can't stop all hosts at the same time: you must deploy each host one after the other.
 
 == The problem
 
-Let's take the Elasticsearch example.
+Let's take the Elasticsearch example and explain Ansible basics.
 
 The tasks required to deploy Elasticsearch on each host of the cluster are gathered in an `elasticsearch` role.
-In short, a role is a recipe to install and update an Elasticsearch node.
+In short, the role is a recipe to install and update an Elasticsearch on a given machine.
 Once declared, this role is applied to all hosts belonging to the `elasticsearch` group in the Ansible playbook.
 
 .playbook.yml
@@ -49,7 +49,8 @@ At some point, the `elasticsearch` role will probably contain something to stop 
 ...
 ----
 
-This naive Ansible playbook will stop all Elasticsearch nodes at the same time, making the whole cluster unavailable until nodes are started again.
+This naive Ansible playbook will stop all Elasticsearch nodes at the same time, 
+making the whole cluster unavailable until nodes are started again.
 To fix this problem, the role can be ran in serial instead of parallel:
 
 .deploy.yml
@@ -73,9 +74,11 @@ The main idea to improve speed is to split the role into multiple steps, and do 
   * Stop the node
   * Install or upgrade the node as quickly as possible, do as few things as possible.
   * Start the node
-3. *In Parallel*: finish applying settings on a running cluster and remove old files and binaries.
+3. *In Parallel*: finish applying settings on the running cluster and remove old files and binaries.
 
-Then describe each step in its own YAML file: `before.yml`, `stop_start.yml` and `after.yml`.
+
+For this purpose, describe each step in its own YAML file: 
+`before.yml` for step 1, `stop_start.yml` for step 2 and `after.yml` for step 3.
 Finally, the role entry point `main.yml` will include the appropriate step using a variable named `elasticsearch_step`:
 
 .roles/elasticsearch/tasks/main.yml
@@ -84,6 +87,7 @@ Finally, the role entry point `main.yml` will include the appropriate step using
 - name: "Running step {{ elasticsearch_step }}"
   include: "{{ elasticsearch_step }}.yml"
 ----
+This little trick, will allow calling the `elasticsearch` role, yet running only a part of it.
 
 We can also create a fake step including all the steps (more on that later):
 
@@ -144,6 +148,7 @@ In this particular case, this role can still be used, and the `stop_start` step 
 ----
 
 Or even simpler, we can use the `all` step:
+Or even simpler, we can use the fake `all` step:
 
 .playbook.yml
 [source,yaml]
@@ -171,6 +176,7 @@ A a result, the `before` step should mark whether the `stop_start` is required:
 ----
 - set_fact:
     elasticsearch_restart_needed: True
+  when: ...
 ----
 
 Then on lucky days, you can skip the expensive `stop_start` step and have a quick and fully parallel deployment.
@@ -194,18 +200,19 @@ Node specific configuration (`elasticsearch.yml`, Kafka `server.properties`...) 
 
 == Cluster wide configuration
 
-In distributed systems, some configuration must be done once for the whole cluster.
+In distributed systems, some configuration must be done only once for the whole cluster.
 Here are some examples:
 
 * *Elasticsearch*: License, Users and grants, Indices, Mappings, Templates, Cluster settings (allocation awareness, minimum master nodes...)
 * *Kafka*: Users and grants, Topics
 * *Cassandra*: Users and grants, Keyspaces, Tables
 
-Obviously, this kind of configuration must be ran in the `after` once the cluster is started and listening.
+Obviously, this kind of configuration must be ran in the `after` step, once the cluster is started and listening.
 
 .roles/elasticsearch/tasks/after.yml
 [source,yaml]
 ----
+# Configure article index
 - uri:
     url: "http://{{ ansible_ssh_hostname }}:9200/article"
     method: PUT
