@@ -1,4 +1,288 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Mon, 23 Jan 2017 19:19:44 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[From Java to Go]]></title><description><![CDATA[<div id="preamble">
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Tue, 29 Aug 2017 20:54:33 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Ansible and rolling upgrades]]></title><description><![CDATA[<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Ansible is a nice tool to deploy distributed systems like Elasticsearch, Kafka, Cassandra and the like.
+These systems are built with high availability in mind and can tolerate partial failures.
+However, upgrading these softwares, or updating their configuration, requires restarting each member of the cluster.
+Care must be taken when deploying changes to avoid complete unavailability.</p>
+</div>
+<div class="paragraph">
+<p>The aim of this article is to describe a pattern I discovered
+trying to improve the deployment speed of Ansible playbooks
+and yet being able to guarantee availability during this upgrade process.
+This is the story of two contradicting goals.
+To improve deployment speed, you need to deploy all hosts in parallel.
+To guarantee availability, you can&#8217;t stop all hosts at the same time: you must deploy each host one after the other.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_problem">The problem</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Let&#8217;s take the Elasticsearch example to explain Ansible basics.</p>
+</div>
+<div class="paragraph">
+<p>The tasks required to deploy Elasticsearch on each host of the cluster are gathered in an <code>elasticsearch</code> role.
+In short, the <code>elasticsearch</code> role is the recipe to install and update an Elasticsearch on a given machine.
+Once declared, this role is applied to all hosts belonging to the <code>elasticsearch</code> group in the Ansible playbook.</p>
+</div>
+<div class="listingblock">
+<div class="title">playbook.yml</div>
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">- hosts: elasticsearch
+  any_errors_fatal: true
+  roles:
+    - role: elasticsearch</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>At some point, the <code>elasticsearch</code> role will probably contain something to stop Elasticsearch in order for changes to be reloaded:</p>
+</div>
+<div class="listingblock">
+<div class="title">roles/elasticsearch/tasks/main.yml</div>
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">...
+- name: Stop service
+  become: true
+  service:
+    name: elasticsearch
+    state: stopped
+    enabled: true
+...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This naive Ansible playbook will stop all Elasticsearch nodes at the same time,
+making the whole cluster unavailable until enough nodes are started again.
+To fix this problem, the role can be ran in serial instead of parallel:</p>
+</div>
+<div class="listingblock">
+<div class="title">deploy.yml</div>
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">- hosts: es
+  serial: 1 # Force serial execution
+  roles:
+    - role: elasticsearch</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>But deploying every host, one after the other (in serial), takes a very long time and makes deployment endless.
+Bigger clusters mean longer deployment times.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_refactoring_the_role">Refactoring the role</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The main idea to improve speed is to split the role into multiple steps, and do as much as possible in parallel:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>In Parallel</strong>: Deploy system settings, software settings, software binaries.
+But don&#8217;t stop anything and don&#8217;t remove anything at this point.</p>
+</li>
+<li>
+<p><strong>In Serial</strong>:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Stop the node</p>
+</li>
+<li>
+<p>Install or upgrade the node as quickly as possible, do as few things as possible.</p>
+</li>
+<li>
+<p>Start the node</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><strong>In Parallel</strong>: finish applying settings on the running cluster and remove old files and binaries.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>For this purpose, describe each step in its own YAML file:
+<code>before.yml</code> for step 1, <code>stop_start.yml</code> for step 2 and <code>after.yml</code> for step 3.
+Finally, the role entry point <code>main.yml</code> will include the appropriate step using a variable named <code>elasticsearch_step</code>:</p>
+</div>
+<div class="listingblock">
+<div class="title">roles/elasticsearch/tasks/main.yml</div>
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">- name: "Running step {{ elasticsearch_step }}"
+  include: "{{ elasticsearch_step }}.yml"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This little trick, will allow calling the <code>elasticsearch</code> role, yet running only a part of it.</p>
+</div>
+<div class="paragraph">
+<p>We can also create a fake step including all the steps, it will allow to run the whole role as before (more on that later):</p>
+</div>
+<div class="listingblock">
+<div class="title">roles/elasticsearch/tasks/all.yml</div>
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">- include: "before.yml"
+- include: "stop_start.yml"
+- include: "after.yml"</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_refactoring_the_playbook">Refactoring the playbook</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Now, in the playbook we will call the role 3 times, each individual step being called independently.</p>
+</div>
+<div class="listingblock">
+<div class="title">playbook.yml</div>
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml"># In parallel
+- hosts: elasticsearch
+  any_errors_fatal: true
+  roles:
+    - role: elasticsearch
+      elasticsearch_step: "before"
+
+# In serial
+- hosts: elasticsearch
+  any_errors_fatal: true
+  serial: 1
+  roles:
+    - role: elasticsearch
+      elasticsearch_step: "stop_start"
+
+# In parallel
+- hosts: elasticsearch
+  any_errors_fatal: true
+  roles:
+    - role: elasticsearch
+      elasticsearch_step: "after"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To install a brand new cluster, there is nothing to stop, and we don&#8217;t fear anything.
+In this particular case, this role can still be used, and the <code>stop_start</code> step can be called in parallel:</p>
+</div>
+<div class="listingblock">
+<div class="title">playbook.yml</div>
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml"># New cluster
+- hosts: elasticsearch
+  any_errors_fatal: true
+  roles:
+    - role: elasticsearch
+      elasticsearch_step: "before"
+    - role: elasticsearch
+      elasticsearch_step: "stop_start"
+    - role: elasticsearch
+      elasticsearch_step: "after"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Or even simpler, we can use the fake <code>all</code> step:</p>
+</div>
+<div class="listingblock">
+<div class="title">playbook.yml</div>
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml"># New cluster
+- hosts: elasticsearch
+  any_errors_fatal: true
+  roles:
+    - role: elasticsearch
+      elasticsearch_step: "all"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You may have noticed the <code>serial</code> attribute is a number, I set to 1.
+For big clusters, and provided you have more than one replica of your data,
+you can stop&#8217;n&#8217;start nodes two by two, three by three&#8230;&#8203;</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_unreloaded_configuration">Unreloaded configuration</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Most of the time, I am only running the Ansible playbook to change settings that don&#8217;t need nodes to be restarted.
+To skip the expensive part, the trick is to detect in the <code>before</code> step whether nodes should be restarted or not.
+A a result, the <code>before</code> step should mark whether the <code>stop_start</code> is required:</p>
+</div>
+<div class="listingblock">
+<div class="title">roles/elasticsearch/tasks/before.yml</div>
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">- set_fact:
+    elasticsearch_restart_needed: True
+  when: ...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>On lucky days, you can skip the expensive <code>stop_start</code> step and have a quick and fully parallel deployment.</p>
+</div>
+<div class="paragraph">
+<p>Other days, when upgrading software version, or changing configuration which can not be hot reloaded, running the Ansible playbook will be slower.
+Node specific configuration (<code>elasticsearch.yml</code>, Kafka <code>server.properties</code>&#8230;&#8203;) is usually part of the problem as it requires node restart.</p>
+</div>
+<div class="listingblock">
+<div class="title">playbook.yml</div>
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">- hosts: elasticsearch
+  any_errors_fatal: true
+  serial: 1
+  roles:
+    - role: elasticsearch
+      elasticsearch_step: "stop_start"
+  when: elasticsearch_restart_needed defined and elasticsearch_restart_needed</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_cluster_wide_configuration">Cluster wide configuration</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In distributed systems, some configuration must be done only once for the whole cluster.
+Here are some examples:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Elasticsearch</strong>: License, Users and grants, Indices, Mappings, Templates, Cluster settings (allocation awareness, minimum master nodes&#8230;&#8203;)</p>
+</li>
+<li>
+<p><strong>Kafka</strong>: Users and grants, Topics</p>
+</li>
+<li>
+<p><strong>Cassandra</strong>: Users and grants, Keyspaces, Tables</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This kind of configuration must be done on a running cluster, the cluster will probably replicate the change using internal specific mechanisms.
+Obviously, it must be ran in the <code>after</code> step, once the cluster is started and listening.</p>
+</div>
+<div class="listingblock">
+<div class="title">roles/elasticsearch/tasks/after.yml</div>
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml"># Configure article index
+- uri:
+    url: "http://{{ ansible_ssh_hostname }}:9200/article"
+    method: PUT
+    body_format: json
+    body: "{{ lookup('file','article_setting.json') }}"
+  run_once: true</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The trick here is to use <code>run_once</code> to play this task on a single node.</p>
+</div>
+</div>
+</div>]]></description><link>https://gquintana.github.io/2017/07/15/Ansible-and-rolling-upgrades.html</link><guid isPermaLink="true">https://gquintana.github.io/2017/07/15/Ansible-and-rolling-upgrades.html</guid><category><![CDATA[ansible]]></category><category><![CDATA[ elasticsearch]]></category><category><![CDATA[ kafka]]></category><category><![CDATA[ cassandra]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Sat, 15 Jul 2017 00:00:00 GMT</pubDate></item><item><title><![CDATA[From Java to Go]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>This is the second episode of my <em>7 languages in 7 weeks</em> series of blog posts.
