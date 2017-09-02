@@ -44,7 +44,7 @@ It means you can read a remote file as if it were local
 [source,java]
 ----
 URI zipUri = new URI("jar:file:/path/to/archive.zip")
-try(FileSystem zipFS = FileSystems.newFileSystem(zipUri, new HashMap<>())) { // <1>
+try(FileSystem zipFS = FileSystems.newFileSystem(zipUri, emptyMap())) { // <1>
 	Files.list(zipFS.getPath("/archive"))
 		.map(Path::toString)
 		.forEach(System.out::println);
