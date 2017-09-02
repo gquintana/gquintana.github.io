@@ -18,5 +18,21 @@
   },
   "theme": {
     "name": "roon"
+  },
+  "urls": {
+    "site": "https://gquintana.github.io",
+    "hubpress": "https://gquintana.github.io",
+    "theme": "//gquintana.github.io/themes/roon",
+    "images": "https://gquintana.github.io/images"
+  },
+  "initialisationConfigComponent": {
+    "name": "initialise-configuration",
+    "computed": {},
+    "methods": {},
+    "staticRenderFns": [
+      null,
+      null,
+      null
+    ]
   }
 }
