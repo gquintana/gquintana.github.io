@@ -4,10 +4,24 @@
 :hp-image: /images/logos/java.png
 
 I've been using `java.io.File` and `java.io.File*Stream` since Java 1.1 a long time ago.
-Java 7 introduced a new file API with `java.nio.file.Path` and `java.nio.file.Files`.
+Java 7 introduced a new file API poorly name *NIO2* containing `java.nio.file.Path` and `java.nio.file.Files` classes.
 
 == Quick comparison
 
+
+== One liners
+
+`java.nio.file.Files` allows to read, write, copy files in a single line:
+
+[source,java]
+----
+Files.write(Paths.get("image.png"), bytes); // <1>
+List<String> lines = Files.readAllLines(Paths.get("image.png"), StandardCharsets.UTF_8); / <2>
+----
+<1> Write a binary file
+<2> Read a text file
+
+This nearly makes Guava IO and Commons IO  useless.
 
 == Multiple file systems
 
@@ -15,12 +29,25 @@ When the `File` is only for local files, `Path` can be used to access remote fil
 A `Path` is associated to `FileSystem`. 
 To create a new `Path` instances, the above 2 lines are the same:
 
-```
+[source,java]
+----
 path = Paths.get("path/to/file.txt");
 path = FileSystems.getDefault().getPath("path/to/file.txt");
-```
+----
+
 As the default file system is the local one, you get a path to local file.
 
 But you can plug additional file systems: http://docs.oracle.com/javase/7/docs/technotes/guides/io/fsp/zipfilesystemprovider.html[ZIP], https://github.com/maddingo/nio-fs-provider[SFTP, SMB, WebDAV], https://github.com/lucastheisen/jsch-nio[SSH/SCP], https://github.com/Upplication/Amazon-S3-FileSystem-NIO2[Amazon S3], https://github.com/google/jimfs[In memory], https://github.com/damiencarol/jsr203-hadoop[HDFS], ...
 It means you can read a remote file as if it were local
 
+.Read the content of a Zip file
+[source,java]
+----
+URI zipUri = new URI("jar:file:/path/to/archive.zip")
+try(FileSystem zipFS = FileSystems.newFileSystem(zipUri, new HashMap<>())) { // <1>
+	Files.list(zipFS.getPath("/archive"))
+		.map(Path::toString)
+		.forEach(System.out::println);
+}
+----
+<1> "Mount" the Zip file as a file system
