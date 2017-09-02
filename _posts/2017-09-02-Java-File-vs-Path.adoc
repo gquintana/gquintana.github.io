@@ -16,7 +16,7 @@ Java 7 introduced a new file API poorly name *NIO2* containing `java.nio.file.Pa
 [source,java]
 ----
 Files.write(Paths.get("image.png"), bytes); // <1>
-List<String> lines = Files.readAllLines(Paths.get("image.png"), StandardCharsets.UTF_8); / <2>
+List<String> lines = Files.readAllLines(Paths.get("letter.txt"), StandardCharsets.UTF_8); / <2>
 ----
 <1> Write a binary file
 <2> Read a text file
