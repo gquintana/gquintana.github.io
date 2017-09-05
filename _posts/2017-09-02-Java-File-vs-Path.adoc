@@ -4,7 +4,8 @@
 :hp-image: /images/logos/java.png
 
 I've been using `java.io.File` and `java.io.File*Stream` since Java 1.1 a long time ago.
-Java 7 introduced a new file API poorly name *NIO2* containing `java.nio.file.Path` and `java.nio.file.Files` classes.
+Java 7 introduced a new file API poorly named *NIO2* containing among others the `java.nio.file.Path` and `java.nio.file.Files` classes.
+It took me a while to lose my habits and embrace the new API.
 
 == Quick comparison
 
@@ -14,14 +15,13 @@ Java 7 introduced a new file API poorly name *NIO2* containing `java.nio.file.Pa
 | file = new File("path/to/file.txt")     | path = Paths.get("path/to/file.txt")
 | file = new File(parentFile, "file.txt") | path = parentPath.resolve("file.txt")
 | file.getFileName()                      | path.getFileName().toString()
+| file.getParentFile()                    | path.getParent()
 | file.mkdirs()                           | Files.createDirectories(path)
-| new FileOutputStream(file)              | Files.newOutputStream (path)
-| new FileInputStream(file)               | Files.newInputStream (path)
 | file.length()                           | Files.size(path)
 | file.exists()                           | Files.exists(path)
-| file.getParentFile()                    | path.getParent()
-| file.getParent()                        | path.getParent().toString()
-| file.delete()                           | file.delete()
+| file.delete()                           | Files.delete(path)
+| new FileOutputStream(file)              | Files.newOutputStream(path)
+| new FileInputStream(file)               | Files.newInputStream(path)
 | file.listFiles(filter)                  | Files.list(path).filter(filter).collect(toList())
 |=================================================================================================
 
