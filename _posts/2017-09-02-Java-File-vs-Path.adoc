@@ -79,12 +79,14 @@ With this trick in mind, we can read the content of a Zip file, as if we had ext
 ----
 URI zipUri = new URI("jar:file:/path/to/archive.zip")
 try(FileSystem zipFS = FileSystems.newFileSystem(zipUri, emptyMap())) { // <1>
-	Files.list(zipFS.getPath("/archive"))
+    Path zipPath = zipFS.getPath("/archive") // <2>
+	Files.list(zipPath)
 		.map(Path::toString)
 		.forEach(System.out::println);
 }
 ----
 <1> "Mount" the Zip file as a file system
+<2> `zipPath` is of type `com.sun.nio.zipfs.ZipPath`
 
 You can even plug additional file systems: http://docs.oracle.com/javase/7/docs/technotes/guides/io/fsp/zipfilesystemprovider.html[ZIP], https://github.com/maddingo/nio-fs-provider[SFTP, SMB, WebDAV], https://github.com/lucastheisen/jsch-nio[SSH/SCP], https://github.com/Upplication/Amazon-S3-FileSystem-NIO2[Amazon S3], https://github.com/google/jimfs[In memory], https://github.com/damiencarol/jsr203-hadoop[HDFS], ...
 This almost means you can read a remote file as if it were local.
