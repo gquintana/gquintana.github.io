@@ -71,7 +71,7 @@ path = FileSystems.getDefault().getPath("path/to/file.txt");
 ----
 
 As the default file system is the local one, you get a path to a local file.
-Dependending on the underlying file system, you'll get a different implementation: `sun.nio.fs.UnixPath`, `sun.nio.fs.WindowsPath`...
+Depending on the underlying file system, you'll get a different implementation: `sun.nio.fs.UnixPath`, `sun.nio.fs.WindowsPath`...
 
 With this trick in mind, we can read the content of a Zip file, as if we had extracted it:
 
