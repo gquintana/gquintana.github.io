@@ -14,7 +14,7 @@ Java 7 introduced a new file API poorly name *NIO2* containing `java.nio.file.Pa
 | file = new File("path/to/file.txt")     | path = Paths.get("path/to/file.txt")
 | file = new File(parentFile, "file.txt") | path = parentPath.resolve("file.txt")
 | file.getFileName()                      | path.getFileName().toString()
-| file.mkdirs()                            | Files.createDirectories(path)
+| file.mkdirs()                           | Files.createDirectories(path)
 | new FileOutputStream(file)              | Files.newOutputStream (path)
 | new FileInputStream(file)               | Files.newInputStream (path)
 | file.length()                           | Files.size(path)
@@ -28,8 +28,7 @@ Java 7 introduced a new file API poorly name *NIO2* containing `java.nio.file.Pa
 Some additional notes:
 
 * `Path` throws `IOException` more often than `File`, and rarely return a `boolean` to tell if something was done (`mkdirs()`, `delete()`)
-* `File` is more object oriented than `Path`. I regret that `size()`, `exists()`... methods are not on the `Path` interface. This is probably due to the fact that this API was added in Java 7, but default methods on interfaces were added later in Java 8.
-
+* `File` is more object oriented than `Path`: I regret that `size()`, `exists()`... methods are not on the `Path` interface. This is probably due to the fact that this API was added in Java 7, but default methods on interfaces were added later in Java 8.
 
 == One liners
 
@@ -52,18 +51,18 @@ This nearly makes Guava IO and Commons IO  useless. I regret that there isn't an
 Many APIs (JAXB, Jackson to name a few) don't use `Path`s to read/write files, the workaround is usually use an `InputStream` or an `OutputStream`.
 
 [source,java]
-====
+----
 try(InputStream inputStream = Files.newInputStream(path)) {
   Thing thing = (Thing) unmarshaller.unmarshal(inputStream);
 }
-====
-
+----
 
 == Multiple file systems
 
-When the `File` is only for local files, `Path` can be used to access remote files.
-A `Path` is associated to `FileSystem`. 
-To create a new `Path` instances, the above 2 lines are the same:
+When the `File` is only for local files, `Path` can also be used to access remote files.
+A `Path` is associated to a `FileSystem`. 
+
+To create a new `Path` instances, there is not constructor (`Path` is interface), we need to call a factory method. The above 2 lines are the same:
 
 [source,java]
 ----
@@ -71,12 +70,11 @@ path = Paths.get("path/to/file.txt");
 path = FileSystems.getDefault().getPath("path/to/file.txt");
 ----
 
-As the default file system is the local one, you get a path to local file.
+As the default file system is the local one, you get a path to a local file.
+Dependending on the underlying file system, you'll get a different implementation: `sun.nio.fs.UnixPath`, `sun.nio.fs.WindowsPath`...
 
-But you can plug additional file systems: http://docs.oracle.com/javase/7/docs/technotes/guides/io/fsp/zipfilesystemprovider.html[ZIP], https://github.com/maddingo/nio-fs-provider[SFTP, SMB, WebDAV], https://github.com/lucastheisen/jsch-nio[SSH/SCP], https://github.com/Upplication/Amazon-S3-FileSystem-NIO2[Amazon S3], https://github.com/google/jimfs[In memory], https://github.com/damiencarol/jsr203-hadoop[HDFS], ...
-It means you can read a remote file as if it were local
+With this trick in mind, we can read the content of a Zip file, as if we had extracted it:
 
-.Read the content of a Zip file
 [source,java]
 ----
 URI zipUri = new URI("jar:file:/path/to/archive.zip")
@@ -87,3 +85,7 @@ try(FileSystem zipFS = FileSystems.newFileSystem(zipUri, emptyMap())) { // <1>
 }
 ----
 <1> "Mount" the Zip file as a file system
+
+You can even plug additional file systems: http://docs.oracle.com/javase/7/docs/technotes/guides/io/fsp/zipfilesystemprovider.html[ZIP], https://github.com/maddingo/nio-fs-provider[SFTP, SMB, WebDAV], https://github.com/lucastheisen/jsch-nio[SSH/SCP], https://github.com/Upplication/Amazon-S3-FileSystem-NIO2[Amazon S3], https://github.com/google/jimfs[In memory], https://github.com/damiencarol/jsr203-hadoop[HDFS], ...
+This almost means you can read a remote file as if it were local.
+
