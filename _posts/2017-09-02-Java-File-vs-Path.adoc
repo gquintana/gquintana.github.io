@@ -8,6 +8,28 @@ Java 7 introduced a new file API poorly name *NIO2* containing `java.nio.file.Pa
 
 == Quick comparison
 
+[width="100%",options="header",cols="m,m"]
+|=================================================================================================
+|     java.io.File (class)                |     java.nio.file.Path (interface)
+| file = new File("path/to/file.txt")     | path = Paths.get("path/to/file.txt")
+| file = new File(parentFile, "file.txt") | path = parentPath.resolve("file.txt")
+| file.getFileName()                      | path.getFileName().toString()
+| file.mkdirs()                            | Files.createDirectories(path)
+| new FileOutputStream(file)              | Files.newOutputStream (path)
+| new FileInputStream(file)               | Files.newInputStream (path)
+| file.length()                           | Files.size(path)
+| file.exists()                           | Files.exists(path)
+| file.getParentFile()                    | path.getParent()
+| file.getParent()                        | path.getParent().toString()
+| file.delete()                           | file.delete()
+| file.listFiles(filter)                  | Files.list(path).filter(filter).collect(toList())
+|=================================================================================================
+
+Some additional notes:
+
+* `Path` throws `IOException` more often than `File`, and rarely return a `boolean` to tell if something was done (`mkdirs()`, `delete()`)
+* `File` is more object oriented than `Path`. I regret that `size()`, `exists()`... methods are not on the `Path` interface. This is probably due to the fact that this API was added in Java 7, but default methods on interfaces were added later in Java 8.
+
 
 == One liners
 
@@ -25,7 +47,17 @@ Files.lines(Paths.get("letter.txt"), StandardCharsets.UTF_8)
 <1> Write a binary file
 <2> Read a text file
 
-This nearly makes Guava IO and Commons IO  useless.
+This nearly makes Guava IO and Commons IO  useless. I regret that there isn't any method out of the box to read/write a whole file as a single string.
+
+Many APIs (JAXB, Jackson to name a few) don't use `Path`s to read/write files, the workaround is usually use an `InputStream` or an `OutputStream`.
+
+[source,java]
+====
+try(InputStream inputStream = Files.newInputStream(path)) {
+  Thing thing = (Thing) unmarshaller.unmarshal(inputStream);
+}
+====
+
 
 == Multiple file systems
 
