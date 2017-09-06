@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Wed, 06 Sep 2017 11:29:56 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Java File vs Path]]></title><description><![CDATA[<div id="preamble">
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Wed, 06 Sep 2017 11:30:26 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Java File vs Path]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>I&#8217;ve been using <code>java.io.File</code> and <code>java.io.File*Stream</code> since Java 1.1, a long time ago.
@@ -67,7 +67,7 @@ It took me a while to lose my habits and embrace the new API.</p>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>file.listFiles(filter)</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Files.list(path).filter(filter) .collect(toList())</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Files.list(path) .filter(filter) .collect(toList())</code></p></td>
 </tr>
 </tbody>
 </table>
