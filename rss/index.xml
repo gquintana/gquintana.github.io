@@ -1,4 +1,183 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Tue, 29 Aug 2017 20:54:33 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Ansible and rolling upgrades]]></title><description><![CDATA[<div id="preamble">
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Wed, 06 Sep 2017 05:38:41 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Java File vs Path]]></title><description><![CDATA[<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>I&#8217;ve been using <code>java.io.File</code> and <code>java.io.File*Stream</code> since Java 1.1 a long time ago.
+Java 7 introduced a new file API poorly named <strong>NIO2</strong> containing among others the <code>java.nio.file.Path</code> and <code>java.nio.file.Files</code> classes.
+It took me a while to lose my habits and embrace the new API.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_quick_comparison">Quick comparison</h2>
+<div class="sectionbody">
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">java.io.File (class)</th>
+<th class="tableblock halign-left valign-top">java.nio.file.Path (interface)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>file = new File("path/to/file.txt")</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>path = Paths.get("path/to/file.txt")</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>file = new File(parentFile, "file.txt")</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>path = parentPath.resolve("file.txt")</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>file.getFileName()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>path.getFileName().toString()</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>file.getParentFile()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>path.getParent()</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>file.mkdirs()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Files.createDirectories(path)</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>file.length()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Files.size(path)</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>file.exists()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Files.exists(path)</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>file.delete()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Files.delete(path)</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>new FileOutputStream(file)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Files.newOutputStream(path)</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>new FileInputStream(file)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Files.newInputStream(path)</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>file.listFiles(filter)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Files.list(path).filter(filter).collect(toList())</code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>Some additional notes:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>Path</code> throws <code>IOException</code> more often than <code>File</code>, and rarely return a <code>boolean</code> to tell if something was done (<code>mkdirs()</code>, <code>delete()</code>)</p>
+</li>
+<li>
+<p><code>File</code> is more object oriented than <code>Path</code>: I regret that <code>size()</code>, <code>exists()</code>&#8230;&#8203; methods are not on the <code>Path</code> interface. This is probably due to the fact that this API was added in Java 7, but default methods on interfaces were added later in Java 8.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_one_liners">One liners</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>java.nio.file.Files</code> allows to read, write, copy files in a single line:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-java" data-lang="java">Files.write(Paths.get("image.png"), bytes); <i class="conum" data-value="1"></i><b>(1)</b>
+
+List&lt;String&gt; lines = Files.readAllLines(Paths.get("letter.txt"), StandardCharsets.UTF_8); <i class="conum" data-value="2"></i><b>(2)</b>
+
+Files.lines(Paths.get("letter.txt"), StandardCharsets.UTF_8)
+		.forEach(System.out::println);</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Write a binary file</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Read a text file</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>This nearly makes Guava IO and Commons IO  useless. I regret that there isn&#8217;t any method out of the box to read/write a whole file as a single string.</p>
+</div>
+<div class="paragraph">
+<p>Many APIs (JAXB, Jackson to name a few) don&#8217;t use <code>Path`s to read/write files, the workaround is usually use an `InputStream</code> or an <code>OutputStream</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-java" data-lang="java">try(InputStream inputStream = Files.newInputStream(path)) {
+  Thing thing = (Thing) unmarshaller.unmarshal(inputStream);
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_multiple_file_systems">Multiple file systems</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When the <code>File</code> is only for local files, <code>Path</code> can also be used to access remote files.
+A <code>Path</code> is associated to a <code>FileSystem</code>.</p>
+</div>
+<div class="paragraph">
+<p>To create a new <code>Path</code> instances, there is not constructor (<code>Path</code> is interface), we need to call a factory method. The above 2 lines are the same:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-java" data-lang="java">path = Paths.get("path/to/file.txt");
+path = FileSystems.getDefault().getPath("path/to/file.txt");</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As the default file system is the local one, you get a path to a local file.
+Depending on the underlying file system, you&#8217;ll get a different implementation: <code>sun.nio.fs.UnixPath</code>, <code>sun.nio.fs.WindowsPath</code>&#8230;&#8203;</p>
+</div>
+<div class="paragraph">
+<p>With this trick in mind, we can read the content of a Zip file, as if we had extracted it:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-java" data-lang="java">URI zipUri = new URI("jar:file:/path/to/archive.zip")
+try(FileSystem zipFS = FileSystems.newFileSystem(zipUri, emptyMap())) { <i class="conum" data-value="1"></i><b>(1)</b>
+    Path zipPath = zipFS.getPath("/archive") <i class="conum" data-value="2"></i><b>(2)</b>
+	Files.list(zipPath)
+		.map(Path::toString)
+		.forEach(System.out::println);
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>"Mount" the Zip file as a file system</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td><code>zipPath</code> is of type <code>com.sun.nio.zipfs.ZipPath</code></td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>You can even plug additional file systems: <a href="http://docs.oracle.com/javase/7/docs/technotes/guides/io/fsp/zipfilesystemprovider.html">ZIP</a>, <a href="https://github.com/maddingo/nio-fs-provider">SFTP, SMB, WebDAV</a>, <a href="https://github.com/lucastheisen/jsch-nio">SSH/SCP</a>, <a href="https://github.com/Upplication/Amazon-S3-FileSystem-NIO2">Amazon S3</a>, <a href="https://github.com/google/jimfs">In memory</a>, <a href="https://github.com/damiencarol/jsr203-hadoop">HDFS</a>, &#8230;&#8203;
+This almost means you can read a remote file as if it were local.</p>
+</div>
+</div>
+</div>]]></description><link>https://gquintana.github.io/2017/09/02/Java-File-vs-Path.html</link><guid isPermaLink="true">https://gquintana.github.io/2017/09/02/Java-File-vs-Path.html</guid><category><![CDATA[java]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Sat, 02 Sep 2017 00:00:00 GMT</pubDate></item><item><title><![CDATA[Ansible and rolling upgrades]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>Ansible is a nice tool to deploy distributed systems like Elasticsearch, Kafka, Cassandra and the like.
@@ -282,7 +461,7 @@ Obviously, it must be ran in the <code>after</code> step, once the cluster is st
 <p>The trick here is to use <code>run_once</code> to play this task on a single node.</p>
 </div>
 </div>
-</div>]]></description><link>https://gquintana.github.io/2017/07/15/Ansible-and-rolling-upgrades.html</link><guid isPermaLink="true">https://gquintana.github.io/2017/07/15/Ansible-and-rolling-upgrades.html</guid><category><![CDATA[ansible]]></category><category><![CDATA[ elasticsearch]]></category><category><![CDATA[ kafka]]></category><category><![CDATA[ cassandra]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Sat, 15 Jul 2017 00:00:00 GMT</pubDate></item><item><title><![CDATA[From Java to Go]]></title><description><![CDATA[<div id="preamble">
+</div>]]></description><link>https://gquintana.github.io/2017/07/15/Ansible-and-rolling-upgrades.html</link><guid isPermaLink="true">https://gquintana.github.io/2017/07/15/Ansible-and-rolling-upgrades.html</guid><category><![CDATA[ansible]]></category><category><![CDATA[elasticsearch]]></category><category><![CDATA[kafka]]></category><category><![CDATA[cassandra]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Sat, 15 Jul 2017 00:00:00 GMT</pubDate></item><item><title><![CDATA[From Java to Go]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>This is the second episode of my <em>7 languages in 7 weeks</em> series of blog posts.
@@ -1048,7 +1227,7 @@ But it is not has expressive as many other languages for business applications.<
 <p>I don’t pretend to be a Go expert at all, if I wrote something wrong, tell me.</p>
 </div>
 </div>
-</div>]]></description><link>https://gquintana.github.io/2017/01/15/From-Java-to-Go.html</link><guid isPermaLink="true">https://gquintana.github.io/2017/01/15/From-Java-to-Go.html</guid><category><![CDATA[7li7w]]></category><category><![CDATA[ go]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Sun, 15 Jan 2017 00:00:00 GMT</pubDate></item><item><title><![CDATA[From Java to Ruby]]></title><description><![CDATA[<div id="preamble">
+</div>]]></description><link>https://gquintana.github.io/2017/01/15/From-Java-to-Go.html</link><guid isPermaLink="true">https://gquintana.github.io/2017/01/15/From-Java-to-Go.html</guid><category><![CDATA[7li7w]]></category><category><![CDATA[go]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Sun, 15 Jan 2017 00:00:00 GMT</pubDate></item><item><title><![CDATA[From Java to Ruby]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>One of my 2017 resolutions is to try different languages and see how they compare to Java.
@@ -1648,7 +1827,7 @@ both were born in the nineties.</p>
 <p>I don&#8217;t pretend to be a Ruby expert at all, if I wrote something wrong, tell me.</p>
 </div>
 </div>
-</div>]]></description><link>https://gquintana.github.io/2017/01/08/From-Java-to-Ruby.html</link><guid isPermaLink="true">https://gquintana.github.io/2017/01/08/From-Java-to-Ruby.html</guid><category><![CDATA[7li7w]]></category><category><![CDATA[ ruby]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Sun, 08 Jan 2017 00:00:00 GMT</pubDate></item><item><title><![CDATA[Testing a Java and Elasticsearch 5.0 application]]></title><description><![CDATA[<div id="preamble">
+</div>]]></description><link>https://gquintana.github.io/2017/01/08/From-Java-to-Ruby.html</link><guid isPermaLink="true">https://gquintana.github.io/2017/01/08/From-Java-to-Ruby.html</guid><category><![CDATA[7li7w]]></category><category><![CDATA[ruby]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Sun, 08 Jan 2017 00:00:00 GMT</pubDate></item><item><title><![CDATA[Testing a Java and Elasticsearch 5.0 application]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>A long time ago, I wrote <a href="https://blog.zenika.com/2013/04/29/integrer-elasticsearch-dans-une-application-java/">this article in french</a> explaining
@@ -2896,7 +3075,7 @@ and smoothly integrates Kafka with Spring and Spring Integration:</p>
 <p>This library makes Kafka usage very similar to ActiveMQ or RabbitMQ.</p>
 </div>
 </div>
-</div>]]></description><link>https://gquintana.github.io/2016/10/10/Kafka-Java-Client.html</link><guid isPermaLink="true">https://gquintana.github.io/2016/10/10/Kafka-Java-Client.html</guid><category><![CDATA[kafka]]></category><category><![CDATA[ java]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Mon, 10 Oct 2016 00:00:00 GMT</pubDate></item><item><title><![CDATA[Testing Logstash configuration]]></title><description><![CDATA[<div id="preamble">
+</div>]]></description><link>https://gquintana.github.io/2016/10/10/Kafka-Java-Client.html</link><guid isPermaLink="true">https://gquintana.github.io/2016/10/10/Kafka-Java-Client.html</guid><category><![CDATA[kafka]]></category><category><![CDATA[java]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Mon, 10 Oct 2016 00:00:00 GMT</pubDate></item><item><title><![CDATA[Testing Logstash configuration]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>You wrote a piece of Logstash configuration which can parse some logs.
