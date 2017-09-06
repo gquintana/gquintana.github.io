@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Wed, 06 Sep 2017 05:45:34 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Java File vs Path]]></title><description><![CDATA[<div id="preamble">
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Wed, 06 Sep 2017 11:26:07 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Java File vs Path]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>I&#8217;ve been using <code>java.io.File</code> and <code>java.io.File*Stream</code> since Java 1.1, a long time ago.
@@ -81,6 +81,9 @@ It took me a while to lose my habits and embrace the new API.</p>
 </li>
 <li>
 <p><code>File</code> is more object oriented than <code>Path</code>: I regret that <code>size()</code>, <code>exists()</code>&#8230;&#8203; methods are not on the <code>Path</code> interface. This is probably due to the fact that this API was added in Java 7, but default methods on interfaces were added later in Java 8.</p>
+</li>
+<li>
+<p><code>Path</code> based <code>InputStream</code>/`OutputStream`s are less expensive from a GC point view. Thanks <a href="https://twitter.com/thekittster/status/905326864251670532">@kittster</a> for mentionning <a href="https://www.cloudbees.com/blog/fileinputstream-fileoutputstream-considered-harmful">this article from Cloudbees</a>.</p>
 </li>
 </ul>
 </div>

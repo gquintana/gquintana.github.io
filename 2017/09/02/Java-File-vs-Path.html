@@ -13,7 +13,7 @@
     <link rel="shortcut icon" href="https://gquintana.github.io/favicon.ico">
 
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:400,700,400italic,700italic|Open+Sans:400italic,700italic,700,400">
-    <link rel="stylesheet" type="text/css" href="//gquintana.github.io/themes/roon/assets/css/screen.css?v=1504676734558" />
+    <link rel="stylesheet" type="text/css" href="//gquintana.github.io/themes/roon/assets/css/screen.css?v=1504697167485" />
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/idea.min.css" />
 
     <link rel="canonical" href="https://gquintana.github.io/2017/09/02/Java-File-vs-Path.html" />
@@ -159,6 +159,9 @@ It took me a while to lose my habits and embrace the new API.</p>
 </li>
 <li>
 <p><code>File</code> is more object oriented than <code>Path</code>: I regret that <code>size()</code>, <code>exists()</code>&#8230;&#8203; methods are not on the <code>Path</code> interface. This is probably due to the fact that this API was added in Java 7, but default methods on interfaces were added later in Java 8.</p>
+</li>
+<li>
+<p><code>Path</code> based <code>InputStream</code>/`OutputStream`s are less expensive from a GC point view. Thanks <a href="https://twitter.com/thekittster/status/905326864251670532">@kittster</a> for mentionning <a href="https://www.cloudbees.com/blog/fileinputstream-fileoutputstream-considered-harmful">this article from Cloudbees</a>.</p>
 </li>
 </ul>
 </div>
