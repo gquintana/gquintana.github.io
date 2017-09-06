@@ -11,7 +11,7 @@ Spoiler: The most funny part of this article is at the end!
 
 == Quick comparison
 
-[width="100%",options="header",cols="m,m"]
+[width="100%",options="header",cols="50%m,50%m"]
 |=================================================================================================
 |     java.io.File (class)                |     java.nio.file.Path (interface)
 | file = new File("path/to/file.txt")     | path = Paths.get("path/to/file.txt")
@@ -24,7 +24,7 @@ Spoiler: The most funny part of this article is at the end!
 | file.delete()                           | Files.delete(path)
 | new FileOutputStream(file)              | Files.newOutputStream(path)
 | new FileInputStream(file)               | Files.newInputStream(path)
-| file.listFiles(filter)                  | Files.list(path).filter(filter).collect(toList())
+| file.listFiles(filter)                  | Files.list(path) .filter(filter) .collect(toList())
 |=================================================================================================
 
 Some additional notes:
