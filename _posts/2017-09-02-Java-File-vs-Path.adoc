@@ -3,9 +3,11 @@
 :hp-tags: java
 :hp-image: /images/logos/java.png
 
-I've been using `java.io.File` and `java.io.File*Stream` since Java 1.1 a long time ago.
-Java 7 introduced a new file API poorly named *NIO2* containing among others the `java.nio.file.Path` and `java.nio.file.Files` classes.
+I've been using `java.io.File` and `java.io.File*Stream` since Java 1.1, a long time ago.
+Java 7 introduced a new file API named *NIO2* containing, among others, the `java.nio.file.Path` and `java.nio.file.Files` classes.
 It took me a while to lose my habits and embrace the new API.
+
+Spoiler: The most funny part of this article is at the end!
 
 == Quick comparison
 
