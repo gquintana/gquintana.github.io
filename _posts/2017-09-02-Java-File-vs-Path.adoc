@@ -31,6 +31,7 @@ Some additional notes:
 
 * `Path` throws `IOException` more often than `File`, and rarely return a `boolean` to tell if something was done (`mkdirs()`, `delete()`)
 * `File` is more object oriented than `Path`: I regret that `size()`, `exists()`... methods are not on the `Path` interface. This is probably due to the fact that this API was added in Java 7, but default methods on interfaces were added later in Java 8.
+* `Path` based `InputStream`/`OutputStream`s are less expensive from a GC point view. Thanks https://twitter.com/thekittster/status/905326864251670532[@kittster] for mentionning https://www.cloudbees.com/blog/fileinputstream-fileoutputstream-considered-harmful[this article from Cloudbees].
 
 == One liners
 
