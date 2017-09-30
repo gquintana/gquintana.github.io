@@ -1,0 +1,34 @@
+= Log collection in AWS land
+
+:hp-image: /images/logos/aws.png
+// :published_at: 2019-01-31
+:hp-tags: java, cloud
+
+The AWS universe is huge, finding the appropriate component for your needs and understanding how it works is not easy.
+In this article, I will describe what I discovered while trying to collect logs from applications deployed on Beanstalk and send them into Elasticsearch.
+
+Disclaimer: I am an AWS newbie
+
+## The family picture
+
+
+
+## Beanstalk
+
+There are several components producing logs in a Beanstalk instance:
+
+1. Beanstalk deployment
+2. Proxy server: either Apache or Nginx produce Access logs and Error logs
+3. Web server: Tomcat, NodeJS... 
+4. Application with its own logging framework
+
+Each product produces logs with their own format.
+Beanstalk knows how to automatically collect logs from the first three components: deploy logs, access logs, web server logs...
+As it knows where this logs are located it is in charge of rotating, archiving (on S3) and purging these logs.
+
+The Beanstalk console allows to download 100 lines of each file for a given instance and view them from the browser.
+It is useful to understand why a deployment fails, but it's not meant to dig into the logs of a running application cluster.
+
+## Cloudwatch
+
+## Elasticsearch
