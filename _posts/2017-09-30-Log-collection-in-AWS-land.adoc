@@ -60,7 +60,7 @@ To tell Beanstalk to take care of your application specific log files, just at s
 The first file allows `my-app.log` (current log file) content to appear in the Beanstalk console.
 The second file allows all (old log files) files to be archived.
 
-## Cloudwatch
+## Cloudwatch Logs
 
 First of all, the log stream from Beanstalk to Cloudwatch must be enabled in Beanstalk configuration file:
 
@@ -114,7 +114,7 @@ More information can be found https://aws.amazon.com/fr/blogs/aws/cloudwatch-log
 ## Elasticsearch
 
 To send logs into Elasticsearch and get a better log search experience,
-subscribe a log filter to Cloudwatch log group.
+subscribe a log filter to each Cloudwatch log group.
 There is a special Lambda which can do Log filtering and send logs to Elasticsearch.
 This log filter can be used to split text logs into fields:
 
@@ -123,6 +123,8 @@ image::{image_dir}/cloudwatch_log_filter.png[Cloudwatch log filter]
 This tool can split space delimited logs, like access logs, into fields.
 But it's hard to "grok" more complicated logs with such basic tool.
 It supports JSON formatted logs, so a good solution for application logs, is to configure your favorite logging framework to produce JSON logs.
+
+https://medium.com/wolox-driving-innovation/centralized-logging-in-microservices-using-aws-cloudwatch-elasticsearch-f5db7a57e553[This article] is worth reading.
 
 At this point, we can open Kibana and configure an index pattern named `cwl-*`.
 Cloudwatch log filter mimics Logstash and uses a field named `@timestamp` for timestamp.
