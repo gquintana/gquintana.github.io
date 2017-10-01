@@ -2,8 +2,8 @@
 
 :hp-image: /images/logos/aws.png
 // :published_at: 2019-01-31
-:hp-tags: java, cloud
-:image_dir: ../images/2017-09-30-Log-collection-in-AWS-land
+:hp-tags: elasticsearch, cloud
+:image_dir: 2017-09-30-Log-collection-in-AWS-land
 
 In AWS, it is really easy to popup new machines and scale.
 The more machines you have, the more important it's to centralize logs.
@@ -104,6 +104,13 @@ image::{image_dir}/cloudwatch_log_search.png[Cloudwatch log viewer]
 It's better than Beanstalk console to monitor a running platform.
 Yet, log search is still limited because logs are not structured (split into fields) and the full text search is simplistic.
 
+Using Cloudwatch, it is also possible :
+
+* to raise alerts when a specific pattern is found in logs
+* to extract metrics from logs (HTTP request time, number of 404 errors in Access logs for example)
+
+More information can be found https://aws.amazon.com/fr/blogs/aws/cloudwatch-log-service/[here].
+
 ## Elasticsearch
 
 To send logs into Elasticsearch and get a better log search experience,
@@ -116,13 +123,6 @@ image::{image_dir}/cloudwatch_log_filter.png[Cloudwatch log filter]
 This tool can split space delimited logs, like access logs, into fields.
 But it's hard to "grok" more complicated logs with such basic tool.
 It supports JSON formatted logs, so a good solution for application logs, is to configure your favorite logging framework to produce JSON logs.
-
-From Cloudwatch, it is also possible :
-
-* to raise alerts when a specific pattern is found in logs
-* to extract metrics from logs (HTTP request time, number of 404 errors in Access logs for example)
-
-More information https://aws.amazon.com/fr/blogs/aws/cloudwatch-log-service/[here].
 
 At this point, we can open Kibana and configure an index pattern named `cwl-*`.
 Cloudwatch log filter mimics Logstash and uses a field named `@timestamp` for timestamp.
