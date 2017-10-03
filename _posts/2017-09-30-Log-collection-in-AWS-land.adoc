@@ -9,7 +9,7 @@ In AWS, it is really easy to popup new machines and scale.
 The more machines you have, the more important it's to centralize logs.
 In this article, I will describe what I discovered while trying to collect logs from applications deployed on Beanstalk and send them into Elasticsearch.
 
-Disclaimer: I am an AWS newbie
+Disclaimer: I am an AWS newbie. 
 
 ## The family picture
 
@@ -27,6 +27,8 @@ Lambda:: a provided Lambda function is used to bridge logs from Cloudwatch to El
 
 To ship logs into Cloudwatch, an AWSLogs agent is provided.
 To archive logs into S3, a script is cron-ed along with logrotate.
+
+This article will skip the security (IAM) settings which are required to allow these components to communicate.
 
 ## Beanstalk
 
@@ -74,7 +76,7 @@ option_settings:
     RetentionInDays: 30
 ----
 This sets up the Cloudwatch log agent.
-You can also install it on any EC2 instance with yum:
+Provided you're using an image based on Amazon Linux, you can also install it on any EC2 instance with yum:
 
 [source,shell]
 ----
@@ -96,6 +98,8 @@ file=/var/log/my-app/my-app*.log
 
 Log files produced my components (Apache, Tomcat...) managed by Beanstalk are already configured.
 The above config file is only for application specific log files.
+This agent support multiline logs (like stacktraces, call trace...) provided they start with a whitespace (space, tab). 
+It's not as powerful as Filebeat or Logstash.
 
 At this point, you'll be able to see logs aggregated from multiple Beanstalk instances in the Cloudwatch console.
 
@@ -107,7 +111,7 @@ Yet, log search is still limited because logs are not structured (split into fie
 Using Cloudwatch, it is also possible :
 
 * to raise alerts when a specific pattern is found in logs
-* to extract metrics from logs (HTTP request time, number of 404 errors in Access logs for example)
+* to extract metrics from logs (HTTP request time, number of 404 errors in Access logs for example) and draw charts
 
 More information can be found https://aws.amazon.com/fr/blogs/aws/cloudwatch-log-service/[here].
 
@@ -127,4 +131,11 @@ It supports JSON formatted logs, so a good solution for application logs, is to 
 https://medium.com/wolox-driving-innovation/centralized-logging-in-microservices-using-aws-cloudwatch-elasticsearch-f5db7a57e553[This article] is worth reading.
 
 At this point, we can open Kibana and configure an index pattern named `cwl-*`.
-Cloudwatch log filter mimics Logstash and uses a field named `@timestamp` for timestamp.
+Cloudwatch log filter mimics Logstash and uses a field named `@timestamp` for timestamp
+
+## Conclusion
+
+AWS provides all the building blocks to collect logs and monitor your whole infrastructure.
+It's not hard to collect logs and send them in Elasticsearch.
+But it's also far less powerful than the complete Elastic stack.
+
