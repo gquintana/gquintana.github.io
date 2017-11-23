@@ -135,7 +135,7 @@ Cloudwatch log filter mimics Logstash and uses a field named `@timestamp` for ti
 
 ## Conclusion
 
-AWS provides all the building blocks to collect logs and monitor your whole infrastructure.
+AWS provides all the building blocks to centralize logs and monitor your whole infrastructure.
 It's not hard to collect logs and send them in Elasticsearch.
 But it's also far less powerful than the complete Elastic stack.
 
