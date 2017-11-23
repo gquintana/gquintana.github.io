@@ -1,0 +1,16 @@
+= Structured logging with SLF4J and Logback
+:published_at: 2016-12-01
+:hp-tags: java
+:hp-image: /images/logos/slf4j.png
+
+== Structured logging with SLF4J
+
+
+
+== JSON logging with Logback contrib
+
+
+
+== JSON logging with Logback Logstash layout
+
+
