@@ -1,4 +1,225 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Wed, 06 Sep 2017 11:30:26 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Java File vs Path]]></title><description><![CDATA[<div id="preamble">
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Thu, 23 Nov 2017 20:18:59 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Log collection in AWS land]]></title><description><![CDATA[<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>In AWS, it is really easy to popup new machines and scale.
+The more machines you have, the more important it&#8217;s to centralize logs.
+In this article, I will describe what I discovered while trying to collect logs from applications deployed on Beanstalk and send them into Elasticsearch.</p>
+</div>
+<div class="paragraph">
+<p>Disclaimer: I am an AWS newbie.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_family_picture">The family picture</h2>
+<div class="sectionbody">
+<div class="imageblock">
+<div class="content">
+<img src="https://gquintana.github.io/images/2017-09-30-Log-collection-in-AWS-land/big-picture.svg" alt="Big picture">
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Beanstalk</dt>
+<dd>
+<p>contains a web server and runs an application (Java, JS, Go&#8230;&#8203;), both produce logs in a local <code>/var/log/something</code> directory.
+There can be multiple instances of the same application for scalability, or it can be different applications in the same environment.</p>
+</dd>
+<dt class="hdlist1">Cloudwatch</dt>
+<dd>
+<p>is used to monitor EC2, Beanstalk&#8230;&#8203; instances, it is the place where logs and metrics are gathered.
+From there you can trigger alerts, schedule tasks&#8230;&#8203;</p>
+</dd>
+<dt class="hdlist1">S3</dt>
+<dd>
+<p>is a file storage where can be used to archive logs on long term and survive instances stop.
+However theses logs are not easily searchable because they are compressed files.</p>
+</dd>
+<dt class="hdlist1">Elasticsearch</dt>
+<dd>
+<p>can be used to index logs and make them searchable.
+A Kibana UI is provided to make search and dashboard building even more easy.</p>
+</dd>
+<dt class="hdlist1">Lambda</dt>
+<dd>
+<p>a provided Lambda function is used to bridge logs from Cloudwatch to Elasticsearch</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>To ship logs into Cloudwatch, an AWSLogs agent is provided.
+To archive logs into S3, a script is cron-ed along with logrotate.</p>
+</div>
+<div class="paragraph">
+<p>This article will skip the security (IAM) settings which are required to allow these components to communicate.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_beanstalk">Beanstalk</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>There are several components producing logs in a Beanstalk instance:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Beanstalk deployment</p>
+</li>
+<li>
+<p>Proxy server: either Apache or Nginx produce Access logs and Error logs</p>
+</li>
+<li>
+<p>Web server: Tomcat, NodeJS&#8230;&#8203;</p>
+</li>
+<li>
+<p>Application with its own logging framework</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Each component produces logs with its own format.
+Beanstalk knows how to automatically collect logs for the first three components: deploy logs, access logs, web server logs&#8230;&#8203;
+As it knows where this logs are located it is in charge of rotating, archiving on S3, and purging log files.</p>
+</div>
+<div class="paragraph">
+<p>The Beanstalk console allows to <a href="http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/using-features.logging.html">download 100</a> lines of each file for a given instance.
+It is useful to understand why a deployment fails, but it&#8217;s not meant to dig into the logs of a running application cluster.</p>
+</div>
+<div class="paragraph">
+<p>To tell Beanstalk to take care of your application specific log files, just at some configuration files to indicate where they are located:</p>
+</div>
+<div class="listingblock">
+<div class="title">/opt/elasticbeanstalk/tasks/taillogs.d/my-app.conf</div>
+<div class="content">
+<pre class="highlight"><code>/var/log/my-app/my-app.log</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">/opt/elasticbeanstalk/tasks/bundlelogs.d/my-app.conf</div>
+<div class="content">
+<pre class="highlight"><code>/var/log/my-app/my-app.*.log</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The first file allows <code>my-app.log</code> (current log file) content to appear in the Beanstalk console.
+The second file allows all (old log files) files to be archived.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_cloudwatch_logs">Cloudwatch Logs</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>First of all, the log stream from Beanstalk to Cloudwatch must be enabled in Beanstalk configuration file:</p>
+</div>
+<div class="listingblock">
+<div class="title">&nbsp;.ebextensions/cloudwatch.config</div>
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">option_settings:
+  aws:elasticbeanstalk:cloudwatch:logs:
+    StreamLogs: true
+    DeleteOnTerminate: false
+    RetentionInDays: 30</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This sets up the Cloudwatch log agent.
+Provided you&#8217;re using an image based on Amazon Linux, you can also install it on any EC2 instance with yum:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">yum update -y
+yum install -y awslogs
+service awslogs start</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then the Cloudwatch log agent must be configured to watch your custom log files.</p>
+</div>
+<div class="listingblock">
+<div class="title">/etc/awslogs/config/my-app.conf</div>
+<div class="content">
+<pre class="highlight"><code class="language-toml" data-lang="toml">[/var/log/my-app/my-app.log]
+log_group_name=/aws/elasticbeanstalk/my-app-dev/var/log/my-app/my-app.log
+log_stream_name={instance_id}
+file=/var/log/my-app/my-app*.log</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Log files produced my components (Apache, Tomcat&#8230;&#8203;) managed by Beanstalk are already configured.
+The above config file is only for application specific log files.
+This agent support multiline logs (like stacktraces, call trace&#8230;&#8203;) provided they start with a whitespace (space, tab).
+It&#8217;s not as powerful as Filebeat or Logstash.</p>
+</div>
+<div class="paragraph">
+<p>At this point, you&#8217;ll be able to see logs aggregated from multiple Beanstalk instances in the Cloudwatch console.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://gquintana.github.io/images/2017-09-30-Log-collection-in-AWS-land/cloudwatch_log_search.png" alt="Cloudwatch log viewer">
+</div>
+</div>
+<div class="paragraph">
+<p>It&#8217;s better than Beanstalk console to monitor a running platform.
+Yet, log search is still limited because logs are not structured (split into fields) and the full text search is simplistic.</p>
+</div>
+<div class="paragraph">
+<p>Using Cloudwatch, it is also possible :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>to raise alerts when a specific pattern is found in logs</p>
+</li>
+<li>
+<p>to extract metrics from logs (HTTP request time, number of 404 errors in Access logs for example) and draw charts</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>More information can be found <a href="https://aws.amazon.com/fr/blogs/aws/cloudwatch-log-service/">here</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_elasticsearch">Elasticsearch</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To send logs into Elasticsearch and get a better log search experience,
+subscribe a log filter to each Cloudwatch log group.
+There is a special Lambda which can do Log filtering and send logs to Elasticsearch.
+This log filter can be used to split text logs into fields:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://gquintana.github.io/images/2017-09-30-Log-collection-in-AWS-land/cloudwatch_log_filter.png" alt="Cloudwatch log filter">
+</div>
+</div>
+<div class="paragraph">
+<p>This tool can split space delimited logs, like access logs, into fields.
+But it&#8217;s hard to "grok" more complicated logs with such basic tool.
+It supports JSON formatted logs, so a good solution for application logs, is to configure your favorite logging framework to produce JSON logs.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://medium.com/wolox-driving-innovation/centralized-logging-in-microservices-using-aws-cloudwatch-elasticsearch-f5db7a57e553">This article</a> is worth reading.</p>
+</div>
+<div class="paragraph">
+<p>At this point, we can open Kibana and configure an index pattern named <code>cwl-*</code>.
+Cloudwatch log filter mimics Logstash and uses a field named <code>@timestamp</code> for timestamp</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>AWS provides all the building blocks to centralize logs and monitor your whole infrastructure.
+It&#8217;s not hard to collect logs and send them in Elasticsearch.
+But it&#8217;s also far less powerful than the complete Elastic stack.</p>
+</div>
+</div>
+</div>]]></description><link>https://gquintana.github.io/2017/09/30/Log-collection-in-AWS-land.html</link><guid isPermaLink="true">https://gquintana.github.io/2017/09/30/Log-collection-in-AWS-land.html</guid><category><![CDATA[elasticsearch]]></category><category><![CDATA[cloud]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Sat, 30 Sep 2017 00:00:00 GMT</pubDate></item><item><title><![CDATA[Java File vs Path]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>I&#8217;ve been using <code>java.io.File</code> and <code>java.io.File*Stream</code> since Java 1.1, a long time ago.
@@ -467,7 +688,7 @@ Obviously, it must be ran in the <code>after</code> step, once the cluster is st
 <p>The trick here is to use <code>run_once</code> to play this task on a single node.</p>
 </div>
 </div>
-</div>]]></description><link>https://gquintana.github.io/2017/07/15/Ansible-and-rolling-upgrades.html</link><guid isPermaLink="true">https://gquintana.github.io/2017/07/15/Ansible-and-rolling-upgrades.html</guid><category><![CDATA[ansible]]></category><category><![CDATA[elasticsearch]]></category><category><![CDATA[kafka]]></category><category><![CDATA[cassandra]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Sat, 15 Jul 2017 00:00:00 GMT</pubDate></item><item><title><![CDATA[From Java to Go]]></title><description><![CDATA[<div id="preamble">
+</div>]]></description><link>https://gquintana.github.io/2017/07/15/Ansible-and-rolling-upgrades.html</link><guid isPermaLink="true">https://gquintana.github.io/2017/07/15/Ansible-and-rolling-upgrades.html</guid><category><![CDATA[ansible]]></category><category><![CDATA[ elasticsearch]]></category><category><![CDATA[ kafka]]></category><category><![CDATA[ cassandra]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Sat, 15 Jul 2017 00:00:00 GMT</pubDate></item><item><title><![CDATA[From Java to Go]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>This is the second episode of my <em>7 languages in 7 weeks</em> series of blog posts.
@@ -1233,7 +1454,7 @@ But it is not has expressive as many other languages for business applications.<
 <p>I don’t pretend to be a Go expert at all, if I wrote something wrong, tell me.</p>
 </div>
 </div>
-</div>]]></description><link>https://gquintana.github.io/2017/01/15/From-Java-to-Go.html</link><guid isPermaLink="true">https://gquintana.github.io/2017/01/15/From-Java-to-Go.html</guid><category><![CDATA[7li7w]]></category><category><![CDATA[go]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Sun, 15 Jan 2017 00:00:00 GMT</pubDate></item><item><title><![CDATA[From Java to Ruby]]></title><description><![CDATA[<div id="preamble">
+</div>]]></description><link>https://gquintana.github.io/2017/01/15/From-Java-to-Go.html</link><guid isPermaLink="true">https://gquintana.github.io/2017/01/15/From-Java-to-Go.html</guid><category><![CDATA[7li7w]]></category><category><![CDATA[ go]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Sun, 15 Jan 2017 00:00:00 GMT</pubDate></item><item><title><![CDATA[From Java to Ruby]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>One of my 2017 resolutions is to try different languages and see how they compare to Java.
@@ -1833,7 +2054,7 @@ both were born in the nineties.</p>
 <p>I don&#8217;t pretend to be a Ruby expert at all, if I wrote something wrong, tell me.</p>
 </div>
 </div>
-</div>]]></description><link>https://gquintana.github.io/2017/01/08/From-Java-to-Ruby.html</link><guid isPermaLink="true">https://gquintana.github.io/2017/01/08/From-Java-to-Ruby.html</guid><category><![CDATA[7li7w]]></category><category><![CDATA[ruby]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Sun, 08 Jan 2017 00:00:00 GMT</pubDate></item><item><title><![CDATA[Testing a Java and Elasticsearch 5.0 application]]></title><description><![CDATA[<div id="preamble">
+</div>]]></description><link>https://gquintana.github.io/2017/01/08/From-Java-to-Ruby.html</link><guid isPermaLink="true">https://gquintana.github.io/2017/01/08/From-Java-to-Ruby.html</guid><category><![CDATA[7li7w]]></category><category><![CDATA[ ruby]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Sun, 08 Jan 2017 00:00:00 GMT</pubDate></item><item><title><![CDATA[Testing a Java and Elasticsearch 5.0 application]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>A long time ago, I wrote <a href="https://blog.zenika.com/2013/04/29/integrer-elasticsearch-dans-une-application-java/">this article in french</a> explaining
@@ -3081,7 +3302,7 @@ and smoothly integrates Kafka with Spring and Spring Integration:</p>
 <p>This library makes Kafka usage very similar to ActiveMQ or RabbitMQ.</p>
 </div>
 </div>
-</div>]]></description><link>https://gquintana.github.io/2016/10/10/Kafka-Java-Client.html</link><guid isPermaLink="true">https://gquintana.github.io/2016/10/10/Kafka-Java-Client.html</guid><category><![CDATA[kafka]]></category><category><![CDATA[java]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Mon, 10 Oct 2016 00:00:00 GMT</pubDate></item><item><title><![CDATA[Testing Logstash configuration]]></title><description><![CDATA[<div id="preamble">
+</div>]]></description><link>https://gquintana.github.io/2016/10/10/Kafka-Java-Client.html</link><guid isPermaLink="true">https://gquintana.github.io/2016/10/10/Kafka-Java-Client.html</guid><category><![CDATA[kafka]]></category><category><![CDATA[ java]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Mon, 10 Oct 2016 00:00:00 GMT</pubDate></item><item><title><![CDATA[Testing Logstash configuration]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>You wrote a piece of Logstash configuration which can parse some logs.
