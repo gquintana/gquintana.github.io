@@ -44,10 +44,16 @@ try(MDC.MDCCloseable mdc = MDC.putCloseable("user", "gquintana")) {
 	demoLogger.info("Hello world!");
 }
 ----
-Hopefully, this kind of code won't make its way in your business code because, it is hidden in an interceptor like a Servlet filter, a Spring aspect.
+Hopefully, this kind of code won't make its way in your business code because, it is usually hidden in an interceptor like a Servlet filter, a Spring aspect. In Logback, there is a `MDCInsertingServletFilter` class which can be used as an example.
 
-The MDC can store information about the user (user Id, session Id, token Id), about the request (request Id, transaction Id), about long running threads (batch instance Id, broker client Id).
+The MDC can store information about the user (user Id, session Id, token Id), about the current request (request Id, transaction Id), about long running threads (batch instance Id, broker client Id). 
+Later on, this information will be part of the log.
 
+By the way, as the MDC is usually stored as a thread local variable.
+This means two things:
+
+1. It must be properly cleaned after being used, or you may experience information leaks if the thread is reused (thread pools).
+2. The information may no be properly transfered from thread to another. Think about asynchronous calls.
 
 == JSON logging with Logback contrib
 
