@@ -113,7 +113,7 @@ It will produce the expected result:
 ----
 The Maven coordinates for this library are `net.logstash.logback:logstash-logback-encoder:4.11`.
 
-The second one uses a different extention point called *layout*.
+The second one uses a different extension point called *layout*.
 In the end, it looks very similar to the first one, a bit more verbose though:
 [source,xml]
 ----
