@@ -48,37 +48,36 @@ Later on, this information will be part of the log.
 
 Having this kind of information allows to group logs by user, by request, by processing.
 Remember that logs may be scattered across differents servers, on different time periods. 
-In short having something to correlate logs is important.
+In short it allows to correlate logs belonging to the same scenario and find answers to questions like "what was the user X doing when he met this nasty error?"
 
-Let's get back to the example.
-The MDC is stores extra information about logs.
-It is usually based on a thread local variable, this  means two things:
+Let's get back to the example, we saw the MDC stores extra information about logs.
+The MDC is usually based on a thread local variable, this has two drawbacks:
 
-1. It must be properly cleaned after being used, or you may experience information leaks if the thread is reused (thread pools).
-2. The information may no be properly transfered from thread to another. Think about asynchronous calls.
+1. It must be properly cleaned after being used, or you may experience information leaks if the thread is reused. Think about thread pools in web servers like Tomcat.
+2. The information may no be properly transfered from one thread to another. Think about asynchronous calls.
 
-As a result calling `MDC.remove`, like the above example, (or `MDC.clear`) is required to clean the MDC after usage.
-To avoid forgetting to do housekeeping afterwards, we can use a try-with-resource:
+As a result, calling `MDC.remove`, like the above example, (or `MDC.clear`) is required to clean the MDC after usage.
+To avoid forgetting to do housekeeping afterwards, we can use a try-with-resource construct:
 [source,java]
 ----
 try(MDC.MDCCloseable mdc = MDC.putCloseable("user", "gquintana")) {
 	demoLogger.info("Hello world!");
 }
 ----
-Hopefully, this kind of code won't make its way in your business code because, it is usually hidden in an interceptor like a Servlet filter, a Spring aspect. In Logback, there is a `MDCInsertingServletFilter` class which can be used as an example.
+Hopefully, this kind of code won't make its way in your business code because it is usually hidden in an interceptor like a Servlet filter, a Spring aspect or a JAXRS interceptor. In Logback, there is a `MDCInsertingServletFilter` class which can be used as an example.
 
 
 == JSON logging with Logback
 
 At this point, a log is more than simple string, 
-it's qualified with useful information: timestamp, level, thread, user, message.
+it is qualified with useful information: timestamp, level, thread, user, message.
 In order to send it to a log collection tool like Elasticsearch, 
-you should keep the in a structured format like JSON.
-You should not flatten it in you own specific text format.
+you should keep it in a structured format like JSON.
+You should not flatten it in your own specific text format.
 
-A structured format also has the virtue of handling properly multiline logs like stack traces, call traces and messages containing line separators (wanted or not).
+A structured format also has the virtue of handling properly multiline logs like stack traces, call traces or messages containing line separators (wanted or not).
 
-Most popular log collection tools likes Filebeat, Graylog, Fluent already use some kind of compressed JSON format under the hood.
+Most popular log collection tools likes Filebeat, Graylog, Fluentd already uses some kind of compressed JSON format under the hood.
 You should too.
 
 Generating JSON logs with Logback is very easy. 
