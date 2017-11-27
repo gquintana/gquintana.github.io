@@ -30,19 +30,20 @@ Notice, this "Hello world!" message is qualified with several fields:
 * Level
 * Logger/Category
 
-We can add more contextual information to this list, and give more detail about what was going on when this log was printed. For instance, to log the user Id, let's use the MDC (Mapped Diagnostic Context) to set more data in the log:
+We can add more contextual information to this list, and give more detail about what was going on when this log was printed. For instance, to log the user Id, let's use the MDC (Mapped Diagnostic Context):
 [source,java]
 ----
 MDC.put("userId", "gquintana");
 demoLogger.info("Hello world!");
 MDC.remove("userId");
 ----
-With the suitable configuration, we can get the user Id the log:
+The MDC is a map-like object filled in the Java code and used in the backend logging library to output custom data.
+With the adequate configuration, we can get the user Id the log:
 [source]
 ----
 21:10:29.178 [Thread-1] gquintana INFO  logodissey.DemoLogger - Hello world!
 ----
-The MDC can store information about the user (user Id, session Id, token Id), about the current request (request Id, transaction Id), about long running threads (batch instance Id, broker client Id). 
+The MDC can store any information about the user (user Id, session Id, token Id), about the current request (request Id, transaction Id), about long running threads (batch instance Id, broker client Id). 
 Later on, this information will be part of the log.
 
 Having this kind of information allows to group logs by user, by request, by processing.
