@@ -141,5 +141,18 @@ The result is very close as well, but fields are named differently:
    "context":"default"
 }
 ----
+In order to be on par with the first example, it is possible to subclass the `JsonLayout` and add custom fields:
+[source,java]
+----
+public class CustomJsonLayout extends JsonLayout {
+    @Override
+    protected void addCustomDataToJsonMap(Map<String, Object> map, ILoggingEvent event) {
+        map.put("application", "log-odissey");
+        try {
+            map.put("host", InetAddress.getLocalHost().getHostName());
+        } catch (UnknownHostException e) {
+        }
+    }
+}
+----
 Several Maven dependencies are required: `ch.qos.logback.contrib:logback-json-classic:0.1.5`, `ch.qos.logback.contrib:logback-jackson:0.1.5` and `com.fasterxml.jackson.core:jackson-databind`.
-
