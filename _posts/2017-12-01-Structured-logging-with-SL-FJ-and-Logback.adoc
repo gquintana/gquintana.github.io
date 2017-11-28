@@ -3,11 +3,11 @@
 :hp-tags: java
 :hp-image: /images/logos/slf4j.png
 
-I stumbled upon the term "structured logging" reading https://kartar.net/2015/12/structured-logging/[a 2015 blog post by James Turnbull].
-It's not a new concept. 
-I discovered Python developpers had a library dedicated to *structured logging*: http://www.structlog.org[structlog].
+I stumbled upon the term "structured logging" reading https://kartar.net/2015/12/structured-logging/[a 2015 blog post by James Turnbull], 
+it's an interesting but not a new concept. 
+I also discovered Python  and .Net developpers had a library dedicated to *structured logging*: http://www.structlog.org[structlog] and https://serilog.net/[serilog].
 
-In this article I will describe what can be done in Java with usual logging libraries like SLF4J et Logback.
+In this article I will describe how to do structured logging in Java with usual logging libraries like SLF4J et Logback.
 
 == Structured logging with SLF4J
 
@@ -30,7 +30,14 @@ Notice, this "Hello world!" message is qualified with several fields:
 * Level
 * Logger/Category
 
-We can add more contextual information to this list, and give more detail about what was going on when this log was printed. For instance, to log the user Id, let's use the MDC (Mapped Diagnostic Context):
+This is what the term "structured logging" means, 
+a log is more than a string, 
+it gives contextual information about what was occuring
+, it tell more detail about what was going on when this log was printed
+
+How can we enrich this contextual information,
+and add the user Id for example?
+It is the purpose of the MDC (Mapped Diagnostic Context),:
 [source,java]
 ----
 MDC.put("userId", "gquintana");
