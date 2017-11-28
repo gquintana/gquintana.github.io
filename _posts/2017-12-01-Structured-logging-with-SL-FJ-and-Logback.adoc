@@ -5,23 +5,23 @@
 
 I stumbled upon the term "structured logging" reading https://kartar.net/2015/12/structured-logging/[a 2015 blog post by James Turnbull], 
 it's an interesting but not a new concept. 
-I also discovered Python  and .Net developpers had a library dedicated to *structured logging*: http://www.structlog.org[structlog] and https://serilog.net/[serilog].
+I also discovered Python  and .Net developers had a library dedicated to *structured logging*: http://www.structlog.org[structlog] and https://serilog.net/[serilog].
 
 In this article I will describe how to do structured logging in Java with usual logging libraries like SLF4J et Logback.
 
 == Structured logging with SLF4J
 
-All Java developpers know how to log a message:
+All Java developers know how to log a message:
 [source,java]
 ----
-Logger demoLogger = LoggerFactory.getLogger("logodissey.DemoLogger");
+Logger demoLogger = LoggerFactory.getLogger("logodyssey.DemoLogger");
 demoLogger.info("Hello world!");
 ----
 
 Properly configured, it produces a log like
 [source]
 ----
-21:10:29.178 [Thread-1] INFO  logodissey.DemoLogger - Hello world!
+21:10:29.178 [Thread-1] INFO  logodyssey.DemoLogger - Hello world!
 ----
 Notice, this "Hello world!" message is qualified with several fields:
 
@@ -32,7 +32,7 @@ Notice, this "Hello world!" message is qualified with several fields:
 
 This is what the term "structured logging" means, 
 a log is more than a string, 
-it gives contextual information about what was occuring
+it gives contextual information about what was occurring
 , it tell more detail about what was going on when this log was printed
 
 How can we enrich this contextual information,
@@ -44,17 +44,17 @@ MDC.put("userId", "gquintana");
 demoLogger.info("Hello world!");
 MDC.remove("userId");
 ----
-The MDC is a map-like object filled in the Java code and used in the backend logging library to output custom data.
+The MDC is a map-like object filled in the Java code and used in the back-end logging library to output custom data.
 With the adequate configuration, we can get the user Id the log:
 [source]
 ----
-21:10:29.178 [Thread-1] gquintana INFO  logodissey.DemoLogger - Hello world!
+21:10:29.178 [Thread-1] gquintana INFO  logodyssey.DemoLogger - Hello world!
 ----
 The MDC can store any information about the user (user Id, session Id, token Id), about the current request (request Id, transaction Id), about long running threads (batch instance Id, broker client Id). 
 Later on, this information will be part of the log.
 
 Having this kind of information allows to group logs by user, by request, by processing.
-Remember that logs may be scattered across differents servers, on different time periods. 
+Remember that logs may be scattered across different servers, on different time periods. 
 In short it allows to correlate logs belonging to the same scenario and find answers to questions like "what was the user X doing when he met this nasty error?"
 
 Let's get back to the example, we saw the MDC stores extra information about logs.
@@ -67,7 +67,7 @@ As a result, calling `MDC.remove`, like the above example, (or `MDC.clear`) is r
 To avoid forgetting to do housekeeping afterwards, we can use a try-with-resource construct:
 [source,java]
 ----
-try(MDC.MDCCloseable mdc = MDC.putCloseable("user", "gquintana")) {
+try(MDC.MDCCloseable mdc = MDC.putCloseable("userId", "gquintana")) {
 	demoLogger.info("Hello world!");
 }
 ----
@@ -78,14 +78,21 @@ Hopefully, this kind of code won't make its way in your business code because it
 
 At this point, a log is more than simple string, 
 it is qualified with useful information: timestamp, level, thread...
-How can we write this data structure on disk or send it over the wire to log collection tool tool like Elasticsearch?
-We must serialize it,
-however we should not flatten it in dumb text format and loose the structure.
-We must keep it in a structured format like JSON.
+How can we write this data structure on disk or send it over the wire to log collection tool?
+We have to serialize it.
+For a human being, a simple text format as shown above is readable enough.
+However, for a machine, it is a just a word soup without any structure.
+In order to send structured logs to a log collection tool, 
+and take advantage of this structure (search by user, by thread...), 
+we must use a structured format like JSON.
 
-A structured format like JSON also can also handle properly multiline logs like stack traces/call traces or messages containing line separators (wanted or not).
+Compared to the Syslog, another popular log format, the JSON format
 
-Most popular log collection tools likes Filebeat, Graylog, Fluentd already uses some kind of compressed JSON format under the hood.
+* Can properly handle  multi-line logs like stack traces/call traces or messages containing line separators (wanted or not)
+* Can have custom fields like user Id, transaction Id 
+* Is more verbose, so compression (GZip or the like) may be required to reduce the weight
+
+Most popular log collection tools likes Filebeat, Graylog, Fluentd already use some kind of compressed JSON format under the hood.
 You should too.
 
 Generating JSON logs with Logback is very easy. 
@@ -97,9 +104,9 @@ The first one uses a Logback extension point known as *encoder* that you can plu
 [source,xml]
 ----
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>log/log-odissey.log</file>
+        <file>log/log-odyssey.log</file>
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <customFields>{"application":"log-odissey"}</customFields>
+            <customFields>{"application":"log-odyssey"}</customFields>
         </encoder>
     </appender>
 ----
@@ -110,7 +117,7 @@ It will produce the expected result:
   "@timestamp": "2017-11-25T21:10:29.178+01:00",
   "@version": 1,
   "message": "Hello world!",
-  "logger_name": "logodissey.DemoLogger",
+  "logger_name": "logodyssey.DemoLogger",
   "thread_name": "Thread-1",
   "level": "INFO",
   "level_value": 20000,
@@ -125,9 +132,8 @@ The second one uses a different extension point called *layout*.
 In the end, it looks very similar to the first one, a bit more verbose though:
 [source,xml]
 ----
-    <appender name="FILE
-    "class="ch.qos.logback.core.FileAppender">
-        <file>target/log/log-odissey.log</file>
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>log/log-odyssey.log</file>
         <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
             <layout class="ch.qos.logback.contrib.json.classic.JsonLayout">
                 <jsonFormatter class="ch.qos.logback.contrib.jackson.JacksonJsonFormatter"/>
@@ -140,13 +146,15 @@ The result is very close as well, but fields are named differently:
 [source,json]
 ----
 {
-   "timestamp":"1511814391083",
-   "level":"INFO",
-   "thread":"Thread-1",
-   "mdc":{"user":"gquintana"},
-   "logger":"logodissey.DemoLogger",
-   "message":"Hello world!",
-   "context":"default"
+    "timestamp":"1511814391083",
+    "level":"INFO",
+    "thread":"Thread-1",
+    "mdc": {
+        "userId":"gquintana"
+	},
+    "logger":"logodyssey.DemoLogger",
+    "message":"Hello world!",
+    "context":"default"
 }
 ----
 In order to be on par with the first example, it is possible to subclass the `JsonLayout` and add custom fields:
@@ -155,7 +163,7 @@ In order to be on par with the first example, it is possible to subclass the `Js
 public class CustomJsonLayout extends JsonLayout {
     @Override
     protected void addCustomDataToJsonMap(Map<String, Object> map, ILoggingEvent event) {
-        map.put("application", "log-odissey");
+        map.put("application", "log-odyssey");
         try {
             map.put("host", InetAddress.getLocalHost().getHostName());
         } catch (UnknownHostException e) {
@@ -163,4 +171,10 @@ public class CustomJsonLayout extends JsonLayout {
     }
 }
 ----
-Several Maven dependencies are required: `ch.qos.logback.contrib:logback-json-classic:0.1.5`, `ch.qos.logback.contrib:logback-jackson:0.1.5` and `com.fasterxml.jackson.core:jackson-databind`.
+Several Maven dependencies are required `ch.qos.logback.contrib:logback-json-classic:0.1.5`, 
+`ch.qos.logback.contrib:logback-jackson:0.1.5` and `com.fasterxml.jackson.core:jackson-databind`
+for this library to work.
+
+In the end both libraries are similar, both are based on the Jackson library and produce one JSON document per line.
+This format is known as http://ndjson.org/[NDJSON] or and http://jsonlines.org/[JSON Lines].
+Logstash and Filebeat can easily read this kind of JSON file.
