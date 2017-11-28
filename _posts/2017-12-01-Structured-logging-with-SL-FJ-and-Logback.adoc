@@ -37,7 +37,7 @@ it gives contextual information about what was occuring
 
 How can we enrich this contextual information,
 and add the user Id for example?
-It is the purpose of the MDC (Mapped Diagnostic Context),:
+It is the purpose of the MDC (Mapped Diagnostic Context):
 [source,java]
 ----
 MDC.put("userId", "gquintana");
@@ -77,12 +77,13 @@ Hopefully, this kind of code won't make its way in your business code because it
 == JSON logging with Logback
 
 At this point, a log is more than simple string, 
-it is qualified with useful information: timestamp, level, thread, user, message.
-In order to send it to a log collection tool like Elasticsearch, 
-you should keep it in a structured format like JSON.
-You should not flatten it in your own specific text format.
+it is qualified with useful information: timestamp, level, thread...
+How can we write this data structure on disk or send it over the wire to log collection tool tool like Elasticsearch?
+We must serialize it,
+however we should not flatten it in dumb text format and loose the structure.
+We must keep it in a structured format like JSON.
 
-A structured format also has the virtue of handling properly multiline logs like stack traces, call traces or messages containing line separators (wanted or not).
+A structured format like JSON also can also handle properly multiline logs like stack traces/call traces or messages containing line separators (wanted or not).
 
 Most popular log collection tools likes Filebeat, Graylog, Fluentd already uses some kind of compressed JSON format under the hood.
 You should too.
