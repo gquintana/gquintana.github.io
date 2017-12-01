@@ -1,5 +1,5 @@
 = Structured logging with SLF4J and Logback
-:published_at: 2017-12-01
+:published_at: 2017-12-02
 :hp-tags: java
 :hp-image: /images/logos/slf4j.png
 
