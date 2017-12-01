@@ -172,7 +172,7 @@ Several Maven dependencies are required `ch.qos.logback.contrib:logback-json-cla
 `ch.qos.logback.contrib:logback-jackson:0.1.5` and `com.fasterxml.jackson.core:jackson-databind`
 for this library to work.
 
-In the end these libraries are similar, both user the Jackson library to generate JSON.
-Contrary to the above JSON examples which have been prettyfied to be human readable, producing one JSON document per line is better.
+In the end these libraries are similar, both use the Jackson library to generate JSON.
+Contrary to the above JSON examples which have been prettyfied to be human readable, producing one JSON document per line is better because it is more compact, and each end of line marks the end of a log, there is no multi-line log.
 This format is known as http://ndjson.org/[NDJSON] or and http://jsonlines.org/[JSON Lines].
 Logstash and Filebeat can easily read this kind of JSON file.
