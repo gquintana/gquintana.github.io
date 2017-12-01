@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Fri, 01 Dec 2017 20:05:59 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Structured logging with SLF4J and Logback]]></title><description><![CDATA[<div id="preamble">
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Fri, 01 Dec 2017 20:38:45 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Structured logging with SLF4J and Logback]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>I don&#8217;t know who first coined the term <strong>structured logging</strong>.
@@ -68,7 +68,7 @@ Later on, this information will be part of the log.</p>
 <div class="paragraph">
 <p>Having this kind of information allows to group logs by user, by request, by processing.
 Remember that logs may be scattered across different servers, on different time periods.
-In short, these additional fields allow correlating logs belonging to the same scenario and finding answers to questions like "what was the user X doing when he met this nasty error?"</p>
+These additional fields allow correlating logs belonging to the same scenario and finding answers to questions like "what was the user X doing when he met this nasty error?"</p>
 </div>
 <div class="paragraph">
 <p>Let&#8217;s get back to the example, we saw the MDC stores extra information about logs.
@@ -86,7 +86,7 @@ The MDC is usually based on a thread local variable, this has two drawbacks:</p>
 </div>
 <div class="paragraph">
 <p>As a result, calling <code>MDC.remove</code>, like the above example, (or <code>MDC.clear</code>) is required to clean the MDC after usage.
-To avoid forgetting to do housekeeping afterwards, we can use a try-with-resource construct:</p>
+In order not to forget to do the housework afterwards, we can use a try-with-resource construct:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -106,17 +106,17 @@ Hopefully, this kind of code won&#8217;t make its way in your business code beca
 <div class="sectionbody">
 <div class="paragraph">
 <p>At this point, a log is more than simple string,
-it is qualified with useful information: timestamp, level, thread&#8230;&#8203;
-How can we write this data structure on disk or send it over the wire to log collection tool?
+it is qualified with useful information: timestamp, level, thread, user Id&#8230;&#8203;
+How can we write this data structure on disk or send it over the wire to a log collection tool?
 We have to serialize it.
 For a human being, a simple text format as shown above is readable enough.
-However, for a machine, this is a just a word soup without any structure.
-In order to send structured logs to a log collection tool,
-and take advantage of this structure (search by user, by thread&#8230;&#8203;),
-we must use a structured format like JSON.</p>
+However, for a machine, this is just a word soup without any structure.
+In short, to send structured logs to a log collection tool
+and benefit from this structure (search by user, by thread&#8230;&#8203;),
+we must use a structured format, like JSON for example.</p>
 </div>
 <div class="paragraph">
-<p>Compared to the Syslog, another popular log format, the JSON format</p>
+<p>Compared to the Syslog format, another popular log format, the JSON format</p>
 </div>
 <div class="ulist">
 <ul>
@@ -194,7 +194,7 @@ In the end, it looks very similar to the first one, a bit more verbose though:</
 </div>
 </div>
 <div class="paragraph">
-<p>The result is very close as well, but fields are named differently:</p>
+<p>The result is very close as well, even though the fields are named differently:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -234,7 +234,8 @@ In the end, it looks very similar to the first one, a bit more verbose though:</
 for this library to work.</p>
 </div>
 <div class="paragraph">
-<p>In the end both libraries are similar, both are based on the Jackson library and produce one JSON document per line.
+<p>In the end these libraries are similar, both user the Jackson library to generate JSON.
+Contrary to the above JSON examples which have been prettyfied to be human readable, producing one JSON document per line is better.
 This format is known as <a href="http://ndjson.org/">NDJSON</a> or and <a href="http://jsonlines.org/">JSON Lines</a>.
 Logstash and Filebeat can easily read this kind of JSON file.</p>
 </div>
