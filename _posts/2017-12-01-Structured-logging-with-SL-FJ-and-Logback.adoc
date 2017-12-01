@@ -51,7 +51,7 @@ Later on, this information will be part of the log.
 
 Having this kind of information allows to group logs by user, by request, by processing.
 Remember that logs may be scattered across different servers, on different time periods. 
-In short, these additional fields allow correlating logs belonging to the same scenario and finding answers to questions like "what was the user X doing when he met this nasty error?"
+These additional fields allow correlating logs belonging to the same scenario and finding answers to questions like "what was the user X doing when he met this nasty error?"
 
 Let's get back to the example, we saw the MDC stores extra information about logs.
 The MDC is usually based on a thread local variable, this has two drawbacks:
@@ -60,7 +60,7 @@ The MDC is usually based on a thread local variable, this has two drawbacks:
 2. The information may no be properly transfered from one thread to another. Think about asynchronous calls.
 
 As a result, calling `MDC.remove`, like the above example, (or `MDC.clear`) is required to clean the MDC after usage.
-To avoid forgetting to do housekeeping afterwards, we can use a try-with-resource construct:
+In order not to forget to do the housework afterwards, we can use a try-with-resource construct:
 [source,java]
 ----
 try(MDC.MDCCloseable mdc = MDC.putCloseable("userId", "gquintana")) {
@@ -74,16 +74,16 @@ Hopefully, this kind of code won't make its way in your business code because it
 == JSON logging with Logback
 
 At this point, a log is more than simple string, 
-it is qualified with useful information: timestamp, level, thread...
-How can we write this data structure on disk or send it over the wire to log collection tool?
+it is qualified with useful information: timestamp, level, thread, user Id...
+How can we write this data structure on disk or send it over the wire to a log collection tool?
 We have to serialize it.
 For a human being, a simple text format as shown above is readable enough.
-However, for a machine, this is a just a word soup without any structure.
-In order to send structured logs to a log collection tool, 
-and take advantage of this structure (search by user, by thread...), 
-we must use a structured format like JSON.
+However, for a machine, this is just a word soup without any structure.
+In short, to send structured logs to a log collection tool 
+and benefit from this structure (search by user, by thread...), 
+we must use a structured format, like JSON for example.
 
-Compared to the Syslog, another popular log format, the JSON format
+Compared to the Syslog format, another popular log format, the JSON format
 
 * Can properly handle  multi-line logs like stack traces/call traces or messages containing line separators (wanted or not)
 * Is a versatile format and can have custom fields like user Id, transaction Id 
@@ -139,7 +139,7 @@ In the end, it looks very similar to the first one, a bit more verbose though:
         </encoder>
     </appender>
 ----
-The result is very close as well, but fields are named differently:
+The result is very close as well, even though the fields are named differently:
 [source,json]
 ----
 {
@@ -172,6 +172,7 @@ Several Maven dependencies are required `ch.qos.logback.contrib:logback-json-cla
 `ch.qos.logback.contrib:logback-jackson:0.1.5` and `com.fasterxml.jackson.core:jackson-databind`
 for this library to work.
 
-In the end both libraries are similar, both are based on the Jackson library and produce one JSON document per line.
+In the end these libraries are similar, both user the Jackson library to generate JSON.
+Contrary to the above JSON examples which have been prettyfied to be human readable, producing one JSON document per line is better.
 This format is known as http://ndjson.org/[NDJSON] or and http://jsonlines.org/[JSON Lines].
 Logstash and Filebeat can easily read this kind of JSON file.
