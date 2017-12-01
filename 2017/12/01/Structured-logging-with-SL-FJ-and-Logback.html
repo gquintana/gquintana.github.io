@@ -13,7 +13,7 @@
     <link rel="shortcut icon" href="https://gquintana.github.io/favicon.ico">
 
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:400,700,400italic,700italic|Open+Sans:400italic,700italic,700,400">
-    <link rel="stylesheet" type="text/css" href="//gquintana.github.io/themes/roon/assets/css/screen.css?v=1512160725185" />
+    <link rel="stylesheet" type="text/css" href="//gquintana.github.io/themes/roon/assets/css/screen.css?v=1512161032115" />
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/idea.min.css" />
 
     <link rel="canonical" href="https://gquintana.github.io/2017/12/01/Structured-logging-with-SL-FJ-and-Logback.html" />
@@ -312,8 +312,8 @@ In the end, it looks very similar to the first one, a bit more verbose though:</
 for this library to work.</p>
 </div>
 <div class="paragraph">
-<p>In the end these libraries are similar, both user the Jackson library to generate JSON.
-Contrary to the above JSON examples which have been prettyfied to be human readable, producing one JSON document per line is better.
+<p>In the end these libraries are similar, both use the Jackson library to generate JSON.
+Contrary to the above JSON examples which have been prettyfied to be human readable, producing one JSON document per line is better because it is more compact, and each end of line marks the end of a log, there is no multi-line log.
 This format is known as <a href="http://ndjson.org/">NDJSON</a> or and <a href="http://jsonlines.org/">JSON Lines</a>.
 Logstash and Filebeat can easily read this kind of JSON file.</p>
 </div>
