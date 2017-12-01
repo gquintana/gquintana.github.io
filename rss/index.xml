@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Fri, 01 Dec 2017 19:41:50 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Structured logging with SLF4J and Logback]]></title><description><![CDATA[<div id="preamble">
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Fri, 01 Dec 2017 19:43:55 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Structured logging with SLF4J and Logback]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>I stumbled upon the term "structured logging" reading <a href="https://kartar.net/2015/12/structured-logging/">a 2015 blog post by James Turnbull</a>,
@@ -253,7 +253,7 @@ This format is known as <a href="http://ndjson.org/">NDJSON</a> or and <a href="
 Logstash and Filebeat can easily read this kind of JSON file.</p>
 </div>
 </div>
-</div>]]></description><link>https://gquintana.github.io/2017/12/01/Structured-logging-with-SLF4J-and-Logback.html</link><guid isPermaLink="true">https://gquintana.github.io/2017/12/01/Structured-logging-with-SLF4J-and-Logback.html</guid><category><![CDATA[java]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Fri, 01 Dec 2017 00:00:00 GMT</pubDate></item><item><title><![CDATA[Structured logging with SLF4J and Logback]]></title><description><![CDATA[<div id="preamble">
+</div>]]></description><link>https://gquintana.github.io/2017/12/02/Structured-logging-with-SL-FJ-and-Logback.html</link><guid isPermaLink="true">https://gquintana.github.io/2017/12/02/Structured-logging-with-SL-FJ-and-Logback.html</guid><category><![CDATA[java]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Sat, 02 Dec 2017 00:00:00 GMT</pubDate></item><item><title><![CDATA[Structured logging with SLF4J and Logback]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>I stumbled upon the term "structured logging" reading <a href="https://kartar.net/2015/12/structured-logging/">a 2015 blog post by James Turnbull</a>,
@@ -508,7 +508,7 @@ This format is known as <a href="http://ndjson.org/">NDJSON</a> or and <a href="
 Logstash and Filebeat can easily read this kind of JSON file.</p>
 </div>
 </div>
-</div>]]></description><link>https://gquintana.github.io/2017/12/01/Structured-logging-with-SL-FJ-and-Logback.html</link><guid isPermaLink="true">https://gquintana.github.io/2017/12/01/Structured-logging-with-SL-FJ-and-Logback.html</guid><dc:creator><![CDATA[Gerald Quintana]]></dc:creator></item><item><title><![CDATA[Log collection in AWS land]]></title><description><![CDATA[<div id="preamble">
+</div>]]></description><link>https://gquintana.github.io/2017/12/01/Structured-logging-with-SLF4J-and-Logback.html</link><guid isPermaLink="true">https://gquintana.github.io/2017/12/01/Structured-logging-with-SLF4J-and-Logback.html</guid><category><![CDATA[java]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Fri, 01 Dec 2017 00:00:00 GMT</pubDate></item><item><title><![CDATA[Log collection in AWS land]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>In AWS, it is really easy to popup new machines and scale.
