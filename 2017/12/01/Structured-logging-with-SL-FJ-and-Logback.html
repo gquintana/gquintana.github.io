@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <title>Structured logging with SLF4J and Logback</title>
+    <meta name="description" content="" />
+
+    <meta name="HandheldFriendly" content="True" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="shortcut icon" href="https://gquintana.github.io/favicon.ico">
+
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:400,700,400italic,700italic|Open+Sans:400italic,700italic,700,400">
+    <link rel="stylesheet" type="text/css" href="//gquintana.github.io/themes/roon/assets/css/screen.css?v=1512157184060" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/idea.min.css" />
+
+    <link rel="canonical" href="https://gquintana.github.io/2017/12/01/Structured-logging-with-SL-FJ-and-Logback.html" />
+    <meta name="referrer" content="origin" />
+    
+    <meta property="og:site_name" content="JRald" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Structured logging with SLF4J and Logback" />
+    <meta property="og:description" content="I stumbled upon the term &quot;structured logging&quot; reading a 2015 blog post by James Turnbull, it&amp;#8217;s an interesting but not a new concept. I also discovered Python  and .Net developers had a library dedicated to structured logging: structlog and serilog. In this article I will describe how to" />
+    <meta property="og:url" content="https://gquintana.github.io/2017/12/01/Structured-logging-with-SL-FJ-and-Logback.html" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Structured logging with SLF4J and Logback" />
+    <meta name="twitter:description" content="I stumbled upon the term &quot;structured logging&quot; reading a 2015 blog post by James Turnbull, it&amp;#8217;s an interesting but not a new concept. I also discovered Python  and .Net developers had a library dedicated to structured logging: structlog and serilog. In this article I will describe how to" />
+    <meta name="twitter:url" content="https://gquintana.github.io/2017/12/01/Structured-logging-with-SL-FJ-and-Logback.html" />
+    
+    <script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "Article",
+    "publisher": "JRald",
+    "author": {
+        "@type": "Person",
+        "name": "Gerald Quintana",
+        "image": "https://avatars3.githubusercontent.com/u/755587?v=4",
+        "url": "https://gquintana.github.io/author/gquintana/"
+    },
+    "headline": "Structured logging with SLF4J and Logback",
+    "url": "https://gquintana.github.io/2017/12/01/Structured-logging-with-SL-FJ-and-Logback.html",
+    "description": "I stumbled upon the term &quot;structured logging&quot; reading a 2015 blog post by James Turnbull, it&amp;#8217;s an interesting but not a new concept. I also discovered Python  and .Net developers had a library dedicated to structured logging: structlog and serilog. In this article I will describe how to"
+}
+    </script>
+
+    <meta name="generator" content="HubPress" />
+    <link rel="alternate" type="application/rss+xml" title="JRald" href="https://gquintana.github.io/rss/" />
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.10.0/styles/atom-one-dark.min.css">
+    
+        <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
+</head>
+<body class="post-template  noimage">
+
+    
+
+
+    <article role="main" class="">
+        <header>
+            <a href="https://gquintana.github.io" id="home_link">«</a>
+            <div class="meta"><time datetime="2017-12-01"><a href="https://gquintana.github.io/2017/12/01/Structured-logging-with-SL-FJ-and-Logback.html">December 01, 2017</a></time> <span class="count" id="js-reading-time"></span></div>
+            <h1>
+                Structured logging with SLF4J and Logback
+            </h1>
+        </header>
+
+        <div class="text" id="js-post-content">
+            <div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>I stumbled upon the term "structured logging" reading <a href="https://kartar.net/2015/12/structured-logging/">a 2015 blog post by James Turnbull</a>,
+it&#8217;s an interesting but not a new concept.
+I also discovered Python  and .Net developers had a library dedicated to <strong>structured logging</strong>: <a href="http://www.structlog.org">structlog</a> and <a href="https://serilog.net/">serilog</a>.</p>
+</div>
+<div class="paragraph">
+<p>In this article I will describe how to do structured logging in Java with usual logging libraries like SLF4J et Logback.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_structured_logging_with_slf4j">Structured logging with SLF4J</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>All Java developers know how to log a message:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-java" data-lang="java">Logger demoLogger = LoggerFactory.getLogger("logodyssey.DemoLogger");
+demoLogger.info("Hello world!");</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Properly configured, it produces a log like</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>21:10:29.178 [Thread-1] INFO  logodyssey.DemoLogger - Hello world!</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Notice, this "Hello world!" message is qualified with several fields:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Timestamp</p>
+</li>
+<li>
+<p>Thread Id</p>
+</li>
+<li>
+<p>Level</p>
+</li>
+<li>
+<p>Logger/Category</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This is what the term "structured logging" means,
+a log is more than a string,
+it gives contextual information about what was occurring
+, it tell more detail about what was going on when this log was printed</p>
+</div>
+<div class="paragraph">
+<p>How can we enrich this contextual information,
+and add the user Id for example?
+It is the purpose of the MDC (Mapped Diagnostic Context):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-java" data-lang="java">MDC.put("userId", "gquintana");
+demoLogger.info("Hello world!");
+MDC.remove("userId");</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The MDC is a map-like object filled in the Java code and used in the back-end logging library to output custom data.
+With the adequate configuration, we can get the user Id the log:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>21:10:29.178 [Thread-1] gquintana INFO  logodyssey.DemoLogger - Hello world!</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The MDC can store any information about the user (user Id, session Id, token Id), about the current request (request Id, transaction Id), about long running threads (batch instance Id, broker client Id).
+Later on, this information will be part of the log.</p>
+</div>
+<div class="paragraph">
+<p>Having this kind of information allows to group logs by user, by request, by processing.
+Remember that logs may be scattered across different servers, on different time periods.
+In short it allows to correlate logs belonging to the same scenario and find answers to questions like "what was the user X doing when he met this nasty error?"</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s get back to the example, we saw the MDC stores extra information about logs.
+The MDC is usually based on a thread local variable, this has two drawbacks:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>It must be properly cleaned after being used, or you may experience information leaks if the thread is reused. Think about thread pools in web servers like Tomcat.</p>
+</li>
+<li>
+<p>The information may no be properly transfered from one thread to another. Think about asynchronous calls.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>As a result, calling <code>MDC.remove</code>, like the above example, (or <code>MDC.clear</code>) is required to clean the MDC after usage.
+To avoid forgetting to do housekeeping afterwards, we can use a try-with-resource construct:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-java" data-lang="java">try(MDC.MDCCloseable mdc = MDC.putCloseable("userId", "gquintana")) {
+	demoLogger.info("Hello world!");
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Hopefully, this kind of code won&#8217;t make its way in your business code because it is usually hidden in an interceptor like a Servlet filter, a Spring aspect or a JAXRS interceptor. In Logback, there is a <code>MDCInsertingServletFilter</code> class which can be used as an example.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_json_logging_with_logback">JSON logging with Logback</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>At this point, a log is more than simple string,
+it is qualified with useful information: timestamp, level, thread&#8230;&#8203;
+How can we write this data structure on disk or send it over the wire to log collection tool?
+We have to serialize it.
+For a human being, a simple text format as shown above is readable enough.
+However, for a machine, it is a just a word soup without any structure.
+In order to send structured logs to a log collection tool,
+and take advantage of this structure (search by user, by thread&#8230;&#8203;),
+we must use a structured format like JSON.</p>
+</div>
+<div class="paragraph">
+<p>Compared to the Syslog, another popular log format, the JSON format</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Can properly handle  multi-line logs like stack traces/call traces or messages containing line separators (wanted or not)</p>
+</li>
+<li>
+<p>Can have custom fields like user Id, transaction Id</p>
+</li>
+<li>
+<p>Is more verbose, so compression (GZip or the like) may be required to reduce the weight</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Most popular log collection tools likes Filebeat, Graylog, Fluentd already use some kind of compressed JSON format under the hood.
+You should too.</p>
+</div>
+<div class="paragraph">
+<p>Generating JSON logs with Logback is very easy.
+I&#8217;ll show how to use two Logback extensions,
+the <a href="https://github.com/logstash/logstash-logback-encoder">Logstash Logback encoder</a>
+and the <a href="https://github.com/qos-ch/logback-contrib/wiki">Logback Contrib</a> library.</p>
+</div>
+<div class="paragraph">
+<p>The first one uses a Logback extension point known as <strong>encoder</strong> that you can plug into any appender:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-xml" data-lang="xml">    &lt;appender name="FILE" class="ch.qos.logback.core.FileAppender"&gt;
+        &lt;file&gt;log/log-odyssey.log&lt;/file&gt;
+        &lt;encoder class="net.logstash.logback.encoder.LogstashEncoder"&gt;
+            &lt;customFields&gt;{"application":"log-odyssey"}&lt;/customFields&gt;
+        &lt;/encoder&gt;
+    &lt;/appender&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It will produce the expected result:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-json" data-lang="json">{
+  "@timestamp": "2017-11-25T21:10:29.178+01:00",
+  "@version": 1,
+  "message": "Hello world!",
+  "logger_name": "logodyssey.DemoLogger",
+  "thread_name": "Thread-1",
+  "level": "INFO",
+  "level_value": 20000,
+  "HOSTNAME": "my-laptop",
+  "userId": "gquintana",
+  "application": "log-odyssey"
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The Maven coordinates for this library are <code>net.logstash.logback:logstash-logback-encoder:4.11</code>.</p>
+</div>
+<div class="paragraph">
+<p>The second one uses a different extension point called <strong>layout</strong>.
+In the end, it looks very similar to the first one, a bit more verbose though:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-xml" data-lang="xml">    &lt;appender name="FILE" class="ch.qos.logback.core.FileAppender"&gt;
+        &lt;file&gt;log/log-odyssey.log&lt;/file&gt;
+        &lt;encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder"&gt;
+            &lt;layout class="ch.qos.logback.contrib.json.classic.JsonLayout"&gt;
+                &lt;jsonFormatter class="ch.qos.logback.contrib.jackson.JacksonJsonFormatter"/&gt;
+                &lt;appendLineSeparator&gt;true&lt;/appendLineSeparator&gt;
+            &lt;/layout&gt;
+        &lt;/encoder&gt;
+    &lt;/appender&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The result is very close as well, but fields are named differently:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-json" data-lang="json">{
+    "timestamp":"1511814391083",
+    "level":"INFO",
+    "thread":"Thread-1",
+    "mdc": {
+        "userId":"gquintana"
+	},
+    "logger":"logodyssey.DemoLogger",
+    "message":"Hello world!",
+    "context":"default"
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In order to be on par with the first example, it is possible to subclass the <code>JsonLayout</code> and add custom fields:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-java" data-lang="java">public class CustomJsonLayout extends JsonLayout {
+    @Override
+    protected void addCustomDataToJsonMap(Map&lt;String, Object&gt; map, ILoggingEvent event) {
+        map.put("application", "log-odyssey");
+        try {
+            map.put("host", InetAddress.getLocalHost().getHostName());
+        } catch (UnknownHostException e) {
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Several Maven dependencies are required <code>ch.qos.logback.contrib:logback-json-classic:0.1.5</code>,
+<code>ch.qos.logback.contrib:logback-jackson:0.1.5</code> and <code>com.fasterxml.jackson.core:jackson-databind</code>
+for this library to work.</p>
+</div>
+<div class="paragraph">
+<p>In the end both libraries are similar, both are based on the Jackson library and produce one JSON document per line.
+This format is known as <a href="http://ndjson.org/">NDJSON</a> or and <a href="http://jsonlines.org/">JSON Lines</a>.
+Logstash and Filebeat can easily read this kind of JSON file.</p>
+</div>
+</div>
+</div>
+        </div>
+
+        <menu>
+            <a href="" id="btn_share" class="btn" title="Share">
+                <span aria-hidden="true" data-icon="S"></span>
+                <strong>Share</strong>
+            </a>
+            <a href="http://twitter.com/share?text=Structured%20logging%20with%20SLF4J%20and%20Logback&url=https://gquintana.github.io/2017/12/01/Structured-logging-with-SL-FJ-and-Logback.html" onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;" id="btn_comment" class="btn" target="_blank">
+                <span aria-hidden="true" data-icon="C"></span> Comment on Twitter
+            </a>
+        </menu>
+
+
+        <footer class="post-footer" role="contentinfo">
+
+            <div class="vcard">
+                <a href="https://gquintana.github.io/rss" id="btn_feed" class="btn" title="Feed" target="_blank">
+                    <span aria-hidden="true" data-icon=")"></span>
+                    <strong>Feed</strong>
+                </a>
+
+                <a href="https://gquintana.github.io/author/gquintana/" class="photo">
+                    <span style="background-image: url('https://avatars3.githubusercontent.com/u/755587?v&#x3D;4');">
+                        <img src="https://avatars3.githubusercontent.com/u/755587?v&#x3D;4" alt="Gerald Quintana">
+                    </span>
+                </a>
+
+                <div class="details">
+                    <h4><a href="https://gquintana.github.io/author/gquintana/" class="url n">Gerald Quintana</a></h4>
+                    Lyon, France<br>
+                    
+                </div>
+            </div>
+
+            <div id="user_bio">
+                <div class="inner">
+                    
+                </div>
+            </div>
+
+        </footer>
+
+
+
+
+    <section class="post-comments">
+      <div id="disqus_thread"></div>
+      <script type="text/javascript">
+      var disqus_shortname = 'https-gquintana-github-io'; // required: replace example with your forum shortname
+      /* * * DON'T EDIT BELOW THIS LINE * * */
+      (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      })();
+      </script>
+      <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+      <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    </section>
+
+
+    </article>
+
+    <div id="share_modal">
+        <div class="wrap">
+            <div class="inner">
+                <header>
+                    Share
+                    <a href="" class="close" title="Close">&times;</a>
+                </header>
+
+                <div class="roon-share-links">
+                    <a href="https://twitter.com/share" class="twitter-share-button" data-dnt="true">Tweet</a>
+                    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+                    <div id="fb-elems">
+                        <div id="fb-root"></div>
+                        <script>(function(d, s, id) {
+                        var js, fjs = d.getElementsByTagName(s)[0];
+                        if (d.getElementById(id)) return;
+                        js = d.createElement(s); js.id = id;
+                        js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=463438580397968";
+                        fjs.parentNode.insertBefore(js, fjs);
+                        }(document, 'script', 'facebook-jssdk'));</script>
+                        <div class="fb-like" data-send="false" data-layout="button_count" data-width="110" data-show-faces="false" data-font="arial"></div>
+                    </div>
+
+                    <div id="pinit-btn">
+                        <a href="//pinterest.com/pin/create/button/?url=https://gquintana.github.io/2017/12/01/Structured-logging-with-SL-FJ-and-Logback.html&amp;description=Structured%20logging%20with%20SLF4J%20and%20Logback-JRald " data-pin-do="buttonPin" data-pin-config="beside"><img src="//assets.pinterest.com/images/pidgets/pin_it_button.png"></a>
+                        <script type="text/javascript" src="//assets.pinterest.com/js/pinit.js"></script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+    <script>
+
+            function get_text(el) {
+                ret = "";
+                var length = el.childNodes.length;
+                for(var i = 0; i < length; i++) {
+                    var node = el.childNodes[i];
+                    if(node.nodeType != 8) {
+                        ret += node.nodeType != 1 ? node.nodeValue : get_text(node);
+                    }
+                }
+                return ret;
+            }
+            function reading_time () {
+                var post_content = document.getElementById('js-post-content');
+                if (post_content) {
+                    var words = get_text(post_content),
+                        count = words.split(/\s+/).length,
+                        read_time = Math.ceil((count / 150)),
+                        read_time_node = document.createTextNode(read_time + ' min read');
+                    document.getElementById('js-reading-time').appendChild(read_time_node);
+                }
+            }
+
+        function no_schema_links () {
+            var links = document.querySelectorAll('.js-remove-domain-schema');
+            if (links) {
+                for (i = 0; i < links.length; ++i) {
+                    var link = links[i],
+                        text = link.innerHTML,
+                        no_schema = text.replace(/.*?:\/\//g, "");
+                    link.innerHTML = no_schema;
+                }
+            }
+        }
+
+        window.onload = function () {
+            no_schema_links();
+
+            reading_time();
+        }
+    </script>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js?v="></script> <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment-with-locales.min.js?v="></script> <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.10.0/highlight.min.js?v="></script> 
+      <script type="text/javascript">
+        jQuery( document ).ready(function() {
+          // change date with ago
+          jQuery('ago.ago').each(function(){
+            var element = jQuery(this).parent();
+            element.html( moment(element.text()).fromNow());
+          });
+        });
+
+        hljs.initHighlightingOnLoad();
+      </script>
+
+        <script>
+            $(function(){
+                var share_modal = $("#share_modal"),
+                    update_social_links = true;
+
+                $("#btn_share").click(function(){
+                    var that = $(this);
+                    share_modal.fadeIn(200);
+                    return false;
+                });
+
+                share_modal.click(function(e){
+                    if (e.target.className == "wrap" || e.target.id == "share_modal") {
+                        share_modal.fadeOut(200);
+                    }
+                    return false;
+                });
+
+                share_modal.find("div.inner > header > a.close").click(function(){
+                    share_modal.fadeOut(200);
+                    return false;
+                });
+            });
+        </script>
+
+
+    <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-85700184-1', 'auto');
+    ga('send', 'pageview');
+
+    </script>
+
+</body>
+</html>
