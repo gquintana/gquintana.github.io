@@ -176,3 +176,19 @@ In the end these libraries are similar, both use the Jackson library to generate
 Contrary to the above JSON examples which have been prettyfied to be human readable, producing one JSON document per line is better because it is more compact, and each end of line marks the end of a log, there is no multi-line log.
 This format is known as http://ndjson.org/[NDJSON] or and http://jsonlines.org/[JSON Lines].
 Logstash and Filebeat can easily read this kind of JSON file.
+
+== Conclusion
+
+A log is more than a textual message, it can be enriched with information at different levels:
+
+* Line of code: message, timestamp, level, threadId, appender...
+* User or transaction: user Id, session Id...
+* Deployment unit: application Id, container Id, host Id, environment Id (production, staging)...
+
+Once qualified with this contextual information, 
+the log message becomes a structured piece of information 
+and must be processed as such.
+Producing logs in JSON format allows to keep that structure
+and eases storing these logs in Elasticsearch.
+More on that later, it time permits.
+
