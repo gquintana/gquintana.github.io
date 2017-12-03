@@ -13,7 +13,7 @@
     <link rel="shortcut icon" href="https://gquintana.github.io/favicon.ico">
 
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:400,700,400italic,700italic|Open+Sans:400italic,700italic,700,400">
-    <link rel="stylesheet" type="text/css" href="//gquintana.github.io/themes/roon/assets/css/screen.css?v=1512161032115" />
+    <link rel="stylesheet" type="text/css" href="//gquintana.github.io/themes/roon/assets/css/screen.css?v=1512334018664" />
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/idea.min.css" />
 
     <link rel="canonical" href="https://gquintana.github.io/2017/12/01/Structured-logging-with-SL-FJ-and-Logback.html" />
@@ -316,6 +316,35 @@ for this library to work.</p>
 Contrary to the above JSON examples which have been prettyfied to be human readable, producing one JSON document per line is better because it is more compact, and each end of line marks the end of a log, there is no multi-line log.
 This format is known as <a href="http://ndjson.org/">NDJSON</a> or and <a href="http://jsonlines.org/">JSON Lines</a>.
 Logstash and Filebeat can easily read this kind of JSON file.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A log is more than a textual message, it can be enriched with information at different levels:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Line of code: message, timestamp, level, threadId, appender&#8230;&#8203;</p>
+</li>
+<li>
+<p>User or transaction: user Id, session Id&#8230;&#8203;</p>
+</li>
+<li>
+<p>Deployment unit: application Id, container Id, host Id, environment Id (production, staging)&#8230;&#8203;</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Once qualified with this contextual information,
+the log message becomes a structured piece of information
+and must be processed as such.
+Producing logs in JSON format allows to keep that structure
+and eases storing these logs in Elasticsearch.
+More on that later, it time permits.</p>
 </div>
 </div>
 </div>
