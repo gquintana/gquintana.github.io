@@ -1,0 +1,52 @@
+= Ansible collection processing
+
+:hp-tags: ansible
+:hp-image: /images/logos/ansible.png
+:source_dir: ../sources/2019-04-15-Ansible-collection-processing
+:published_at: 2019-04-25
+
+As a Java developer, I sometimes dream of having an the Java 8+ Stream API
+in my Ansible playbook to process list and dict variables.
+
+[source,yaml]
+----
+include::{source_dir}/group_vars/all.yml[tags=list_var]
+----
+
+== Jinja Filters
+
+The main tool are Jinja filters. There are 2 libraries available:
+
+* The Jinja http://jinja.pocoo.org/docs/2.10/templates/#list-of-builtin-filters[builtin filters].
+  This list can also be found in https://github.com/pallets/jinja/blob/master/jinja2/filters.py[filters.py].
+* The https://docs.ansible.com/ansible/latest/user_guide/playbooks_filters.html#[Ansible filters]
+
+Like in other data processing libraries there two types of operators:
+
+* *Mappers:* selectattr, rejectattr, map, list
+* *Reducers:* join, first, last, max, min
+
+[source,yaml]
+----
+include::{source_dir}/group_vars/all.yml[tags=simple]
+----
+<1> The `rejectattr` filter returns an iterator, but the `count` filter requires a list.
+	So I have to convert it.
+
+The `selectattr`/`rejectattr` filters can take 3 arguments: the attribute, a boolean operator and an argument.
+The operator can be chosen among Jinja's http://jinja.pocoo.org/docs/2.10/templates/#list-of-builtin-tests[builtin tests].
+This list can also be found in https://github.com/pallets/jinja/blob/master/jinja2/filters.py[tests.py].
+[source,yaml]
+----
+include::{source_dir}/group_vars/all.yml[tags=select_advanced]
+----
+
+With Ansible 2.7+, the `map` filter can take 3 arguments: the attribute, an operator and arguments.
+The operator can be chosen among Jinja filters, and will be applied to each element of the list.
+[source,yaml]
+----
+include::{source_dir}/group_vars/all.yml[tags=map_advanced]
+----
+
+
+== JSON Path
