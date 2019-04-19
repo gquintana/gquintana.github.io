@@ -23,4 +23,4 @@
         msg: "{{jq_assistant_user_ids}} "
     - name: JSON Query B users
       debug:
-        msg: "{{jq_bid_user_ids}} "
+        msg: "{{ jq_bid_user_ids }} "

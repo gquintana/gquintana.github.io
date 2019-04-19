@@ -2,7 +2,7 @@
 
 :hp-tags: ansible
 :hp-image: /images/logos/ansible.png
-:source_dir: ../sources/2019-04-15-Ansible-collection-processing
+:source_dir: ../sources/2019-04-25-Ansible-collection-processing
 :published_at: 2019-04-25
 
 As a Java developer, I sometimes dream that I can use the Java 8+ Stream API in my Ansible playbook to process list and dict variables.
@@ -50,4 +50,23 @@ include::{source_dir}/group_vars/all.yml[tags=map_advanced]
 ----
 <1> For each `users` take its name and when the regular expression matches , apply the replacement, then join the result.
 
-== JSON Path
+== JSON Query
+
+Another strategy is to use a JSON Path to walk down the YAML tree.
+
+----
+include::{source_dir}/group_vars/all.yml[tags=json_query]
+----
+<1> Take the `id` attributes of `users` having `admin` set to true and then join them.
+<2> Take the `id` attributes of `users` having `role` set to `assistant` and then join them.
+
+This `json_query` is based on the `jmespath` Python https://pypi.org/project/jmespath/[library], this means:
+
+. You can use http://jmespath.org/[jmespath.org] web site to cook your JSON path query.
+. You'll have to add the `jmespath` library to your Python virtual env.
+
+Sadly, nesting JMES path expressions inside Jinja template expressions inside YAML files can be tedious.
+This following example fails, even if the JMES path is alright in Python interpreter.
+----
+include::{source_dir}/group_vars/all.yml[tags=json_query_error]
+----
