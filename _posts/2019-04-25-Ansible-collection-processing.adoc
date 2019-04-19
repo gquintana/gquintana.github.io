@@ -5,8 +5,7 @@
 :source_dir: ../sources/2019-04-15-Ansible-collection-processing
 :published_at: 2019-04-25
 
-As a Java developer, I sometimes dream of having an the Java 8+ Stream API
-in my Ansible playbook to process list and dict variables.
+As a Java developer, I sometimes dream that I can use the Java 8+ Stream API in my Ansible playbook to process list and dict variables.
 
 [source,yaml]
 ----
@@ -15,27 +14,29 @@ include::{source_dir}/group_vars/all.yml[tags=list_var]
 
 == Jinja Filters
 
-The main tool are Jinja filters. There are 2 libraries available:
+The main tool for this purpose are Jinja filters. There are 2 libraries of filters available:
 
 * The Jinja http://jinja.pocoo.org/docs/2.10/templates/#list-of-builtin-filters[builtin filters].
-  This list can also be found in https://github.com/pallets/jinja/blob/master/jinja2/filters.py[filters.py].
+  This list can also be found in Ansible source code https://github.com/pallets/jinja/blob/master/jinja2/filters.py[filters.py].
 * The https://docs.ansible.com/ansible/latest/user_guide/playbooks_filters.html#[Ansible filters]
 
-Like in other data processing libraries there two types of operators:
+Filters are similar to Unix or Anguler pipes and can be chained. 
 
-* *Mappers:* selectattr, rejectattr, map, list
-* *Reducers:* join, first, last, max, min
+Like in other data processing libraries there two kinds of operators:
+
+* *Mappers* which take stream of element and produce stream of elements: selectattr, rejectattr, map, list
+* *Reducers:* which take a stream of elements and produce a single  element: join, first, last, max, min
 
 [source,yaml]
 ----
 include::{source_dir}/group_vars/all.yml[tags=simple]
 ----
-<1> The `rejectattr` filter returns an iterator, but the `count` filter requires a list.
-	So I have to convert it.
+<1> Take the `id` attributes of `users` having `admin` set to true and join them.
+<2> Take the `users` havin `admin` set to false and count them. As the `rejectattr` filter returns an iterator, but the `count` filter requires a list, I have to use `list` filter to convert it.
 
 The `selectattr`/`rejectattr` filters can take 3 arguments: the attribute, a boolean operator and an argument.
 The operator can be chosen among Jinja's http://jinja.pocoo.org/docs/2.10/templates/#list-of-builtin-tests[builtin tests].
-This list can also be found in https://github.com/pallets/jinja/blob/master/jinja2/filters.py[tests.py].
+This list can also be found in Ansible source code https://github.com/pallets/jinja/blob/master/jinja2/filters.py[tests.py].
 [source,yaml]
 ----
 include::{source_dir}/group_vars/all.yml[tags=select_advanced]
@@ -47,6 +48,6 @@ The operator can be chosen among Jinja filters, and will be applied to each elem
 ----
 include::{source_dir}/group_vars/all.yml[tags=map_advanced]
 ----
-
+<1> For each `users` take its name and when the regular expression matches , apply the replacement, then join the result.
 
 == JSON Path
