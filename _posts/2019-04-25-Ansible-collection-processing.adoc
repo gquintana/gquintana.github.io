@@ -7,6 +7,7 @@
 
 As a Java developer, I sometimes dream that I can use the Java 8+ Stream API in my Ansible playbook to process list and dict variables.
 
+In this article, I'll show you can process a list of users:
 [source,yaml]
 ----
 include::{source_dir}/group_vars/all.yml[tags=list_var]
@@ -14,7 +15,7 @@ include::{source_dir}/group_vars/all.yml[tags=list_var]
 
 == Jinja Filters
 
-The main tool for this purpose are Jinja filters. There are 2 libraries of filters available:
+The main tool to transform Ansible variables are Jinja filters. There are 2 libraries of filters available:
 
 * The Jinja http://jinja.pocoo.org/docs/2.10/templates/#list-of-builtin-filters[builtin filters].
   This list can also be found in Ansible source code https://github.com/pallets/jinja/blob/master/jinja2/filters.py[filters.py].
@@ -48,11 +49,12 @@ The operator can be chosen among Jinja filters, and will be applied to each elem
 ----
 include::{source_dir}/group_vars/all.yml[tags=map_advanced]
 ----
-<1> For each `users` take its name and when the regular expression matches , apply the replacement, then join the result.
+<1> For each `users` take its name and when the regular expression matches  apply the replacement, then join the result.
 
 == JSON Query
 
 Another strategy is to use a JSON Path to walk down the YAML tree.
+It's bit less verbose and bit more powerful than the previous solution.
 
 ----
 include::{source_dir}/group_vars/all.yml[tags=json_query]
@@ -60,13 +62,18 @@ include::{source_dir}/group_vars/all.yml[tags=json_query]
 <1> Take the `id` attributes of `users` having `admin` set to true and then join them.
 <2> Take the `id` attributes of `users` having `role` set to `assistant` and then join them.
 
-This `json_query` is based on the `jmespath` Python https://pypi.org/project/jmespath/[library], this means:
+This `json_query` is based on the `jmespath` Python https://pypi.org/project/jmespath/[library], this means 2 things:
 
 . You can use http://jmespath.org/[jmespath.org] web site to cook your JSON path query.
-. You'll have to add the `jmespath` library to your Python virtual env.
+. You'll have to add the `jmespath` library to your Python environnement.
 
-Sadly, nesting JMES path expressions inside Jinja template expressions inside YAML files can be tedious.
+Sadly, nesting JMESPath expressions inside Jinja template expressions inside YAML files can be tricky.
 This following example fails, even if the JMES path is alright in Python interpreter.
 ----
 include::{source_dir}/group_vars/all.yml[tags=json_query_error]
 ----
+
+== Conclusion
+
+It's possible to transform a variable containing an array into another list. However it's still painful to do.
+
