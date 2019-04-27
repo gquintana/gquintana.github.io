@@ -79,7 +79,7 @@ include::{source_dir}/group_vars/all.yml[tags=json_query_error]
 == Conclusion
 
 It's possible to transform a variable containing an array into another list. 
-However it's still painful to do.
+However it's still painful to do because neither YAML nor Jinja tare programming languages.
 I personnaly regret I can't invoke Python code from Ansible playbook and use for comprehensions, imagine something like:
 [source,yaml]
 ----
