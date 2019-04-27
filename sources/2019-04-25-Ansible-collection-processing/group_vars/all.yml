@@ -18,7 +18,6 @@ users:
     admin: False
     role: assistant
 #end::list_var[]
-
 #tag::simple[]
 admin_user_ids: |
   {{ users
@@ -45,6 +44,13 @@ user_first_names: |
   |map('regex_replace', '(\\w+)( .*)?', '\\g<1>')
   |join(',') }} #<1>
 #end::map_advanced[]
+
+#tag::host_var[]
+all_host_names: |
+  {{ groups['all']
+  |map('extract', hostvars, 'ansible_hostname')
+  |join(',') }} #<1>
+#end::host_var[]
 
 #tag::json_query[]
 jq_admin_user_ids: |

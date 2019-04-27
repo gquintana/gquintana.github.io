@@ -15,6 +15,9 @@
     - name: User first names
       debug:
         msg: "{{user_first_names}} "
+    - name: Ansible host names
+      debug:
+        msg: "{{ all_host_names }}"
     - name: JSON Query Admin user Ids
       debug:
         msg: "Admins {{jq_admin_user_ids}} Others {{normal_user_count}}"
