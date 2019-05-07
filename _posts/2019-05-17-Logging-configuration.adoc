@@ -1,0 +1,11 @@
+= Logging configuration
+:hp-image: /images/logos/java.png
+:published_at: 2019-05-17
+:hp-tags: java
+
+
+
+== Logback
+
+
+== Log4J2
