@@ -1,4 +1,5 @@
 = Logging configuration
+
 :hp-image: /images/logos/java.png
 :published_at: 2019-05-17
 :hp-tags: java
@@ -42,6 +43,7 @@ You can force Logback to use a specific configuration file using a JVM property 
 ----
 include::{source_dir}/log4j2-config/pom.xml[tags=dependencies]
 ----
+
 .log4j2.xml
 [source,xml]
 ----
@@ -64,16 +66,17 @@ Even if it's deprecated, let's end with the venerable Log4J v1 library.
 ----
 include::{source_dir}/log4j1-config/pom.xml[tags=dependencies]
 ----
+
 .log4j.xml
 [source,xml]
 ----
-include::{source_dir}/log4j2-config/src/main/resources/log4j2.xml[]
+include::{source_dir}/log4j1-config/src/main/resources/log4j.xml[]
 ----
 <1> Like Logback, the `debug` flag enables Log4J1 internal logs.
 <2> There aren't any properties in Log4J1.
 <3> The `PatternLayout` is documented in the http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/PatternLayout.html[JavaDoc].
-<4> Format the `date` in ISO8601.
-<5> There is no DailyRollingFileAppender in Log4J1 unless you add `log4j-extras` extension.
-    Even with this extension, one can not mix size and time rollover.
+<4> There is no DailyRollingFileAppender in Log4J1 unless you add `log4j-extras` extension.
+Even with this extension, one can not mix size and time rollover.
+<5> Format the `date` in ISO8601.
 
 You shouldn't forget `file:/` if you use specific configuration file with the JVM property `-Dlog4j.configuration=file:///path/to/config.xml`.

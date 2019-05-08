@@ -13,7 +13,7 @@
         <RollingFile name="FILE"
                      fileName="${logDir}/blog.log"
                      filePattern="${logDir}/blog.%d{yyyy-MM-dd}-%i.log.gz">
-            <PatternLayout>
+            <PatternLayout><!--4-->
                 <Pattern>%d{ISO8601} %-5level [%thread] %logger %m%n</Pattern>
             </PatternLayout>
             <Policies>

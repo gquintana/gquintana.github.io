@@ -8,11 +8,11 @@
             <param name="ConversionPattern" value="%d{HH:mm:ss.SSS} %-5p %c{1} - %m%n"/>
         </layout>
     </appender>
-    <appender name="FILE" class="org.apache.log4j.RollingFileAppender"><!--5-->
+    <appender name="FILE" class="org.apache.log4j.RollingFileAppender"><!--4-->
         <param name="File" value="${log.dir}/blog.log"/>
         <param name="MaxFileSize" value="10MB"/>
         <param name="MaxBackupIndex" value="10"/>
-        <layout class="org.apache.log4j.PatternLayout"><!--4-->
+        <layout class="org.apache.log4j.PatternLayout"><!--5-->
             <param name="ConversionPattern" value="%d{ISO8601} %-5p [%t] %c - %m%n"/>
         </layout>
     </appender>
