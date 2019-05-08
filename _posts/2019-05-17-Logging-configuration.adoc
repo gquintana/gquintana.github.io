@@ -2,10 +2,55 @@
 :hp-image: /images/logos/java.png
 :published_at: 2019-05-17
 :hp-tags: java
+:source_dir: ../sources/2019-05-17-Logging-configuration
 
+There is nothing fundamentally new in this article.
+It's just a quick reminder about Java logging framework configuration.
 
+The configuration files will contain:
+
+* Console aka stdout output
+* Rolling file output with both date and size rolling policies.
+	Rotating the file every day is practical because it allows to find yesterday's failure cause easily.
+	Rotating when the file reaches a given allows to protect against disk flood.
+* Sample log patterns to help formating log file.
 
 == Logback
 
+.pom.xml
+[source,xml]
+----
+include::{source_dir}/logback-config/pom.xml[tags=dependencies]
+----
+
+.logback.xml
+[source,xml]
+----
+include::{source_dir}/logback-config/src/main/resources/logback.xml[]
+----
+<1> The `debug` flag enables Logback startup logs.
+<2> The `log.dir` property can be overriden at JVM (`-Dlog.dir=...`) or OS level.
+<3> The `pattern` is documented in the https://logback.qos.ch/manual/layouts.html#ClassicPatternLayout[layout] section.
+<4> Format the `date` in ISO8601.
+
+You can force Logback to use a specific configuration file using a JVM property `-Dlogback.configurationFile=/path/to/config.xml`.
 
 == Log4J2
+
+.pom.xml
+[source,xml]
+----
+include::{source_dir}/log4j2-config/src/main/resources/log4j2.xml[tags=dependencies]
+----
+.log4j2.xml
+[source,xml]
+----
+include::{source_dir}/log4j2-config/src/main/resources/log4j2.xml[]
+----
+<1> Setting `status` to `trace` or `debug` shows Log4J2 internal logs.
+<2> The `logDir` property is set from JVM property (`-Dlog.dir=...`) with default value.
+		See https://logging.apache.org/log4j/2.x/manual/configuration.html#Property_Substitution[Property substitution] in documentation.
+<3> The `PatternLayout` is documented in the https://logging.apache.org/log4j/2.x/manual/layouts.html#PatternLayout[layout] section.
+<4> Format the `date` in ISO8601.
+
+You can tell Log4J2 to load a specific configuration file using a JVM property `-Dlog4j.configurationFile=/path/to/config.xml`.

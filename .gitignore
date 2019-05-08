@@ -1,3 +1,7 @@
 .vscode/
 .venv/
 playbook.retry
+.idea/
+*.iml
+target/
+*.log
