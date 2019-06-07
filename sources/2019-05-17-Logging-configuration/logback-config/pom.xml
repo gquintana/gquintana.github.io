@@ -16,12 +16,12 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
-        <!--tag:dependencies-->
+        <!--tag::dependencies[]-->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <scope>runtime</scope>
         </dependency>
-        <!--end:dependencies-->
+        <!--end::dependencies[]-->
     </dependencies>
 </project>
