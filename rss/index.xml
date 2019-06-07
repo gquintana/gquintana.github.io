@@ -1,4 +1,291 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Sat, 27 Apr 2019 12:31:12 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Ansible collection processing]]></title><description><![CDATA[<div id="preamble">
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[JRald]]></title><description><![CDATA[Yet another blog about tech stuff]]></description><link>https://gquintana.github.io</link><generator>RSS for Node</generator><lastBuildDate>Fri, 07 Jun 2019 18:25:06 GMT</lastBuildDate><atom:link href="https://gquintana.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Logging configuration]]></title><description><![CDATA[<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>There is nothing fundamentally new in this article.
+It&#8217;s just a quick reminder (to myself) about Java logging framework configuration.</p>
+</div>
+<div class="paragraph">
+<p>The configuration files will contain:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Console aka stdout output</p>
+</li>
+<li>
+<p>Rolling file output with both date and size rolling policies.
+Rotating the file every day is practical because it allows to find yesterday&#8217;s failure cause easily.
+Rotating when the file reaches a given size allows to protect against disk flood.</p>
+</li>
+<li>
+<p>Sample log patterns to help formating log file.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Logging libraries support multiple configuration file format: XML, Properties, YAML&#8230;&#8203; I chose to use XML, it&#8217;s a matter of taste.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_logback">Logback</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="title">pom.xml</div>
+<div class="content">
+<pre class="highlight"><code class="language-xml" data-lang="xml">        &lt;dependency&gt;
+            &lt;groupId&gt;ch.qos.logback&lt;/groupId&gt;
+            &lt;artifactId&gt;logback-classic&lt;/artifactId&gt;
+            &lt;scope&gt;runtime&lt;/scope&gt;
+        &lt;/dependency&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Logback implements SLF4J from the ground up.</p>
+</div>
+<div class="listingblock">
+<div class="title">logback.xml</div>
+<div class="content">
+<pre class="highlight"><code class="language-xml" data-lang="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;configuration debug="true"&gt;<i class="conum" data-value="1"></i><b>(1)</b>
+    &lt;!-- Properties --&gt;
+    &lt;property name="log.dir" value="target/log" /&gt;<i class="conum" data-value="2"></i><b>(2)</b>
+
+    &lt;!-- Appenders --&gt;
+    &lt;appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender"&gt;
+        &lt;encoder&gt;<i class="conum" data-value="3"></i><b>(3)</b>
+            &lt;pattern&gt;%date{HH:mm:ss.SSS} %-5level [%thread] %logger{1} - %msg%n&lt;/pattern&gt;
+        &lt;/encoder&gt;
+    &lt;/appender&gt;
+    &lt;appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender"&gt;
+        &lt;file&gt;blog.log&lt;/file&gt;
+        &lt;rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy"&gt;
+            &lt;fileNamePattern&gt;${log.dir}/blog.%d{yyyy-MM-dd}-%i.log&lt;/fileNamePattern&gt;
+            &lt;maxFileSize&gt;10MB&lt;/maxFileSize&gt;
+            &lt;maxHistory&gt;10&lt;/maxHistory&gt;
+            &lt;totalSizeCap&gt;100MB&lt;/totalSizeCap&gt;
+        &lt;/rollingPolicy&gt;
+        &lt;encoder&gt;<i class="conum" data-value="4"></i><b>(4)</b>
+            &lt;pattern&gt;%date{ISO8601} %-5level [%thread] %logger - %msg%n&lt;/pattern&gt;
+        &lt;/encoder&gt;
+    &lt;/appender&gt;
+
+    &lt;!-- Loggers --&gt;
+    &lt;logger name="com.github.gquintana.logging" level="DEBUG"/&gt;
+    &lt;root level="DEBUG"&gt;
+        &lt;appender-ref ref="CONSOLE"/&gt;
+        &lt;appender-ref ref="FILE"/&gt;
+    &lt;/root&gt;
+&lt;/configuration&gt;</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The <code>debug</code> flag enables Logback startup logs.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The <code>log.dir</code> property can be overriden at JVM (<code>-Dlog.dir=&#8230;&#8203;</code>) or OS level.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>The <code>pattern</code> is documented in the <a href="https://logback.qos.ch/manual/layouts.html#ClassicPatternLayout">layout</a> section.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Format the <code>date</code> in ISO8601.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>You can force Logback to use a specific configuration file using a JVM property <code>-Dlogback.configurationFile=/path/to/config.xml</code>.</p>
+</div>
+<div class="paragraph">
+<p>The <a href="https://logback.qos.ch/manual/index.html">Logback Manual</a> contains detailed information.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_log4j2">Log4J2</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="title">pom.xml</div>
+<div class="content">
+<pre class="highlight"><code class="language-xml" data-lang="xml">        &lt;dependency&gt;
+            &lt;groupId&gt;org.apache.logging.log4j&lt;/groupId&gt;
+            &lt;artifactId&gt;log4j-slf4j-impl&lt;/artifactId&gt;
+            &lt;scope&gt;runtime&lt;/scope&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.apache.logging.log4j&lt;/groupId&gt;
+            &lt;artifactId&gt;log4j-core&lt;/artifactId&gt;
+            &lt;scope&gt;runtime&lt;/scope&gt;
+        &lt;/dependency&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The Log4J2-SLF4J adapter is in the Log4J2 group.</p>
+</div>
+<div class="listingblock">
+<div class="title">log4j2.xml</div>
+<div class="content">
+<pre class="highlight"><code class="language-xml" data-lang="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;Configuration status="trace"&gt;<i class="conum" data-value="1"></i><b>(1)</b>
+    &lt;!-- Properties --&gt;
+    &lt;Properties&gt;<i class="conum" data-value="2"></i><b>(2)</b>
+        &lt;Property name="logDir"&gt;${sys:log.dir:-target/log}&lt;/Property&gt;
+    &lt;/Properties&gt;
+
+    &lt;!-- Appenders --&gt;
+    &lt;Appenders&gt;
+        &lt;Console name="CONSOLE"&gt;<i class="conum" data-value="3"></i><b>(3)</b>
+            &lt;PatternLayout pattern="%date{HH:mm:ss.SSS} %-5level [%thread] %logger{1} - %msg%n"/&gt;
+        &lt;/Console&gt;
+        &lt;RollingFile name="FILE"
+                     fileName="${logDir}/blog.log"
+                     filePattern="${logDir}/blog.%d{yyyy-MM-dd}-%i.log.gz"&gt;
+            &lt;PatternLayout&gt;<i class="conum" data-value="4"></i><b>(4)</b>
+                &lt;Pattern&gt;%d{ISO8601} %-5level [%thread] %logger %m%n&lt;/Pattern&gt;
+            &lt;/PatternLayout&gt;
+            &lt;Policies&gt;
+                &lt;TimeBasedTriggeringPolicy/&gt;
+                &lt;SizeBasedTriggeringPolicy size="1m" /&gt;
+            &lt;/Policies&gt;
+            &lt;Strategies&gt;
+                &lt;DefaultRolloverStrategy max="10"/&gt;
+            &lt;/Strategies&gt;
+        &lt;/RollingFile&gt;
+    &lt;/Appenders&gt;
+
+    &lt;!-- Loggers --&gt;
+    &lt;Loggers&gt;
+        &lt;Logger name="com.github.gquintana.logging" level="debug"/&gt;
+        &lt;Root level="info"&gt;
+            &lt;AppenderRef ref="CONSOLE"/&gt;
+            &lt;AppenderRef ref="FILE"/&gt;
+        &lt;/Root&gt;
+    &lt;/Loggers&gt;
+&lt;/Configuration&gt;</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Setting <code>status</code> to <code>trace</code> or <code>debug</code> shows Log4J2 internal logs.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The <code>logDir</code> property is set from JVM property (<code>-Dlog.dir=&#8230;&#8203;</code>) with default value.
+See <a href="https://logging.apache.org/log4j/2.x/manual/configuration.html#Property_Substitution">Property substitution</a> in documentation.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>The <code>PatternLayout</code> is documented in the <a href="https://logging.apache.org/log4j/2.x/manual/layouts.html#PatternLayout">layout</a> section.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Format the <code>date</code> in ISO8601.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>You can tell Log4J2 to load a specific configuration file using a JVM property <code>-Dlog4j.configurationFile=/path/to/config.xml</code>.</p>
+</div>
+<div class="paragraph">
+<p>The <a href="http://logging.apache.org/log4j/2.x/manual/index.html">Log4J2 Manual</a> contains extensive documentation.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_log4j1">Log4J1</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Even if it&#8217;s deprecated, let&#8217;s end with the venerable Log4J v1 library.</p>
+</div>
+<div class="listingblock">
+<div class="title">pom.xml</div>
+<div class="content">
+<pre class="highlight"><code class="language-xml" data-lang="xml">        &lt;dependency&gt;
+            &lt;groupId&gt;log4j&lt;/groupId&gt;
+            &lt;artifactId&gt;log4j&lt;/artifactId&gt;
+            &lt;scope&gt;runtime&lt;/scope&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.slf4j&lt;/groupId&gt;
+            &lt;artifactId&gt;slf4j-log4j12&lt;/artifactId&gt;
+            &lt;scope&gt;runtime&lt;/scope&gt;
+        &lt;/dependency&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The Log4J1-SLF4J adapter is in the SLF4J group.</p>
+</div>
+<div class="listingblock">
+<div class="title">log4j.xml</div>
+<div class="content">
+<pre class="highlight"><code class="language-xml" data-lang="xml">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;
+&lt;!DOCTYPE log4j:configuration SYSTEM "log4j.dtd"&gt;
+&lt;log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/" debug="true"&gt;<i class="conum" data-value="1"></i><b>(1)</b>
+    <i class="conum" data-value="2"></i><b>(2)</b>
+    &lt;!-- Appenders --&gt;
+    &lt;appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender"&gt;
+        &lt;layout class="org.apache.log4j.PatternLayout"&gt;<i class="conum" data-value="3"></i><b>(3)</b>
+            &lt;param name="ConversionPattern" value="%d{HH:mm:ss.SSS} %-5p %c{1} - %m%n"/&gt;
+        &lt;/layout&gt;
+    &lt;/appender&gt;
+    &lt;appender name="FILE" class="org.apache.log4j.RollingFileAppender"&gt;<i class="conum" data-value="4"></i><b>(4)</b>
+        &lt;param name="File" value="${log.dir}/blog.log"/&gt;
+        &lt;param name="MaxFileSize" value="10MB"/&gt;
+        &lt;param name="MaxBackupIndex" value="10"/&gt;
+        &lt;layout class="org.apache.log4j.PatternLayout"&gt;<i class="conum" data-value="5"></i><b>(5)</b>
+            &lt;param name="ConversionPattern" value="%d{ISO8601} %-5p [%t] %c - %m%n"/&gt;
+        &lt;/layout&gt;
+    &lt;/appender&gt;
+    &lt;!-- Loggers --&gt;
+    &lt;root&gt;
+        &lt;priority value="INFO"/&gt;
+        &lt;appender-ref ref="CONSOLE"/&gt;
+        &lt;appender-ref ref="FILE"/&gt;
+    &lt;/root&gt;
+&lt;/log4j:configuration&gt;</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Like Logback, the <code>debug</code> flag enables Log4J1 internal logs.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>There aren&#8217;t any properties in Log4J1.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>The <code>PatternLayout</code> is documented in the <a href="http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/PatternLayout.html">JavaDoc</a>.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>There is no DailyRollingFileAppender in Log4J1 unless you add <code>log4j-extras</code> extension.
+Even with this extension, one can not mix size and time rollover.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Format the <code>date</code> in ISO8601.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>You shouldn&#8217;t forget <code>file:/</code> if you use specific configuration file with the JVM property <code>-Dlog4j.configuration=file:///path/to/config.xml</code>.</p>
+</div>
+<div class="paragraph">
+<p>The <a href="https://logging.apache.org/log4j/1.2/manual.html">Log4J1 Manual</a> is only a quick introduction. By the time, there was a <a href="https://www.amazon.com/Complete-Log4j-Manual-Ceki-Gulcu/dp/2970036908">book</a> .</p>
+</div>
+</div>
+</div>]]></description><link>https://gquintana.github.io/2019/05/17/Logging-configuration.html</link><guid isPermaLink="true">https://gquintana.github.io/2019/05/17/Logging-configuration.html</guid><category><![CDATA[java]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Fri, 17 May 2019 00:00:00 GMT</pubDate></item><item><title><![CDATA[Ansible collection processing]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>As a Java developer, I sometimes dream that I can use the Java 8+ Stream API in my Ansible playbook to process list and dict variables.</p>
@@ -1159,7 +1446,7 @@ Obviously, it must be ran in the <code>after</code> step, once the cluster is st
 <p>The trick here is to use <code>run_once</code> to play this task on a single node.</p>
 </div>
 </div>
-</div>]]></description><link>https://gquintana.github.io/2017/07/15/Ansible-and-rolling-upgrades.html</link><guid isPermaLink="true">https://gquintana.github.io/2017/07/15/Ansible-and-rolling-upgrades.html</guid><category><![CDATA[ansible]]></category><category><![CDATA[ elasticsearch]]></category><category><![CDATA[ kafka]]></category><category><![CDATA[ cassandra]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Sat, 15 Jul 2017 00:00:00 GMT</pubDate></item><item><title><![CDATA[From Java to Go]]></title><description><![CDATA[<div id="preamble">
+</div>]]></description><link>https://gquintana.github.io/2017/07/15/Ansible-and-rolling-upgrades.html</link><guid isPermaLink="true">https://gquintana.github.io/2017/07/15/Ansible-and-rolling-upgrades.html</guid><category><![CDATA[ansible]]></category><category><![CDATA[elasticsearch]]></category><category><![CDATA[kafka]]></category><category><![CDATA[cassandra]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Sat, 15 Jul 2017 00:00:00 GMT</pubDate></item><item><title><![CDATA[From Java to Go]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>This is the second episode of my <em>7 languages in 7 weeks</em> series of blog posts.
@@ -1925,7 +2212,7 @@ But it is not has expressive as many other languages for business applications.<
 <p>I don’t pretend to be a Go expert at all, if I wrote something wrong, tell me.</p>
 </div>
 </div>
-</div>]]></description><link>https://gquintana.github.io/2017/01/15/From-Java-to-Go.html</link><guid isPermaLink="true">https://gquintana.github.io/2017/01/15/From-Java-to-Go.html</guid><category><![CDATA[7li7w]]></category><category><![CDATA[ go]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Sun, 15 Jan 2017 00:00:00 GMT</pubDate></item><item><title><![CDATA[From Java to Ruby]]></title><description><![CDATA[<div id="preamble">
+</div>]]></description><link>https://gquintana.github.io/2017/01/15/From-Java-to-Go.html</link><guid isPermaLink="true">https://gquintana.github.io/2017/01/15/From-Java-to-Go.html</guid><category><![CDATA[7li7w]]></category><category><![CDATA[go]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Sun, 15 Jan 2017 00:00:00 GMT</pubDate></item><item><title><![CDATA[From Java to Ruby]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>One of my 2017 resolutions is to try different languages and see how they compare to Java.
@@ -2525,7 +2812,7 @@ both were born in the nineties.</p>
 <p>I don&#8217;t pretend to be a Ruby expert at all, if I wrote something wrong, tell me.</p>
 </div>
 </div>
-</div>]]></description><link>https://gquintana.github.io/2017/01/08/From-Java-to-Ruby.html</link><guid isPermaLink="true">https://gquintana.github.io/2017/01/08/From-Java-to-Ruby.html</guid><category><![CDATA[7li7w]]></category><category><![CDATA[ ruby]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Sun, 08 Jan 2017 00:00:00 GMT</pubDate></item><item><title><![CDATA[Testing a Java and Elasticsearch 5.0 application]]></title><description><![CDATA[<div id="preamble">
+</div>]]></description><link>https://gquintana.github.io/2017/01/08/From-Java-to-Ruby.html</link><guid isPermaLink="true">https://gquintana.github.io/2017/01/08/From-Java-to-Ruby.html</guid><category><![CDATA[7li7w]]></category><category><![CDATA[ruby]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Sun, 08 Jan 2017 00:00:00 GMT</pubDate></item><item><title><![CDATA[Testing a Java and Elasticsearch 5.0 application]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>A long time ago, I wrote <a href="https://blog.zenika.com/2013/04/29/integrer-elasticsearch-dans-une-application-java/">this article in french</a> explaining
@@ -3773,7 +4060,7 @@ and smoothly integrates Kafka with Spring and Spring Integration:</p>
 <p>This library makes Kafka usage very similar to ActiveMQ or RabbitMQ.</p>
 </div>
 </div>
-</div>]]></description><link>https://gquintana.github.io/2016/10/10/Kafka-Java-Client.html</link><guid isPermaLink="true">https://gquintana.github.io/2016/10/10/Kafka-Java-Client.html</guid><category><![CDATA[kafka]]></category><category><![CDATA[ java]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Mon, 10 Oct 2016 00:00:00 GMT</pubDate></item><item><title><![CDATA[Testing Logstash configuration]]></title><description><![CDATA[<div id="preamble">
+</div>]]></description><link>https://gquintana.github.io/2016/10/10/Kafka-Java-Client.html</link><guid isPermaLink="true">https://gquintana.github.io/2016/10/10/Kafka-Java-Client.html</guid><category><![CDATA[kafka]]></category><category><![CDATA[java]]></category><dc:creator><![CDATA[Gerald Quintana]]></dc:creator><pubDate>Mon, 10 Oct 2016 00:00:00 GMT</pubDate></item><item><title><![CDATA[Testing Logstash configuration]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>You wrote a piece of Logstash configuration which can parse some logs.
