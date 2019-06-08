@@ -1,0 +1,28 @@
+= Kafka integration tests
+:hp-image: /images/logos/kafka.png
+:published_at: 2019-06-31
+:hp-tags: java,kafka
+
+You're developping a Java application which uses Kafka, 
+or maybe you're programming a data processing pipeline based on Kafka Streams. How do you automate tests involving both Java code and Kafka brokers?
+
+Such an integrations should
+
+. Start Zookeeper and then Kafka
+. Run code using Kafka client API to send/consume messages
+. Stop Kafka and then Zookeeper
+
+== Kafka embedded in the test
+
+As both Kafka and Zookeeper are Java applications, it is possible to control them by calling their code. It is https://github.com/danielwegener/logback-kafka-appender/blob/master/src/test/java/com/github/danielwegener/logback/kafka/util/EmbeddedKafkaCluster.java[possible], but is not easy.
+
+There are many libraries make running an embedded Kafka from JUnit easy:
+
+* https://github.com/charithe/kafka-junit[Kafka JUnit] by Charith Ellawala
+* https://docs.spring.io/spring-kafka/docs/2.2.6.RELEASE/reference/html/#testing[Spring Kafka Test] by the Spring team
+
+
+
+
+
+== Kafka in docker
