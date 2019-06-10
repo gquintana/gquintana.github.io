@@ -46,7 +46,7 @@ public class SpringMessageServiceIT {
 
             ConsumerRecords<Integer, String> records = KafkaTestUtils.getRecords(consumer); //<3>
             assertThat(records).are(value("one")); //<4
-            //tag::api[]
+            //end::api[]
         }
 
     }
