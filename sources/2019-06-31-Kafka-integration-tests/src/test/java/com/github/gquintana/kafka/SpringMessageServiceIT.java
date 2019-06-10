@@ -33,7 +33,7 @@ public class SpringMessageServiceIT {
 
     @Test
     public void testAPI() throws Exception {
-
+        //tag::api[]
         try(Consumer<Integer, String> consumer = new KafkaConsumer<Integer, String>( //<1>
                 KafkaTestUtils.consumerProps("spring_group", "true", kafka.getEmbeddedKafka()))) {
             KafkaTemplate<Integer, String> template = new KafkaTemplate<>( //<2>
@@ -45,7 +45,8 @@ public class SpringMessageServiceIT {
             template.send(TOPIC, "two");
 
             ConsumerRecords<Integer, String> records = KafkaTestUtils.getRecords(consumer); //<3>
-            assertThat(records).are(value("one")); //<4>
+            assertThat(records).are(value("one")); //<4
+            //tag::api[]
         }
 
     }
