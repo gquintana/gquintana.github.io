@@ -10,7 +10,8 @@ or maybe you're programming a data processing pipeline based on Kafka Streams. H
 Such an integrations should
 
 . Start Zookeeper and then Kafka
-. Run code using Kafka client API to send/consume messages
+. Send messages into Kafka so as to trigger business code
+. Consume messages from Kafka and check their content
 . Stop Kafka and then Zookeeper
 
 == Kafka embedded in the test
@@ -74,7 +75,40 @@ include::{sourcedir}//src/test/java/com/github/gquintana/kafka/SpringMessageServ
 <3> Use `KafkaTestUtils` to quickly consume messages.
 <4> The `KafkaConditions` integrates with AssertJ to make received messages simpler.
 
+To me this library lacks some syntactic sugar to make tests more readable.
+
 == Kafka in docker
 
+https://www.testcontainers.org/[Test containers] purpose is to start Docker containers from JUnit to do integration tests with any product: MySQL, Elasticsearch, Kafka... There is a base module, a Kafka extension and a JUnit 5 extension. 
+[source,xml]
+----
+include::{sourcedir}/pom.xml[tags=containers]
+----
 
+Testcontainers is strongly integrated with JUnit 5, a single annotation and you're done. A JUnit 4 rule is also available.
+[source,java]
+----
+include::{sourcedir}//src/test/java/com/github/gquintana/kafka/ContainersMessageServiceIT.java[tags=start]
+----
+<1> Trigger Testcontainers start
+<2> Create a Kafka container. 
+	The https://hub.docker.com/r/confluentinc/cp-kafka[cp-kafka Docker image] created by Confluent is used. 
+    As a consequence the version number matches the Confluent Platform version.
+    
+As Testcontainers is a generic library to run containers,
+there is no helper class to read/write messages.
+Starting a Docker container is slower than starting an embedded Kafka,
+but process isolation is stronger, and you are closer to production.
+3 Dockers containers are actually used by Testcontainers Kafka.
 
+== Kafka Consumer subscriptions
+
+Dealing with asynchronous code is usually complicated, Kafka consumers don't help.
+
+It can take a long time for the consumer group controller to be elected, the partitions to be assigned. 
+Between the consumer bootstrap and the first messages being received,
+it can take a second or so.
+
+Using a `ConsumerRebalanceListener` to check which and when partitions are assigned can be useful.
+
+The http://www.awaitility.org/[Awaitility] library can aleviate the burden of asynchronous testing.
