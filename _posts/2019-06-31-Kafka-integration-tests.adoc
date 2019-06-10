@@ -2,6 +2,7 @@
 :hp-image: /images/logos/kafka.png
 :published_at: 2019-06-31
 :hp-tags: java,kafka
+:sourcedir: /sources/2019-06-31-Kafka-integration-tests
 
 You're developping a Java application which uses Kafka, 
 or maybe you're programming a data processing pipeline based on Kafka Streams. How do you automate tests involving both Java code and Kafka brokers?
@@ -19,10 +20,61 @@ As both Kafka and Zookeeper are Java applications, it is possible to control the
 There are many libraries make running an embedded Kafka from JUnit easy:
 
 * https://github.com/charithe/kafka-junit[Kafka JUnit] by Charith Ellawala
+* Another https://mguenther.github.io/kafka-junit/[Kafka JUnit] by Markus Günther
 * https://docs.spring.io/spring-kafka/docs/2.2.6.RELEASE/reference/html/#testing[Spring Kafka Test] by the Spring team
 
+=== Kafka JUnit
 
+Charith's Kafka JUnit library is one of the most simple and efficient.
+[source,xml]
+----
+include::{sourcedir}/pom.xml[tags=charithe]
+----
 
+This library supports both JUnit 4 & 5.
+[source,java]
+----
+include::{sourcedir}//src/test/java/com/github/gquintana/kafka/CharitheMessageServiceIT.java[tags=start]
+----
+<1> Load JUnit 5 extension that will start an embedded Kafka
+<2> A `kafkaHelper` is injected to get embedded Kafka address
 
+This `KafkaHelper` contains several methods to easily producer and consumer messages
+[source,java]
+----
+include::{sourcedir}//src/test/java/com/github/gquintana/kafka/CharitheMessageServiceIT.java[tags=api]
+----
+<1> Start a non blocking consumer
+<2> Produce some messages in a Topic
+
+=== Spring Kafka Test
+
+Spring Kafka Test is an addition to Spring Kafka library.
+[source,xml]
+----
+include::{sourcedir}/pom.xml[tags=spring-kafka]
+----
+
+This library supports only JUnit 4 at the moment, 
+as a result it contains a JUnit Rule to handle embedded Kafka lifecycle.
+[source,java]
+----
+include::{sourcedir}//src/test/java/com/github/gquintana/kafka/SpringMessageServiceIT.java[tags=start]
+----
+<1> JUnit 4 Rule that will start an embedded Kafka and create a topic.
+<2> The `kafka` rule is used to get embedded Kafka address.
+
+Spring Kafka Test contains a `KafkaTestUtils` class which is a swiss army knife to write Kafka related tests. 
+[source,java]
+----
+include::{sourcedir}//src/test/java/com/github/gquintana/kafka/SpringMessageServiceIT.java[tags=api]
+----
+<1> Use `KafkaTestUtils` to create a consumer.
+<2> Use `KafkaTestUtils` along with the usual `KafkaTemplate` to quickly send messages.
+<3> Use `KafkaTestUtils` to quickly consume messages.
+<4> The `KafkaConditions` integrates with AssertJ to make received messages simpler.
 
 == Kafka in docker
+
+
+
