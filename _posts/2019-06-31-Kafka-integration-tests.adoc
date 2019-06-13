@@ -4,10 +4,10 @@
 :hp-tags: java,kafka
 :sourcedir: /sources/2019-06-31-Kafka-integration-tests
 
-You're developping a Java application which uses Kafka, 
+You're developping a Java application plugged to Kafka, 
 or maybe you're programming a data processing pipeline based on Kafka Streams. How do you automate tests involving both Java code and Kafka brokers?
 
-Such an integrations should
+Such an integrations should be able to
 
 . Start Zookeeper and then Kafka
 . Send messages into Kafka so as to trigger business code
@@ -16,9 +16,9 @@ Such an integrations should
 
 == Kafka embedded in the test
 
-As both Kafka and Zookeeper are Java applications, it is possible to control them by calling their code. It is https://github.com/danielwegener/logback-kafka-appender/blob/master/src/test/java/com/github/danielwegener/logback/kafka/util/EmbeddedKafkaCluster.java[possible], but is not easy.
+As both Kafka and Zookeeper are Java applications, it is possible to control them by calling their code. It is possible (have a look at https://github.com/apache/camel/blob/master/components/camel-kafka/src/test/java/org/apache/camel/component/kafka/embedded/EmbeddedKafkaBroker.java[camel-kafka] or https://github.com/danielwegener/logback-kafka-appender/blob/master/src/test/java/com/github/danielwegener/logback/kafka/util/EmbeddedKafkaCluster.java[logback-kafka-appender]), but is not easy.
 
-There are many libraries make running an embedded Kafka from JUnit easy:
+There are many libraries to run an embedded Kafka from JUnit without sweating:
 
 * https://github.com/charithe/kafka-junit[Kafka JUnit] by Charith Ellawala
 * Another https://mguenther.github.io/kafka-junit/[Kafka JUnit] by Markus Günther
@@ -35,7 +35,7 @@ include::{sourcedir}/pom.xml[tags=charithe]
 This library supports both JUnit 4 & 5.
 [source,java]
 ----
-include::{sourcedir}//src/test/java/com/github/gquintana/kafka/CharitheMessageServiceIT.java[tags=start]
+include::{sourcedir}/src/test/java/com/github/gquintana/kafka/CharitheMessageServiceIT.java[tags=start]
 ----
 <1> Load JUnit 5 extension that will start an embedded Kafka
 <2> A `kafkaHelper` is injected to get embedded Kafka address
@@ -43,7 +43,7 @@ include::{sourcedir}//src/test/java/com/github/gquintana/kafka/CharitheMessageSe
 This `KafkaHelper` contains several methods to easily producer and consumer messages
 [source,java]
 ----
-include::{sourcedir}//src/test/java/com/github/gquintana/kafka/CharitheMessageServiceIT.java[tags=api]
+include::{sourcedir}/src/test/java/com/github/gquintana/kafka/CharitheMessageServiceIT.java[tags=api]
 ----
 <1> Start a non blocking consumer
 <2> Produce some messages in a Topic
@@ -60,7 +60,7 @@ This library supports only JUnit 4 at the moment,
 as a result it contains a JUnit Rule to handle embedded Kafka lifecycle.
 [source,java]
 ----
-include::{sourcedir}//src/test/java/com/github/gquintana/kafka/SpringMessageServiceIT.java[tags=start]
+include::{sourcedir}/src/test/java/com/github/gquintana/kafka/SpringMessageServiceIT.java[tags=start]
 ----
 <1> JUnit 4 Rule that will start an embedded Kafka and create a topic.
 <2> The `kafka` rule is used to get embedded Kafka address.
@@ -68,7 +68,7 @@ include::{sourcedir}//src/test/java/com/github/gquintana/kafka/SpringMessageServ
 Spring Kafka Test contains a `KafkaTestUtils` class which is a swiss army knife to write Kafka related tests. 
 [source,java]
 ----
-include::{sourcedir}//src/test/java/com/github/gquintana/kafka/SpringMessageServiceIT.java[tags=api]
+include::{sourcedir}/src/test/java/com/github/gquintana/kafka/SpringMessageServiceIT.java[tags=api]
 ----
 <1> Use `KafkaTestUtils` to create a consumer.
 <2> Use `KafkaTestUtils` along with the usual `KafkaTemplate` to quickly send messages.
@@ -88,7 +88,7 @@ include::{sourcedir}/pom.xml[tags=containers]
 Testcontainers is strongly integrated with JUnit 5, a single annotation and you're done. A JUnit 4 rule is also available.
 [source,java]
 ----
-include::{sourcedir}//src/test/java/com/github/gquintana/kafka/ContainersMessageServiceIT.java[tags=start]
+include::{sourcedir}/src/test/java/com/github/gquintana/kafka/ContainersMessageServiceIT.java[tags=start]
 ----
 <1> Trigger Testcontainers start
 <2> Create a Kafka container. 
@@ -103,7 +103,7 @@ but process isolation is stronger, and you are closer to production.
 
 == Kafka Consumer subscriptions
 
-Dealing with asynchronous code is usually complicated, Kafka consumers don't help.
+Dealing with asynchronous code in tests is often painful, Kafka consumers don't help.
 
 It can take a long time for the consumer group controller to be elected, the partitions to be assigned. 
 Between the consumer bootstrap and the first messages being received,
