@@ -1,8 +1,8 @@
 = Kafka integration tests
 :hp-image: /images/logos/kafka.png
-:published_at: 2019-06-31
+:published_at: 2019-07-03
 :hp-tags: java,kafka
-:sourcedir: /sources/2019-06-31-Kafka-integration-tests
+:sourcedir: /sources/2019-07-03-Kafka-integration-tests
 
 You're developping a Java application plugged to Kafka, 
 or maybe you're programming a data processing pipeline based on Kafka Streams. How do you automate tests involving both Java code and Kafka brokers?
