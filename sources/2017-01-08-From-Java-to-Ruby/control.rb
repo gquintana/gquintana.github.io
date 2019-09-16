@@ -15,4 +15,4 @@ child = Child.new
 # tag::unless2[]
 rude = true
 child.say_hello("mister") unless rude
-# tag::unless2[]
+# end::unless2[]

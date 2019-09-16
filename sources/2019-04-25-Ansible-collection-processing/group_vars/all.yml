@@ -1,4 +1,5 @@
 ---
+#{% raw %}
 #tag::list_var[]
 users:
   - id: bouh
@@ -18,6 +19,7 @@ users:
     admin: False
     role: assistant
 #end::list_var[]
+
 #tag::simple[]
 admin_user_ids: |
   {{ users
@@ -37,6 +39,7 @@ assistant_user_ids: |
   |map(attribute='id')
   |join(',') }}
 #end::select_advanced[]
+
 #tag::map_advanced[]
 user_first_names: |
   {{ users
@@ -62,9 +65,11 @@ jq_assistant_user_ids: |
   |json_query("[?role == 'assistant'].id")
   |join(',') }} #<2>
 #end::json_query[]
+
 #tag::json_query_error[]
 jq_bid_user_ids: |
   {{ users
   |json_query("[?starts_with(id,'b')].id")
   |join(',') }}
 #end::json_query_error[]
+#{% endraw %}

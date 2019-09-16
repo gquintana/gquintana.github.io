@@ -1,15 +1,16 @@
 = Log collection in AWS land
-
-:hp-image: /images/logos/aws.png
+:page-image: /images/logos/aws.png
 // :published_at: 2019-01-31
-:hp-tags: elasticsearch, cloud
+:page-tags: [elasticsearch, cloud]
 :image_dir: 2017-09-30-Log-collection-in-AWS-land
+:page-layout: post
+:page-description: "How to collect and centralize log using AWS components."
 
 In AWS, it is really easy to popup new machines and scale.
 The more machines you have, the more important it's to centralize logs.
 In this article, I will describe what I discovered while trying to collect logs from applications deployed on Beanstalk and send them into Elasticsearch.
 
-Disclaimer: I am an AWS newbie. 
+Disclaimer: I am an AWS newbie.
 
 ## The family picture
 
@@ -98,7 +99,7 @@ file=/var/log/my-app/my-app*.log
 
 Log files produced my components (Apache, Tomcat...) managed by Beanstalk are already configured.
 The above config file is only for application specific log files.
-This agent support multiline logs (like stacktraces, call trace...) provided they start with a whitespace (space, tab). 
+This agent support multiline logs (like stacktraces, call trace...) provided they start with a whitespace (space, tab).
 It's not as powerful as Filebeat or Logstash.
 
 At this point, you'll be able to see logs aggregated from multiple Beanstalk instances in the Cloudwatch console.
@@ -138,4 +139,3 @@ Cloudwatch log filter mimics Logstash and uses a field named `@timestamp` for ti
 AWS provides all the building blocks to centralize logs and monitor your whole infrastructure.
 It's not hard to collect logs and send them in Elasticsearch.
 But it's also far less powerful than the complete Elastic stack.
-

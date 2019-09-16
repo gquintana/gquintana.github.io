@@ -1,9 +1,10 @@
 = Ansible collection processing
-
-:hp-tags: ansible
-:hp-image: /images/logos/ansible.png
+:page-tags: [ansible]
+:page-image: /images/logos/ansible.png
 :source_dir: ../sources/2019-04-25-Ansible-collection-processing
 :published_at: 2019-04-25
+:page-layout: post
+:page-description: "How to filter and transform collections in Ansible playbooks."
 
 As a Java developer, I sometimes dream that I can use the Java 8+ Stream API in my Ansible playbook to process list and dict variables.
 
@@ -21,8 +22,8 @@ The main tool to transform Ansible variables are Jinja filters. There are 2 libr
   This list can also be found in Jinja source code https://github.com/pallets/jinja/blob/master/jinja2/filters.py[filters.py].
 * The https://docs.ansible.com/ansible/latest/user_guide/playbooks_filters.html#[Ansible filters]
   This list can also be found in Ansible source code https://github.com/ansible/ansible/tree/devel/lib/ansible/plugins/filter[filter] directory.
-  
-Filters are similar to Unix or Anguler pipes and can be chained. 
+
+Filters are similar to Unix or Anguler pipes and can be chained.
 
 Like in other data processing libraries there two kinds of operators:
 
@@ -78,7 +79,7 @@ include::{source_dir}/group_vars/all.yml[tags=json_query_error]
 
 == Conclusion
 
-It's possible to transform a variable containing an array into another list. 
+It's possible to transform a variable containing an array into another list.
 However it's still painful to do because neither YAML nor Jinja tare programming languages.
 I personnaly regret I can't invoke Python code from Ansible playbook and use for comprehensions, imagine something like:
 [source,yaml]

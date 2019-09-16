@@ -1,9 +1,10 @@
 # From Java to Ruby
-
-:hp-tags: 7li7w, ruby
+:page-tags: [7li7w, ruby]
 :source_dir: ../sources/2017-01-08-From-Java-to-Ruby
-:hp-image: /images/logos/ruby.png
+:page-image: /images/logos/ruby.png
 :published_at: 2017-01-08
+:page-layout: post
+:page-description: "First impression of the Ruby Language."
 
 One of my 2017 resolutions is to try different languages and see how they compare to Java.
 This is inspired by the https://pragprog.com/book/btlang/seven-languages-in-seven-weeks[7 languages in 7 weeks] book by Bruce A. Tate.

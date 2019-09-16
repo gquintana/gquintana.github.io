@@ -1,8 +1,10 @@
 = Testing a Java and Elasticsearch 5.0 application
-:hp-tags: elasticsearch
+:page-tags: [elasticsearch]
 :published_at: 2016-11-30
-:hp-image: /images/logos/elasticsearch.png
+:page-image: /images/logos/elasticsearch.png
 :source_dir: ../sources/2016-11-29-Testing-a-Java-and-Elasticsearch-50-application
+:page-layout: post
+:page-description: "How to test a Java application based on Elasticsearch."
 
 A long time ago, I wrote https://blog.zenika.com/2013/04/29/integrer-elasticsearch-dans-une-application-java/[this article in french] explaining
 how to test a Java application talking to Elasticsearch.

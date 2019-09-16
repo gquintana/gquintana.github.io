@@ -1,7 +1,8 @@
 = Securing remote JMX
-:hp-tags: java
+:page-tags: [java]
 :published_at: 2016-09-01
-:hp-image: /images/logos/java.png
+:page-image: /images/logos/java.png
+:page-layout: post
 
 Like it or not, JMX is one the main tools for JVM monitoring.
 If you are using Tomcat, Kafka or Cassandra you'll have to setup JMX tools to monitor them.

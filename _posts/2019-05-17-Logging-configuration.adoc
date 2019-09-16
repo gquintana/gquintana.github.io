@@ -1,9 +1,10 @@
 = Logging configuration
-
-:hp-image: /images/logos/java.png
+:page-image: /images/logos/java.png
 :published_at: 2019-05-17
-:hp-tags: java
+:page-tags: [java]
 :source_dir: ../sources/2019-05-17-Logging-configuration
+:page-layout: post
+:page-description: Logging configuration code snippets for common libraries like Logback or Log4J.
 
 There is nothing fundamentally new in this article.
 It's just a quick reminder (to myself) about Java logging framework configuration.

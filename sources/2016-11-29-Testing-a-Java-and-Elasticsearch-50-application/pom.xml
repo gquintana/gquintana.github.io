@@ -73,7 +73,7 @@
         </plugins>
     </build>
     <profiles>
-        <!-- tag::profile_ant[]-->
+        <!-- tag::profile_ant[] -->
         <profile>
             <id>ant</id>
             <properties>
@@ -155,8 +155,8 @@
                 </plugins>
             </build>
         </profile>
-        <!-- end::profile_ant[]-->
-        <!-- tag::profile_docker[]-->
+        <!-- end::profile_ant[] -->
+        <!-- tag::profile_docker[] -->
         <profile>
             <id>docker</id>
             <properties>
@@ -228,6 +228,6 @@
                 </plugins>
             </build>
         </profile>
-        <!-- end::profile_docker[]-->
+        <!-- end::profile_docker[] -->
     </profiles>
 </project>

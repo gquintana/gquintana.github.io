@@ -1,10 +1,12 @@
 = Kafka integration tests
-:hp-image: /images/logos/kafka.png
+:page-image: /images/logos/kafka.png
 :published_at: 2019-07-03
-:hp-tags: java,kafka
-:sourcedir: /sources/2019-07-03-Kafka-integration-tests
+:page-tags: [java,kafka]
+:sourcedir: ../sources/2019-07-03-Kafka-integration-tests
+:page-layout: post
+:page-description: "How to test Java code using Kafka client? This post contains several solutions to manage Kafka in integration tests."
 
-You're developping a Java application plugged to Kafka, 
+You're developping a Java application plugged to Kafka,
 or maybe you're programming a data processing pipeline based on Kafka Streams. How do you automate tests involving both Java code and Kafka brokers?
 
 Such an integration tests should be able to
@@ -59,7 +61,7 @@ Spring Kafka Test is an addition to Spring Kafka library.
 include::{sourcedir}/pom.xml[tags=spring-kafka]
 ----
 
-This library supports only JUnit 4 at the moment, 
+This library supports only JUnit 4 at the moment,
 as a result it contains a JUnit Rule to handle embedded Kafka lifecycle.
 [source,java]
 ----
@@ -68,7 +70,7 @@ include::{sourcedir}/src/test/java/com/github/gquintana/kafka/SpringMessageServi
 <1> JUnit 4 Rule that will start an embedded Kafka and create a topic.
 <2> The `kafka` rule is used to get the embedded Kafka address.
 
-Spring Kafka Test contains a `KafkaTestUtils` class which is a swiss army knife to write Kafka related tests. 
+Spring Kafka Test contains a `KafkaTestUtils` class which is a swiss army knife to write Kafka related tests.
 [source,java]
 ----
 include::{sourcedir}/src/test/java/com/github/gquintana/kafka/SpringMessageServiceIT.java[tags=api]
@@ -78,12 +80,12 @@ include::{sourcedir}/src/test/java/com/github/gquintana/kafka/SpringMessageServi
 <3> Use `KafkaTestUtils` to quickly consume messages.
 <4> The `KafkaConditions` integrates with AssertJ to make received messages simpler.
 
-Spring Kafka Test is probably the way to go when you're developping a Spring application. 
+Spring Kafka Test is probably the way to go when you're developping a Spring application.
 However this library lacks some syntactic sugar to make tests more readable.
 
 == Kafka in docker
 
-https://www.testcontainers.org/[Test containers] purpose is to start Docker containers from JUnit to do integration tests with any product: MySQL, Elasticsearch, Kafka... There is a base module, a Kafka extension and a JUnit 5 extension. 
+https://www.testcontainers.org/[Test containers] purpose is to start Docker containers from JUnit to do integration tests with any product: MySQL, Elasticsearch, Kafka... There is a base module, a Kafka extension and a JUnit 5 extension.
 [source,xml]
 ----
 include::{sourcedir}/pom.xml[tags=containers]
@@ -95,10 +97,10 @@ Testcontainers library is strongly integrated with JUnit 5, a single annotation 
 include::{sourcedir}/src/test/java/com/github/gquintana/kafka/ContainersMessageServiceIT.java[tags=start]
 ----
 <1> Trigger Testcontainers start
-<2> Create a Kafka container. 
-	By default the https://hub.docker.com/r/confluentinc/cp-kafka[cp-kafka Docker image] created by Confluent is used. 
+<2> Create a Kafka container.
+	By default the https://hub.docker.com/r/confluentinc/cp-kafka[cp-kafka Docker image] created by Confluent is used.
     As a consequence the version number matches the Confluent Platform version, not Apache Kafka.
-    
+
 As Testcontainers is a generic library to run containers,
 there is no helper class to read/write messages.
 Starting a Docker container is slower than starting an embedded Kafka,
@@ -110,7 +112,7 @@ You are starting the real thing, no hacked Kafka broker, so you are closer to pr
 
 Dealing with asynchronous code in tests is often painful, Kafka consumers don't help.
 
-It can take a long time for the consumer group controller to be elected, and partitions to be assigned. 
+It can take a long time for the consumer group controller to be elected, and partitions to be assigned.
 Between the consumer bootstrap and the first messages being received,
 it can take a second or so.
 

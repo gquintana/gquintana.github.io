@@ -1,8 +1,9 @@
 = Scaling Kafka
-:hp-tags: kafka
+:page-tags: [kafka]
 :published_at: 2016-10-17
-:hp-image: /images/logos/kafka.png
+:page-image: /images/logos/kafka.png
 :sourcedir: ../sources
+:page-layout: post
 
 In my previous article about Kafka, I introduced some basic concepts,
 and showed how to use this message broker using the Java client API.
@@ -318,4 +319,3 @@ Some solutions exist though:
   whose purpose is to ease these operations.
   Unfortunately, it is not open source.
 * *Mesos* has an https://github.com/mesos/kafka[integration] which seems to be able to make https://docs.mesosphere.com/1.9/usage/service-guides/kafka/[Kafka scaling smoother]
-

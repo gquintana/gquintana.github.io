@@ -1,7 +1,9 @@
 = Structured logging with SLF4J and Logback
 :published_at: 2017-12-01
-:hp-tags: java
-:hp-image: /images/logos/slf4j.png
+:page-tags: [java]
+:page-image: /images/logos/slf4j.png
+:page-layout: post
+:page-description: "How to produce structured logs in Java? I am how to add contextual information to your logs and render it."
 
 I don't know who first coined the term *structured logging*.
 There is https://kartar.net/2015/12/structured-logging/[a 2015 blog post by James Turnbull] to get started.
@@ -25,9 +27,9 @@ Properly configured, it produces a log like
 Notice how this "Hello world!" message is qualified with several fields:
 a timestamp, a thread Id, a level and a logger/category.
 
-This is what the term "structured logging" means, 
-a log is more than a message string. 
-The message is associated with contextual information about what was occurring, 
+This is what the term "structured logging" means,
+a log is more than a message string.
+The message is associated with contextual information about what was occurring,
 it tells more detail about what was going on when this log was printed
 
 How can we enrich this contextual information provided by default,
@@ -46,11 +48,11 @@ With the adequate configuration, we can get the user Id the log:
 ----
 21:10:29.178 [Thread-1] gquintana INFO  logodyssey.DemoLogger - Hello world!
 ----
-The MDC can store any information about the user (user Id, session Id, token Id), about the current request (request Id, transaction Id), about long running threads (batch instance Id, broker client Id). 
+The MDC can store any information about the user (user Id, session Id, token Id), about the current request (request Id, transaction Id), about long running threads (batch instance Id, broker client Id).
 Later on, this information will be part of the log.
 
 Having this kind of information allows to group logs by user, by request, by processing.
-Remember that logs may be scattered across different servers, on different time periods. 
+Remember that logs may be scattered across different servers, on different time periods.
 These additional fields allow correlating logs belonging to the same scenario and finding answers to questions like "what was the user X doing when he met this nasty error?"
 
 Let's get back to the example, we saw the MDC stores extra information about logs.
@@ -73,28 +75,28 @@ Hopefully, this kind of code won't make its way in your business code because it
 
 == JSON logging with Logback
 
-At this point, a log is more than simple string, 
+At this point, a log is more than simple string,
 it is qualified with useful information: timestamp, level, thread, user Id...
 How can we write this data structure on disk or send it over the wire to a log collection tool?
 We have to serialize it.
 For a human being, a simple text format as shown above is readable enough.
 However, for a machine, this is just a word soup without any structure.
-In short, to send structured logs to a log collection tool 
-and benefit from this structure (search by user, by thread...), 
+In short, to send structured logs to a log collection tool
+and benefit from this structure (search by user, by thread...),
 we must use a structured format, like JSON for example.
 
 Compared to the Syslog format, another popular log format, the JSON format
 
 * Can properly handle  multi-line logs like stack traces/call traces or messages containing line separators (wanted or not)
-* Is a versatile format and can have custom fields like user Id, transaction Id 
+* Is a versatile format and can have custom fields like user Id, transaction Id
 * Is more verbose, so compression (GZip or the like) may be required to reduce the weight
 
 Most popular log collection tools likes Filebeat, Graylog, Fluentd already use some kind of compressed JSON format under the hood.
 You should too.
 
-Generating JSON logs with Logback is very easy. 
-I'll show how to use two Logback extensions, 
-the https://github.com/logstash/logstash-logback-encoder[Logstash Logback encoder] 
+Generating JSON logs with Logback is very easy.
+I'll show how to use two Logback extensions,
+the https://github.com/logstash/logstash-logback-encoder[Logstash Logback encoder]
 and the https://github.com/qos-ch/logback-contrib/wiki[Logback Contrib] library.
 
 The first one uses a Logback extension point known as *encoder* that you can plug into any appender:
@@ -168,7 +170,7 @@ public class CustomJsonLayout extends JsonLayout {
     }
 }
 ----
-Several Maven dependencies are required `ch.qos.logback.contrib:logback-json-classic:0.1.5`, 
+Several Maven dependencies are required `ch.qos.logback.contrib:logback-json-classic:0.1.5`,
 `ch.qos.logback.contrib:logback-jackson:0.1.5` and `com.fasterxml.jackson.core:jackson-databind`
 for this library to work.
 
@@ -185,10 +187,9 @@ A log is more than a textual message, it can be enriched with information at dif
 * User or transaction: user Id, session Id...
 * Deployment unit: application Id, container Id, host Id, environment Id (production, staging)...
 
-Once qualified with this contextual information, 
-the log message becomes a structured piece of information 
+Once qualified with this contextual information,
+the log message becomes a structured piece of information
 and must be processed as such.
 Producing logs in JSON format allows to keep that structure
 and eases storing these logs in Elasticsearch.
 More on that later, it time permits.
-

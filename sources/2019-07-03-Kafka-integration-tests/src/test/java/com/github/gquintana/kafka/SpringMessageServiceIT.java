@@ -27,7 +27,7 @@ public class SpringMessageServiceIT {
             false, TOPIC);
     @Test
     public void testSendAndConsume() throws Exception {
-        sendAndConsume(kafka.getEmbeddedKafka().getBrokersAsString(), TOPIC);
+        sendAndConsume(kafka.getEmbeddedKafka().getBrokersAsString(), TOPIC); //<2>
     }
     //end::start[]
 
@@ -45,7 +45,7 @@ public class SpringMessageServiceIT {
             template.send(TOPIC, "two");
 
             ConsumerRecords<Integer, String> records = KafkaTestUtils.getRecords(consumer); //<3>
-            assertThat(records).are(value("one")); //<4
+            assertThat(records).are(value("one")); //<4>
             //end::api[]
         }
 

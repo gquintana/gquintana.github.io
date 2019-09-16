@@ -1,10 +1,11 @@
 = From Java to Go
-
-:hp-tags: 7li7w, go
-:hp-image: /images/logos/golang.png
+:page-tags: [7li7w, go]
+:page-image: /images/logos/golang.png
 :source_dir: ../sources/2017-01-15-From-Java-to-Go
 :image_dir: 2017-01-15-From-Java-to-Go
 :published_at: 2017-01-15
+:page-layout: post
+:page-description: "First impression of the Go Language."
 
 This is the second episode of my _7 languages in 7 weeks_ series of blog posts.
 After link:2017-01-08-From-Java-to-Ruby.html[Ruby], a language which is more than 20 years old,
@@ -326,11 +327,11 @@ structs are powerful and can have interfaces.
 include::{source_dir}/demo/objects.go[tags=main]
 ----
 <1> I wonder why the `NewPerson` constructor and the `GetName` function can not declared inside the struct.
-    In the `GetName` function, the Go Linter warns that the `Person` argument shouldn't be named `this` or `self`, this is why I named it `p`.
-<1> Notice the `Person` struct doesn't tell it implements the `Nameable` interface.
-<2> A function should never take a pointer to an interface,
+<2> In the `GetName` function, the Go Linter warns that the `Person` argument shouldn't be named `this` or `self`, this is why I named it `p`.
+<3> Notice the `Person` struct doesn't tell it implements the `Nameable` interface.
+<4> A function should never take a pointer to an interface,
     because an interface is already a https://research.swtch.com/interfaces[kind of pointer] delegating to the original struct.
-<3> The variable `p` of type `*Person` is automatically converted into `Nameable` interface.
+<5> The variable `p` of type `*Person` is automatically converted into `Nameable` interface.
     Go is doing duck typing, if it has a `GetName` function, then it is a `Nameable` thing.
 
 

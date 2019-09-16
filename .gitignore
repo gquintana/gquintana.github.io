@@ -4,4 +4,7 @@ playbook.retry
 .idea/
 *.iml
 target/
+_site/
 *.log
+.bundle/
+Gemfile.lock

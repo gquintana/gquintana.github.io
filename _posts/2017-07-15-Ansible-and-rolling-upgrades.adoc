@@ -1,10 +1,11 @@
 = Ansible and rolling upgrades
-
-:hp-tags: ansible, elasticsearch, kafka, cassandra
-:hp-image: /images/logos/ansible.png
+:page-tags: [ansible, elasticsearch, kafka, cassandra]
+:page-image: /images/logos/ansible.png
 :source_dir: ../sources/2017-07-05-Ansible-and-rolling-upgrades
 :image_dir: 2017-07-05-Ansible-and-rolling-upgrades
 :published_at: 2017-07-15
+:page-layout: post
+:page-description: "How to upgrade a distributed system with Ansible."
 
 Ansible is a nice tool to deploy distributed systems like Elasticsearch, Kafka, Cassandra and the like.
 These systems are built with high availability in mind and can tolerate partial failures.
@@ -50,7 +51,7 @@ At some point, the `elasticsearch` role will probably contain something to stop 
 ...
 ----
 
-This naive Ansible playbook will stop all Elasticsearch nodes at the same time, 
+This naive Ansible playbook will stop all Elasticsearch nodes at the same time,
 making the whole cluster unavailable until enough nodes are started again.
 To fix this problem, the role can be ran in serial instead of parallel:
 
@@ -79,7 +80,7 @@ The main idea to improve speed is to split the role into multiple steps, and do 
 3. *In Parallel*: finish applying settings on the running cluster and remove old files and binaries.
 
 
-For this purpose, describe each step in its own YAML file: 
+For this purpose, describe each step in its own YAML file:
 `before.yml` for step 1, `stop_start.yml` for step 2 and `after.yml` for step 3.
 Finally, the role entry point `main.yml` will include the appropriate step using a variable named `elasticsearch_step`:
 

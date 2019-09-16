@@ -1,7 +1,8 @@
 = Java File vs Path
-
-:hp-tags: java
-:hp-image: /images/logos/java.png
+:page-tags: [java]
+:page-image: /images/logos/java.png
+:page-layout: post
+:page-description: "How to convert Java 7- File code to Java 8+ Path code"
 
 I've been using `java.io.File` and `java.io.File*Stream` since Java 1.1, a long time ago.
 Java 7 introduced a new file API named *NIO2* containing, among others, the `java.nio.file.Path` and `java.nio.file.Files` classes.
@@ -43,7 +44,7 @@ Files.write(Paths.get("image.png"), bytes); // <1>
 
 List<String> lines = Files.readAllLines(Paths.get("letter.txt"), StandardCharsets.UTF_8); // <2>
 
-Files.lines(Paths.get("letter.txt"), StandardCharsets.UTF_8) 
+Files.lines(Paths.get("letter.txt"), StandardCharsets.UTF_8)
 		.forEach(System.out::println);
 ----
 <1> Write a binary file
@@ -63,7 +64,7 @@ try(InputStream inputStream = Files.newInputStream(path)) {
 == Multiple file systems
 
 When the `File` is only for local files, `Path` can also be used to access remote files.
-A `Path` is associated to a `FileSystem`. 
+A `Path` is associated to a `FileSystem`.
 
 To create a new `Path` instances, there is not constructor (`Path` is interface), we need to call a factory method. The above 2 lines are the same:
 
@@ -93,4 +94,3 @@ try(FileSystem zipFS = FileSystems.newFileSystem(zipUri, emptyMap())) { // <1>
 
 You can even plug additional file systems: http://docs.oracle.com/javase/7/docs/technotes/guides/io/fsp/zipfilesystemprovider.html[ZIP], https://github.com/maddingo/nio-fs-provider[SFTP, SMB, WebDAV], https://github.com/lucastheisen/jsch-nio[SSH/SCP], https://github.com/Upplication/Amazon-S3-FileSystem-NIO2[Amazon S3], https://github.com/google/jimfs[In memory], https://github.com/damiencarol/jsr203-hadoop[HDFS], ...
 This almost means you can read a remote file as if it were local.
-

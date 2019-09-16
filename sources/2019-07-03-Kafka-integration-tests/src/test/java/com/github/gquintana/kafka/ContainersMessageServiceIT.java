@@ -17,5 +17,5 @@ public class ContainersMessageServiceIT {
     public void testSendAndConsume() throws Exception {
         sendAndConsume(kafka.getBootstrapServers(), TOPIC);
     }
-//tag::end[]
+//end::start[]
 }

@@ -1,9 +1,0 @@
-{
-  "files": {
-    "default": "default.hbs",
-    "index": "index.hbs",
-    "post": "post.hbs",
-    "tag": "tag.hbs"
-  },
-  "version":"1.0.0"
-}

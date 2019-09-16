@@ -49,7 +49,7 @@
             <version>5.4.2</version>
             <scope>test</scope>
         </dependency>
-        <!--tag::containers[]-->
+        <!-- tag::containers[] -->
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>testcontainers</artifactId>
@@ -68,13 +68,13 @@
             <version>${testcontainers.version}</version>
             <scope>test</scope>
         </dependency>
-        <!--end::containers[]-->
-        <!--tag::charithe[]-->
+        <!-- end::containers[] -->
+        <!-- tag::charithe[] -->
         <dependency>
             <groupId>com.github.charithe</groupId>
             <artifactId>kafka-junit</artifactId>
             <version>4.1.5</version>
-            <!--end::charithe[]-->
+            <!-- end::charithe[] -->
             <exclusions>
                 <exclusion>
                     <groupId>log4j</groupId>
@@ -86,14 +86,14 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!--tag::spring-kafka[]-->
+        <!-- tag::spring-kafka[] -->
         <dependency>
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka-test</artifactId>
             <version>${spring-kafka.version}</version>
             <scope>test</scope>
         </dependency>
-        <!--end::spring-kafka[]-->
+        <!-- end::spring-kafka[] -->
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>

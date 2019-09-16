@@ -1,8 +1,9 @@
 = Kafka Java Client
-:hp-tags: kafka, java
+:page-tags: [kafka, java]
 :published_at: 2016-10-10
-:hp-image: /images/logos/kafka.png
+:page-image: /images/logos/kafka.png
 :sourcedir: ../sources
+:page-layout: post
 
 Apache Kafka is trendy software which mixes a message broker and an event log.
 From the ground up, it's a distributed solution designed for scalability and performance.
@@ -133,16 +134,16 @@ Like the producer, the consumer is initialized and configured with some properti
 [source,java]
 ----
 Map<String, Object> consumerConfig = new HashMap<>();
-consumerConfig.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka1:9092,kafka2:9092"); <1>
+consumerConfig.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka1:9092,kafka2:9092"); //<1>
 consumerConfig.put(ConsumerConfig.GROUP_ID_CONFIG, "test_group");
 consumerConfig.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 consumerConfig.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 try (Consumer<String, String> consumer = new KafkaConsumer<>(consumerConfig)) {
-    consumer.subscribe(Arrays.asList("the_topic")); <2>
-    ConsumerRecords<String, String> records = consumer.poll(1000L); <3>
+    consumer.subscribe(Arrays.asList("the_topic")); //<2>
+    ConsumerRecords<String, String> records = consumer.poll(1000L); //<3>
     for (ConsumerRecord<String, String> record : records) {
         LOGGER.info("Found message {} {}", record.key(), record.value());
-    }
+    } //<4>
 }
 ----
 <1> Connect to these Kafka connect nodes.
