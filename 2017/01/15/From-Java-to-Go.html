@@ -1,61 +1,37 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-
-    <title>From Java to Go</title>
-    <meta name="description" content="" />
-
-    <meta name="HandheldFriendly" content="True" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <link rel="shortcut icon" href="https://gquintana.github.io/favicon.ico">
-
-    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:400,700,400italic,700italic|Open+Sans:400italic,700italic,700,400">
-    <link rel="stylesheet" type="text/css" href="//gquintana.github.io/themes/roon/assets/css/screen.css?v=1485199184947" />
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/idea.min.css" />
-
-    <link rel="canonical" href="https://gquintana.github.io/2017/01/15/From-Java-to-Go.html" />
-    <meta name="referrer" content="origin" />
-    
-    <meta property="og:site_name" content="JRald" />
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="From Java to Go" />
-    <meta property="og:description" content="This is the second episode of my 7 languages in 7 weeks series of blog posts. After Ruby, a language which is more than 20 years old, I tried a more recent language, Go which was created in 2009. Go gained in traction thanks to the Docker ecosystem: Docker container" />
-    <meta property="og:url" content="https://gquintana.github.io/2017/01/15/From-Java-to-Go.html" />
-    <meta property="article:tag" content="7li7w" />
-    <meta property="article:tag" content=" go" />
-    
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="From Java to Go" />
-    <meta name="twitter:description" content="This is the second episode of my 7 languages in 7 weeks series of blog posts. After Ruby, a language which is more than 20 years old, I tried a more recent language, Go which was created in 2009. Go gained in traction thanks to the Docker ecosystem: Docker container" />
-    <meta name="twitter:url" content="https://gquintana.github.io/2017/01/15/From-Java-to-Go.html" />
-    
-    <script type="application/ld+json">
-null
-    </script>
-
-    <meta name="generator" content="HubPress" />
-    <link rel="alternate" type="application/rss+xml" title="JRald" href="https://gquintana.github.io/rss/" />
-</head>
-<body class="post-template tag-7li7w tag-go  ">
-
-    
-
-
-    <article role="main" class="image">
-        <header>
-            <a href="https://gquintana.github.io" id="home_link">«</a>
-            <div class="meta"><time datetime="2017-01-15"><a href="https://gquintana.github.io/2017/01/15/From-Java-to-Go.html">January 15, 2017</a></time> <span class="count" id="js-reading-time"></span></div>
-            <h1>
-                    <img src="../../..//images/logos/golang.png">
-                From Java to Go
-            </h1>
+<!doctype html>
+<!--[if IE 9]>
+<html class="lt-ie10" lang="en"> <![endif]-->
+<html class="no-js" lang="en" data-useragent="Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0)">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>From Java to Go</title>
+        <meta name="description" content="First impression of the Go Language.">
+        <meta name="author" content="Gérald Quintana">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="/css/coderay.css">
+        <link rel="stylesheet" href="/css/asciidoc.css">
+        <link rel="stylesheet"
+              href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/default.min.css">
+    </head>
+    <body>
+        <header class="container sticky-top">
+            <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+                 <a class="navbar-brand" href="/">JRald blog</a>
+            </nav>
         </header>
+        <main class="container position-relative " role="main">
+            <div>
+    <h1>From Java to Go</h1>
+    <div>
+        <img class="rounded float-right" src="../../../images/logos/golang.png"/>
+        <h5>
+            <span>2017-01-15</span>
+            <span class="badge badge-secondary">7li7w</span> <span class="badge badge-secondary">go</span> 
+        </h5>
 
-        <div class="text" id="js-post-content">
-            <div id="preamble">
+        <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>This is the second episode of my <em>7 languages in 7 weeks</em> series of blog posts.
@@ -69,10 +45,10 @@ Docker container engine, Kubernetes, <a href="https://traefik.io/">Traefik</a> a
 </div>
 </div>
 <div class="sect1">
-<h2 id="_the_good">The good</h2>
+<h2 id="the_good">The good</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_simple_to_learn">Simple to learn</h3>
+<h3 id="simple_to_learn">Simple to learn</h3>
 <div class="paragraph">
 <p>Even if the language is pretty recent, there are many resources to learn Go.
 The first one I stumbled upon was <a href="https://tour.golang.org/">Tour of Go</a>,
@@ -110,7 +86,7 @@ The Go Lang spec is less 100 pages long.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_rich_tooling">Rich tooling</h3>
+<h3 id="rich_tooling">Rich tooling</h3>
 <div class="paragraph">
 <p>As soon as you&#8217;ve installed Go and without any extra step, you can:</p>
 </div>
@@ -144,21 +120,21 @@ and download them with Go Get.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="__code_switch_code_statement"><code>switch</code> statement</h3>
+<h3 id="switch_statement"><code>switch</code> statement</h3>
 <div class="paragraph">
 <p>Compare Go&#8217;s switch statement</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-go" data-lang="go">	switch i {
-	case 0:
-		fmt.Print("None")
-	case 1:
-		fmt.Print("Single ")
-		fallthrough
-	default:
-		fmt.Print("Thing")
-	}</code></pre>
+<pre class="CodeRay highlight"><code data-lang="go">        <span class="keyword">switch</span> i {
+        <span class="keyword">case</span> <span class="integer">0</span>:
+                fmt.Print(<span class="string"><span class="delimiter">&quot;</span><span class="content">None</span><span class="delimiter">&quot;</span></span>)
+        <span class="keyword">case</span> <span class="integer">1</span>:
+                fmt.Print(<span class="string"><span class="delimiter">&quot;</span><span class="content">Single </span><span class="delimiter">&quot;</span></span>)
+                <span class="keyword">fallthrough</span>
+        <span class="keyword">default</span>:
+                fmt.Print(<span class="string"><span class="delimiter">&quot;</span><span class="content">Thing</span><span class="delimiter">&quot;</span></span>)
+        }</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -166,14 +142,14 @@ and download them with Go Get.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-go" data-lang="go">    switch i {
-    case 0:
-      System.out.print("None");
-      break;
-    case 1:
-      System.out.print("Single ")
-    default:
-      System.out.println("Thing")
+<pre class="CodeRay highlight"><code data-lang="go">    <span class="keyword">switch</span> i {
+    <span class="keyword">case</span> <span class="integer">0</span>:
+      System.out.<span class="predefined">print</span>(<span class="string"><span class="delimiter">&quot;</span><span class="content">None</span><span class="delimiter">&quot;</span></span>);
+      <span class="keyword">break</span>;
+    <span class="keyword">case</span> <span class="integer">1</span>:
+      System.out.<span class="predefined">print</span>(<span class="string"><span class="delimiter">&quot;</span><span class="content">Single </span><span class="delimiter">&quot;</span></span>)
+    <span class="keyword">default</span>:
+      System.out.<span class="predefined">println</span>(<span class="string"><span class="delimiter">&quot;</span><span class="content">Thing</span><span class="delimiter">&quot;</span></span>)
     }</code></pre>
 </div>
 </div>
@@ -188,16 +164,16 @@ A missing <code>break</code> can raise subtle bugs.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-go" data-lang="go">	switch {
-	case i == 0:
-		fmt.Print("None")
-	case i == 1:
-		fmt.Print("One ")
-	case i &gt; 1:
-		fmt.Print("Many ")
-	default:
-		fmt.Print("Invalid")
-	}</code></pre>
+<pre class="CodeRay highlight"><code data-lang="go">        <span class="keyword">switch</span> {
+        <span class="keyword">case</span> i == <span class="integer">0</span>:
+                fmt.Print(<span class="string"><span class="delimiter">&quot;</span><span class="content">None</span><span class="delimiter">&quot;</span></span>)
+        <span class="keyword">case</span> i == <span class="integer">1</span>:
+                fmt.Print(<span class="string"><span class="delimiter">&quot;</span><span class="content">One </span><span class="delimiter">&quot;</span></span>)
+        <span class="keyword">case</span> i &gt; <span class="integer">1</span>:
+                fmt.Print(<span class="string"><span class="delimiter">&quot;</span><span class="content">Many </span><span class="delimiter">&quot;</span></span>)
+        <span class="keyword">default</span>:
+                fmt.Print(<span class="string"><span class="delimiter">&quot;</span><span class="content">Invalid</span><span class="delimiter">&quot;</span></span>)
+        }</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -205,7 +181,7 @@ A missing <code>break</code> can raise subtle bugs.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_concurrency_with_channels_and_routines">Concurrency with channels and routines</h3>
+<h3 id="concurrency_with_channels_and_routines">Concurrency with channels and routines</h3>
 <div class="paragraph">
 <p>First of all, a <strong>channel</strong> is a concept used for inter-thread communication.
 There are 2 types of channels:</p>
@@ -217,7 +193,7 @@ There are 2 types of channels:</p>
 the producer waits for the consumer to be ready:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-go" data-lang="go">ch := make(chan string)</code></pre>
+<pre class="CodeRay highlight"><code data-lang="go">ch := <span class="predefined">make</span>(<span class="keyword">chan</span> <span class="predefined-type">string</span>)</code></pre>
 </div>
 </div>
 </li>
@@ -227,7 +203,7 @@ the producer waits for a free location to place data,
 while the consumer waits for a place filled with data:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-go" data-lang="go">ch := make(chan string, 10)</code></pre>
+<pre class="CodeRay highlight"><code data-lang="go">ch := <span class="predefined">make</span>(<span class="keyword">chan</span> <span class="predefined-type">string</span>, <span class="integer">10</span>)</code></pre>
 </div>
 </div>
 </li>
@@ -238,7 +214,7 @@ while the consumer waits for a place filled with data:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-go" data-lang="go">go doit()</code></pre>
+<pre class="CodeRay highlight"><code data-lang="go"><span class="keyword">go</span> doit()</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -247,35 +223,35 @@ The receiver thread will multiply the numbers and print them:</p>
 </div>
 <div class="imageblock">
 <div class="content">
-<img src="https://gquintana.github.io/images/2017-01-15-From-Java-to-Go/concurrency.svg" alt="Channels and Goroutines">
+<img src="2017-01-15-From-Java-to-Go/concurrency.svg" alt="Channels and Goroutines">
 </div>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-go" data-lang="go">func generate(out chan [2]int) {
-	for x := 1; x &lt;= 10; x++ {
-		for y := 1; y &lt;= 10; y++ {
-			t := [2]int{x, y}
-			fmt.Printf("generate %dx%d\n", t[0], t[1])
-			out &lt;- t                                    <i class="conum" data-value="1"></i><b>(1)</b>
-		}
-	}
-	fmt.Println("generate end")
+<pre class="CodeRay highlight"><code data-lang="go"><span class="keyword">func</span> generate(out <span class="keyword">chan</span> [<span class="integer">2</span>]<span class="predefined-type">int</span>) {
+        <span class="keyword">for</span> x := <span class="integer">1</span>; x &lt;= <span class="integer">10</span>; x++ {
+                <span class="keyword">for</span> y := <span class="integer">1</span>; y &lt;= <span class="integer">10</span>; y++ {
+                        t := [<span class="integer">2</span>]<span class="predefined-type">int</span>{x, y}
+                        fmt.Printf(<span class="string"><span class="delimiter">&quot;</span><span class="content">generate %dx%d</span><span class="char">\n</span><span class="delimiter">&quot;</span></span>, t[<span class="integer">0</span>], t[<span class="integer">1</span>])
+                        out &lt;- t                                    <i class="conum" data-value="1"></i><b>(1)</b>
+                }
+        }
+        fmt.Println(<span class="string"><span class="delimiter">&quot;</span><span class="content">generate end</span><span class="delimiter">&quot;</span></span>)
 }
 
-func multiply(in chan [2]int) {
-	for {
-		t := &lt;-in                                           <i class="conum" data-value="2"></i><b>(2)</b>
-		r := [3]int{t[0], t[1], t[0] * t[1]}
-		fmt.Printf("multiply %dx%d=%d\n", r[0], r[1], r[2])
-	}
+<span class="keyword">func</span> multiply(in <span class="keyword">chan</span> [<span class="integer">2</span>]<span class="predefined-type">int</span>) {
+        <span class="keyword">for</span> {
+                t := &lt;-in                                           <i class="conum" data-value="2"></i><b>(2)</b>
+                r := [<span class="integer">3</span>]<span class="predefined-type">int</span>{t[<span class="integer">0</span>], t[<span class="integer">1</span>], t[<span class="integer">0</span>] * t[<span class="integer">1</span>]}
+                fmt.Printf(<span class="string"><span class="delimiter">&quot;</span><span class="content">multiply %dx%d=%d</span><span class="char">\n</span><span class="delimiter">&quot;</span></span>, r[<span class="integer">0</span>], r[<span class="integer">1</span>], r[<span class="integer">2</span>])
+        }
 }
 
-func main() {
-	in := make(chan [2]int, 10)
-	go multiply(in)                                             <i class="conum" data-value="3"></i><b>(3)</b>
-	generate(in)                                                <i class="conum" data-value="4"></i><b>(4)</b>
-	time.Sleep(10 * time.Second)
+<span class="keyword">func</span> main() {
+        in := <span class="predefined">make</span>(<span class="keyword">chan</span> [<span class="integer">2</span>]<span class="predefined-type">int</span>, <span class="integer">10</span>)
+        <span class="keyword">go</span> multiply(in)                                             <i class="conum" data-value="3"></i><b>(3)</b>
+        generate(in)                                                <i class="conum" data-value="4"></i><b>(4)</b>
+        time.Sleep(<span class="integer">10</span> * time.Second)
 }</code></pre>
 </div>
 </div>
@@ -308,10 +284,10 @@ An actor is more or less an async channel with a goroute polling from this chann
 </div>
 </div>
 <div class="sect1">
-<h2 id="_the_bad">The bad</h2>
+<h2 id="the_bad">The bad</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_error_handling">Error handling</h3>
+<h3 id="error_handling">Error handling</h3>
 <div class="paragraph">
 <p>There has been <a href="http://openmymind.net/Golangs-Error-Handling-Good-And-Bad/">debate</a> about how errors are handled.
 I hope not to start a new troll with this paragraph.</p>
@@ -322,8 +298,8 @@ A function can return multiple values, however there are no tuples like in Pytho
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-go" data-lang="go">file, err := ioutil.ReadFile("file.txt") // Correct
-tuple :=     ioutil.ReadFile("file.txt") // Incorrect</code></pre>
+<pre class="CodeRay highlight"><code data-lang="go">file, err := ioutil.ReadFile(<span class="string"><span class="delimiter">&quot;</span><span class="content">file.txt</span><span class="delimiter">&quot;</span></span>) <span class="comment">// Correct</span>
+tuple :=     ioutil.ReadFile(<span class="string"><span class="delimiter">&quot;</span><span class="content">file.txt</span><span class="delimiter">&quot;</span></span>) <span class="comment">// Incorrect</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -334,25 +310,25 @@ tuple :=     ioutil.ReadFile("file.txt") // Incorrect</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-go" data-lang="go">func Order(quantity int) (*Article, error) {                <i class="conum" data-value="1"></i><b>(1)</b>
-	if quantity &lt;= 0 {
-		return nil, errors.New("Invalid quantity")  <i class="conum" data-value="2"></i><b>(2)</b>
-	}
-	return &amp;Article{quantity, 10 * quantity}, nil       <i class="conum" data-value="3"></i><b>(3)</b>
+<pre class="CodeRay highlight"><code data-lang="go"><span class="keyword">func</span> Order(quantity <span class="predefined-type">int</span>) (*Article, <span class="predefined-type">error</span>) {                <i class="conum" data-value="1"></i><b>(1)</b>
+        <span class="keyword">if</span> quantity &lt;= <span class="integer">0</span> {
+                <span class="keyword">return</span> <span class="predefined-constant">nil</span>, errors.New(<span class="string"><span class="delimiter">&quot;</span><span class="content">Invalid quantity</span><span class="delimiter">&quot;</span></span>)  <i class="conum" data-value="2"></i><b>(2)</b>
+        }
+        <span class="keyword">return</span> &amp;Article{quantity, <span class="integer">10</span> * quantity}, <span class="predefined-constant">nil</span>       <i class="conum" data-value="3"></i><b>(3)</b>
 }
-func OrderAndPrint(quantity int) error {
-	article, err := Order(quantity)
-	if err != nil {
-		return err                                  <i class="conum" data-value="4"></i><b>(4)</b>
-	}
-	article.Print()                                     <i class="conum" data-value="5"></i><b>(5)</b>
-	return nil
+<span class="keyword">func</span> OrderAndPrint(quantity <span class="predefined-type">int</span>) <span class="predefined-type">error</span> {
+        article, err := Order(quantity)
+        <span class="keyword">if</span> err != <span class="predefined-constant">nil</span> {
+                <span class="keyword">return</span> err                                  <i class="conum" data-value="4"></i><b>(4)</b>
+        }
+        article.Print()                                     <i class="conum" data-value="5"></i><b>(5)</b>
+        <span class="keyword">return</span> <span class="predefined-constant">nil</span>
 }
-func main() {
-	err := OrderAndPrint(-3)
-	if err != nil {
-		fmt.Errorf("Error %s", err)                 <i class="conum" data-value="6"></i><b>(6)</b>
-	}
+<span class="keyword">func</span> main() {
+        err := OrderAndPrint(<span class="integer">-3</span>)
+        <span class="keyword">if</span> err != <span class="predefined-constant">nil</span> {
+                fmt.Errorf(<span class="string"><span class="delimiter">&quot;</span><span class="content">Error %s</span><span class="delimiter">&quot;</span></span>, err)                 <i class="conum" data-value="6"></i><b>(6)</b>
+        }
 }</code></pre>
 </div>
 </div>
@@ -412,7 +388,7 @@ because I can not write <code>Order(3).Print()</code> or <code>Print(Order(3))</
 </div>
 </div>
 <div class="sect2">
-<h3 id="_pointers">Pointers</h3>
+<h3 id="pointers">Pointers</h3>
 <div class="paragraph">
 <p>Pointers are not a bad thing per se.
 In my case, C/C++ lectures were far away in my memory.
@@ -421,29 +397,29 @@ Should I pass this variable by reference or by value?</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-go" data-lang="go">func RaisePriceByVal(a Article) {
-	a.Price = (a.Price * 110) / 100
+<pre class="CodeRay highlight"><code data-lang="go"><span class="keyword">func</span> RaisePriceByVal(a Article) {
+        a.Price = (a.Price * <span class="integer">110</span>) / <span class="integer">100</span>
 }
 
-func RaisePriceByRef(a *Article) {
-	a.Price = (a.Price * 110) / 100                           <i class="conum" data-value="1"></i><b>(1)</b>
+<span class="keyword">func</span> RaisePriceByRef(a *Article) {
+        a.Price = (a.Price * <span class="integer">110</span>) / <span class="integer">100</span>                           <i class="conum" data-value="1"></i><b>(1)</b>
 }
 
-func newArticle(name string, price int) *Article {
-	a := Article{name, price}
-	return &amp;a                                                 <i class="conum" data-value="5"></i><b>(5)</b>
+<span class="keyword">func</span> newArticle(name <span class="predefined-type">string</span>, price <span class="predefined-type">int</span>) *Article {
+        a := Article{name, price}
+        <span class="keyword">return</span> &amp;a                                                 <i class="conum" data-value="5"></i><b>(5)</b>
 }
 
-func main() {
-	a := Article{"Go in Action", 25}
-	fmt.Printf("Article %s %d\n", a.Name, a.Price)
-	RaisePriceByVal(a)
-	fmt.Printf("By val: Article %s %d\n", a.Name, a.Price)    <i class="conum" data-value="2"></i><b>(2)</b>
-	RaisePriceByRef(&amp;a)                                       <i class="conum" data-value="3"></i><b>(3)</b>
-	fmt.Printf("By ref: Article %s %d\n", a.Name, a.Price)    <i class="conum" data-value="4"></i><b>(4)</b>
-	p := newArticle("The Little Go book", 10)                 <i class="conum" data-value="6"></i><b>(6)</b>
-	RaisePriceByRef(p)
-	fmt.Printf("By ref: Article %s %d\n", p.Name, p.Price)
+<span class="keyword">func</span> main() {
+        a := Article{<span class="string"><span class="delimiter">&quot;</span><span class="content">Go in Action</span><span class="delimiter">&quot;</span></span>, <span class="integer">25</span>}
+        fmt.Printf(<span class="string"><span class="delimiter">&quot;</span><span class="content">Article %s %d</span><span class="char">\n</span><span class="delimiter">&quot;</span></span>, a.Name, a.Price)
+        RaisePriceByVal(a)
+        fmt.Printf(<span class="string"><span class="delimiter">&quot;</span><span class="content">By val: Article %s %d</span><span class="char">\n</span><span class="delimiter">&quot;</span></span>, a.Name, a.Price)    <i class="conum" data-value="2"></i><b>(2)</b>
+        RaisePriceByRef(&amp;a)                                       <i class="conum" data-value="3"></i><b>(3)</b>
+        fmt.Printf(<span class="string"><span class="delimiter">&quot;</span><span class="content">By ref: Article %s %d</span><span class="char">\n</span><span class="delimiter">&quot;</span></span>, a.Name, a.Price)    <i class="conum" data-value="4"></i><b>(4)</b>
+        p := newArticle(<span class="string"><span class="delimiter">&quot;</span><span class="content">The Little Go book</span><span class="delimiter">&quot;</span></span>, <span class="integer">10</span>)                 <i class="conum" data-value="6"></i><b>(6)</b>
+        RaisePriceByRef(p)
+        fmt.Printf(<span class="string"><span class="delimiter">&quot;</span><span class="content">By ref: Article %s %d</span><span class="char">\n</span><span class="delimiter">&quot;</span></span>, p.Name, p.Price)
 }</code></pre>
 </div>
 </div>
@@ -481,43 +457,43 @@ I don&#8217;t have to write <code>*a.Price</code> or <code>a&#8594;Price</code> 
 </div>
 </div>
 <div class="sect2">
-<h3 id="__code_make_code_code_new_code_and_code_new_code"><code>make</code>, <code>new</code> and <code>New</code></h3>
+<h3 id="make_new_and_new"><code>make</code>, <code>new</code> and <code>New</code></h3>
 <div class="paragraph">
 <p>To create, I mean allocate, something there are several operators depending on the type
 and whether you are expecting a pointer or not.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-go" data-lang="go">	// Structs
-	struct1 := Language{"go", "Go Lang"}                      <i class="conum" data-value="1"></i><b>(1)</b>
-	fmt.Println("struct1 ", struct1)
-	struct2 := new(Language)                                  <i class="conum" data-value="2"></i><b>(2)</b>
-	fmt.Println("struct2 ", struct2)
+<pre class="CodeRay highlight"><code data-lang="go">        <span class="comment">// Structs</span>
+        struct1 := Language{<span class="string"><span class="delimiter">&quot;</span><span class="content">go</span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">Go Lang</span><span class="delimiter">&quot;</span></span>}                      <i class="conum" data-value="1"></i><b>(1)</b>
+        fmt.Println(<span class="string"><span class="delimiter">&quot;</span><span class="content">struct1 </span><span class="delimiter">&quot;</span></span>, struct1)
+        struct2 := <span class="predefined">new</span>(Language)                                  <i class="conum" data-value="2"></i><b>(2)</b>
+        fmt.Println(<span class="string"><span class="delimiter">&quot;</span><span class="content">struct2 </span><span class="delimiter">&quot;</span></span>, struct2)
 
-	// Arrays
-	array1 := [5]Language{struct1, *struct2, Language{"java", "Java"}} <i class="conum" data-value="3"></i><b>(3)</b>
-	fmt.Println("array1 ", array1)
-	array2 := new([5]Language)                                <i class="conum" data-value="4"></i><b>(4)</b>
-	fmt.Println("array2 ", array2)
+        <span class="comment">// Arrays</span>
+        array1 := [<span class="integer">5</span>]Language{struct1, *struct2, Language{<span class="string"><span class="delimiter">&quot;</span><span class="content">java</span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">Java</span><span class="delimiter">&quot;</span></span>}} <i class="conum" data-value="3"></i><b>(3)</b>
+        fmt.Println(<span class="string"><span class="delimiter">&quot;</span><span class="content">array1 </span><span class="delimiter">&quot;</span></span>, array1)
+        array2 := <span class="predefined">new</span>([<span class="integer">5</span>]Language)                                <i class="conum" data-value="4"></i><b>(4)</b>
+        fmt.Println(<span class="string"><span class="delimiter">&quot;</span><span class="content">array2 </span><span class="delimiter">&quot;</span></span>, array2)
 
-	// Slices
-	slice1 := array1[1:3]
-	fmt.Println("slice1 ", slice1)
-	slice2 := make([]Language, 1, 5)                          <i class="conum" data-value="5"></i><b>(5)</b>
-	fmt.Println("slice2 ", slice2)
+        <span class="comment">// Slices</span>
+        slice1 := array1[<span class="integer">1</span>:<span class="integer">3</span>]
+        fmt.Println(<span class="string"><span class="delimiter">&quot;</span><span class="content">slice1 </span><span class="delimiter">&quot;</span></span>, slice1)
+        slice2 := <span class="predefined">make</span>([]Language, <span class="integer">1</span>, <span class="integer">5</span>)                          <i class="conum" data-value="5"></i><b>(5)</b>
+        fmt.Println(<span class="string"><span class="delimiter">&quot;</span><span class="content">slice2 </span><span class="delimiter">&quot;</span></span>, slice2)
 
-	// Maps
-	map1 := map[string]Language{                              <i class="conum" data-value="6"></i><b>(6)</b>
-		"go":   struct1,
-		"java": Language{"java", "Java"},
-	}
-	fmt.Println("map1 ", map1)
-	map2 := make(map[string]Language, 3)                      <i class="conum" data-value="7"></i><b>(7)</b>
-	fmt.Println("map2 ", map2)
+        <span class="comment">// Maps</span>
+        map1 := <span class="keyword">map</span>[<span class="predefined-type">string</span>]Language{                              <i class="conum" data-value="6"></i><b>(6)</b>
+                <span class="string"><span class="delimiter">&quot;</span><span class="content">go</span><span class="delimiter">&quot;</span></span>:   struct1,
+                <span class="string"><span class="delimiter">&quot;</span><span class="content">java</span><span class="delimiter">&quot;</span></span>: Language{<span class="string"><span class="delimiter">&quot;</span><span class="content">java</span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">Java</span><span class="delimiter">&quot;</span></span>},
+        }
+        fmt.Println(<span class="string"><span class="delimiter">&quot;</span><span class="content">map1 </span><span class="delimiter">&quot;</span></span>, map1)
+        map2 := <span class="predefined">make</span>(<span class="keyword">map</span>[<span class="predefined-type">string</span>]Language, <span class="integer">3</span>)                      <i class="conum" data-value="7"></i><b>(7)</b>
+        fmt.Println(<span class="string"><span class="delimiter">&quot;</span><span class="content">map2 </span><span class="delimiter">&quot;</span></span>, map2)
 
-	// Other
-	error1 := errors.New("Sample error")                      <i class="conum" data-value="8"></i><b>(8)</b>
-	fmt.Println("error1 ", error1)</code></pre>
+        <span class="comment">// Other</span>
+        error1 := errors.New(<span class="string"><span class="delimiter">&quot;</span><span class="content">Sample error</span><span class="delimiter">&quot;</span></span>)                      <i class="conum" data-value="8"></i><b>(8)</b>
+        fmt.Println(<span class="string"><span class="delimiter">&quot;</span><span class="content">error1 </span><span class="delimiter">&quot;</span></span>, error1)</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -574,12 +550,12 @@ As a result, the main syntax is:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-go" data-lang="go">struct := &amp;Language{"go", "Go Lang"}</code></pre>
+<pre class="CodeRay highlight"><code data-lang="go"><span class="keyword">struct</span> := &amp;Language{<span class="string"><span class="delimiter">&quot;</span><span class="content">go</span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">Go Lang</span><span class="delimiter">&quot;</span></span>}</code></pre>
 </div>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_harsh_compiler">Harsh compiler</h3>
+<h3 id="harsh_compiler">Harsh compiler</h3>
 <div class="paragraph">
 <p>The Go compiler is very strict, this can be good thing at times as it may prevent bugs.
 But it can also be a bit too picky and annoying at times.
@@ -592,7 +568,7 @@ The compiler could just warn and skip unused declarations.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-go" data-lang="go">import _ "fmt"</code></pre>
+<pre class="CodeRay highlight"><code data-lang="go"><span class="keyword">import</span> _ <span class="string"><span class="delimiter">&quot;</span><span class="content">fmt</span><span class="delimiter">&quot;</span></span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -605,20 +581,20 @@ but I didn&#8217;t try it.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_the_odd">The odd</h2>
+<h2 id="the_odd">The odd</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Characters are called <strong>Runes</strong> in the Go terminology.
 But they don&#8217;t hide any secret magic ;-) .</p>
 </div>
 <div class="sect2">
-<h3 id="__code_if_code_and_code_for_code_statements"><code>if</code> and <code>for</code> statements</h3>
+<h3 id="if_and_for_statements"><code>if</code> and <code>for</code> statements</h3>
 <div class="paragraph">
 <p>The <code>for</code> statement uses the usual syntax minus the parenthesis:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-go" data-lang="go">	for i := 0; i &lt; 10; i++ {</code></pre>
+<pre class="CodeRay highlight"><code data-lang="go">        <span class="keyword">for</span> i := <span class="integer">0</span>; i &lt; <span class="integer">10</span>; i++ {</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -626,11 +602,11 @@ But they don&#8217;t hide any secret magic ;-) .</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-go" data-lang="go">		if dice := rand.Int31n(6) + 1; dice &gt; 4 {
-			fmt.Printf("%d You won!", dice)
-		} else {
-			fmt.Printf("%d You lost!", dice)
-		}</code></pre>
+<pre class="CodeRay highlight"><code data-lang="go">                <span class="keyword">if</span> dice := rand.Int31n(<span class="integer">6</span>) + <span class="integer">1</span>; dice &gt; <span class="integer">4</span> {
+                        fmt.Printf(<span class="string"><span class="delimiter">&quot;</span><span class="content">%d You won!</span><span class="delimiter">&quot;</span></span>, dice)
+                } <span class="keyword">else</span> {
+                        fmt.Printf(<span class="string"><span class="delimiter">&quot;</span><span class="content">%d You lost!</span><span class="delimiter">&quot;</span></span>, dice)
+                }</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -643,13 +619,13 @@ the <code>dice</code> declaration adds noise, and the condition doesn&#8217;t ca
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-go" data-lang="go">	var line = "start"
-	reader := bufio.NewReader(os.Stdin)
-	for line != "quit" {                       <i class="conum" data-value="1"></i><b>(1)</b>
-		fmt.Println(line)
-		line, _ = reader.ReadString('\n')
-		line = strings.TrimSpace(line)     <i class="conum" data-value="2"></i><b>(2)</b>
-	}</code></pre>
+<pre class="CodeRay highlight"><code data-lang="go">        <span class="keyword">var</span> line = <span class="string"><span class="delimiter">&quot;</span><span class="content">start</span><span class="delimiter">&quot;</span></span>
+        reader := bufio.NewReader(os.Stdin)
+        <span class="keyword">for</span> line != <span class="string"><span class="delimiter">&quot;</span><span class="content">quit</span><span class="delimiter">&quot;</span></span> {                       <i class="conum" data-value="1"></i><b>(1)</b>
+                fmt.Println(line)
+                line, _ = reader.ReadString(<span class="char">'\n'</span>)
+                line = strings.TrimSpace(line)     <i class="conum" data-value="2"></i><b>(2)</b>
+        }</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -668,15 +644,15 @@ This is the problem I explained with error handling and method chaining.</td>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_the_code_code_symbol">The <code>:=</code> symbol</h3>
+<h3 id="the_symbol">The <code>:=</code> symbol</h3>
 <div class="paragraph">
 <p>The <code>:=</code> symbol is called <em>short variable declaration</em>,
 it triggers type inference so you don&#8217;t have to declare the type of your local variable.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-go" data-lang="go">var i int = 12
-i := 12</code></pre>
+<pre class="CodeRay highlight"><code data-lang="go"><span class="keyword">var</span> i <span class="predefined-type">int</span> = <span class="integer">12</span>
+i := <span class="integer">12</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -688,13 +664,13 @@ At first, I thought it was to tell apart assignment from comparison (<code>==</c
 </div>
 </div>
 <div class="sect2">
-<h3 id="_packages_and_imports">Packages and imports</h3>
+<h3 id="packages_and_imports">Packages and imports</h3>
 <div class="paragraph">
 <p>I wonder why imported packages are strings wrapped by double quotes:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-go" data-lang="go">import "fmt"</code></pre>
+<pre class="CodeRay highlight"><code data-lang="go"><span class="keyword">import</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">fmt</span><span class="delimiter">&quot;</span></span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -702,7 +678,7 @@ At first, I thought it was to tell apart assignment from comparison (<code>==</c
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-go" data-lang="go">import "github.com/go-errors/errors"</code></pre>
+<pre class="CodeRay highlight"><code data-lang="go"><span class="keyword">import</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">github.com/go-errors/errors</span><span class="delimiter">&quot;</span></span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -710,10 +686,10 @@ At first, I thought it was to tell apart assignment from comparison (<code>==</c
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-go" data-lang="go">import 	"io/ioutil"                                        <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="CodeRay highlight"><code data-lang="go"><span class="keyword">import</span>         <span class="string"><span class="delimiter">&quot;</span><span class="content">io/ioutil</span><span class="delimiter">&quot;</span></span>                                        <i class="conum" data-value="1"></i><b>(1)</b>
 
-func main() {
-	data, err := ioutil.ReadFile("subpackage.go")      <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
+<span class="keyword">func</span> main() {
+        data, err := ioutil.ReadFile(<span class="string"><span class="delimiter">&quot;</span><span class="content">subpackage.go</span><span class="delimiter">&quot;</span></span>)      <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -735,7 +711,7 @@ unless you give an alias to the import, but it looks less convenient:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-go" data-lang="go">import stringutil "string/util"</code></pre>
+<pre class="CodeRay highlight"><code data-lang="go"><span class="keyword">import</span> stringutil <span class="string"><span class="delimiter">&quot;</span><span class="content">string/util</span><span class="delimiter">&quot;</span></span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -743,42 +719,42 @@ unless you give an alias to the import, but it looks less convenient:</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_structs_and_interfaces">Structs and interfaces</h3>
+<h3 id="structs_and_interfaces">Structs and interfaces</h3>
 <div class="paragraph">
 <p>Go doesn&#8217;t have classes, inheritance and OOP concepts, but it doesn&#8217;t matter,
 structs are powerful and can have interfaces.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-go" data-lang="go">type Person struct {
-	Name string
-	Age  int
+<pre class="CodeRay highlight"><code data-lang="go"><span class="keyword">type</span> Person <span class="keyword">struct</span> {
+        Name <span class="predefined-type">string</span>
+        Age  <span class="predefined-type">int</span>
 }
 
-// NewPerson Constructor of Person
-func NewPerson(name string) *Person {              <i class="conum" data-value="1"></i><b>(1)</b>
-	return &amp;Person{name, 0}
+<span class="comment">// NewPerson Constructor of Person</span>
+<span class="keyword">func</span> NewPerson(name <span class="predefined-type">string</span>) *Person {              <i class="conum" data-value="1"></i><b>(1)</b>
+        <span class="keyword">return</span> &amp;Person{name, <span class="integer">0</span>}
 }
 
-// GetName Function on Person
-func (p *Person) GetName() string {                <i class="conum" data-value="1"></i><b>(1)</b>
-	return p.Name
+<span class="comment">// GetName Function on Person</span>
+<span class="keyword">func</span> (p *Person) GetName() <span class="predefined-type">string</span> {                <i class="conum" data-value="2"></i><b>(2)</b>
+        <span class="keyword">return</span> p.Name
 }
 
-// Nameable interface
-type Nameable interface {                          <i class="conum" data-value="2"></i><b>(2)</b>
-	GetName() string
+<span class="comment">// Nameable interface</span>
+<span class="keyword">type</span> Nameable <span class="keyword">interface</span> {                          <i class="conum" data-value="3"></i><b>(3)</b>
+        GetName() <span class="predefined-type">string</span>
 }
 
-// SayName Function taking an interface as argument
-func SayName(n Nameable) {                         <i class="conum" data-value="3"></i><b>(3)</b>
-	fmt.Printf("My name is %s\n", n.GetName())
+<span class="comment">// SayName Function taking an interface as argument</span>
+<span class="keyword">func</span> SayName(n Nameable) {                         <i class="conum" data-value="4"></i><b>(4)</b>
+        fmt.Printf(<span class="string"><span class="delimiter">&quot;</span><span class="content">My name is %s</span><span class="char">\n</span><span class="delimiter">&quot;</span></span>, n.GetName())
 }
 
-func main() {
-	p := NewPerson("John")
-	p.Age = 12
-	SayName(p)                                 <i class="conum" data-value="4"></i><b>(4)</b>
+<span class="keyword">func</span> main() {
+        p := NewPerson(<span class="string"><span class="delimiter">&quot;</span><span class="content">John</span><span class="delimiter">&quot;</span></span>)
+        p.Age = <span class="integer">12</span>
+        SayName(p)                                 <i class="conum" data-value="5"></i><b>(5)</b>
 }</code></pre>
 </div>
 </div>
@@ -786,20 +762,23 @@ func main() {
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>I wonder why the <code>NewPerson</code> constructor and the <code>GetName</code> function can not declared inside the struct.
-In the <code>GetName</code> function, the Go Linter warns that the <code>Person</code> argument shouldn&#8217;t be named <code>this</code> or <code>self</code>, this is why I named it <code>p</code>.</td>
+<td>I wonder why the <code>NewPerson</code> constructor and the <code>GetName</code> function can not declared inside the struct.</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Notice the <code>Person</code> struct doesn&#8217;t tell it implements the <code>Nameable</code> interface.</td>
+<td>In the <code>GetName</code> function, the Go Linter warns that the <code>Person</code> argument shouldn&#8217;t be named <code>this</code> or <code>self</code>, this is why I named it <code>p</code>.</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Notice the <code>Person</code> struct doesn&#8217;t tell it implements the <code>Nameable</code> interface.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
 <td>A function should never take a pointer to an interface,
 because an interface is already a <a href="https://research.swtch.com/interfaces">kind of pointer</a> delegating to the original struct.</td>
 </tr>
 <tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
 <td>The variable <code>p</code> of type <code>*Person</code> is automatically converted into <code>Nameable</code> interface.
 Go is doing duck typing, if it has a <code>GetName</code> function, then it is a <code>Nameable</code> thing.</td>
 </tr>
@@ -809,7 +788,7 @@ Go is doing duck typing, if it has a <code>GetName</code> function, then it is a
 </div>
 </div>
 <div class="sect1">
-<h2 id="_conclusion">Conclusion</h2>
+<h2 id="conclusion">Conclusion</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>To me, the Go language is well suited for low level tools
@@ -822,199 +801,48 @@ But it is not has expressive as many other languages for business applications.<
 </div>
 </div>
 </div>
-        </div>
-
-        <menu>
-            <a href="" id="btn_share" class="btn" title="Share">
-                <span aria-hidden="true" data-icon="S"></span>
-                <strong>Share</strong>
-            </a>
-            <a href="http://twitter.com/share?text=From%20Java%20to%20Go&url=https://gquintana.github.io/2017/01/15/From-Java-to-Go.html" onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;" id="btn_comment" class="btn" target="_blank">
-                <span aria-hidden="true" data-icon="C"></span> Comment on Twitter
-            </a>
-        </menu>
-
-
-        <footer class="post-footer" role="contentinfo">
-
-            <div class="vcard">
-                <a href="https://gquintana.github.io/rss" id="btn_feed" class="btn" title="Feed" target="_blank">
-                    <span aria-hidden="true" data-icon=")"></span>
-                    <strong>Feed</strong>
-                </a>
-
-                <a href="https://gquintana.github.io/author/gquintana/" class="photo">
-                    <span style="background-image: url('https://avatars.githubusercontent.com/u/755587?v&#x3D;3');">
-                        <img src="https://avatars.githubusercontent.com/u/755587?v&#x3D;3" alt="Gerald Quintana">
-                    </span>
-                </a>
-
-                <div class="details">
-                    <h4><a href="https://gquintana.github.io/author/gquintana/" class="url n">Gerald Quintana</a></h4>
-                    Lyon, France<br>
-                    
-                </div>
-            </div>
-
-            <div id="user_bio">
-                <div class="inner">
-                    
-                </div>
-            </div>
-
-        </footer>
-
-
-
-
-    <section class="post-comments">
-      <div id="disqus_thread"></div>
-      <script type="text/javascript">
-      var disqus_shortname = 'https-gquintana-github-io'; // required: replace example with your forum shortname
-      /* * * DON'T EDIT BELOW THIS LINE * * */
-      (function() {
-        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-      })();
-      </script>
-      <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-      <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
-    </section>
-
-
-    </article>
-
-    <div id="share_modal">
-        <div class="wrap">
-            <div class="inner">
-                <header>
-                    Share
-                    <a href="" class="close" title="Close">&times;</a>
-                </header>
-
-                <div class="roon-share-links">
-                    <a href="https://twitter.com/share" class="twitter-share-button" data-dnt="true">Tweet</a>
-                    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-
-                    <div id="fb-elems">
-                        <div id="fb-root"></div>
-                        <script>(function(d, s, id) {
-                        var js, fjs = d.getElementsByTagName(s)[0];
-                        if (d.getElementById(id)) return;
-                        js = d.createElement(s); js.id = id;
-                        js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=463438580397968";
-                        fjs.parentNode.insertBefore(js, fjs);
-                        }(document, 'script', 'facebook-jssdk'));</script>
-                        <div class="fb-like" data-send="false" data-layout="button_count" data-width="110" data-show-faces="false" data-font="arial"></div>
-                    </div>
-
-                    <div id="pinit-btn">
-                        <a href="//pinterest.com/pin/create/button/?url=https://gquintana.github.io/2017/01/15/From-Java-to-Go.html&amp;description=From%20Java%20to%20Go-JRald " data-pin-do="buttonPin" data-pin-config="beside"><img src="//assets.pinterest.com/images/pidgets/pin_it_button.png"></a>
-                        <script type="text/javascript" src="//assets.pinterest.com/js/pinit.js"></script>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
+    <div class="clearfix">
+        <h4>Other posts</h4>
+        <ul>
+            
+                <li>2019-07-03
+                    <a href="/2019/07/03/Kafka-integration-tests.html">Kafka integration tests</a>
+                </li>
+            
+                <li>2019-05-17
+                    <a href="/2019/05/17/Logging-configuration.html">Logging configuration</a>
+                </li>
+            
+                <li>2019-04-25
+                    <a href="/2019/04/25/Ansible-collection-processing.html">Ansible collection processing</a>
+                </li>
+            
+                <li>2017-12-01
+                    <a href="/2017/12/01/Structured-logging-with-SL-FJ-and-Logback.html">Structured logging with SLF4J and Logback</a>
+                </li>
+            
+                <li>2017-09-30
+                    <a href="/2017/09/30/Log-collection-in-AWS-land.html">Log collection in AWS land</a>
+                </li>
+            
+        </ul>
+    </div>
+</div>
 
-
-
-
-
-
-    <script>
-
-            function get_text(el) {
-                ret = "";
-                var length = el.childNodes.length;
-                for(var i = 0; i < length; i++) {
-                    var node = el.childNodes[i];
-                    if(node.nodeType != 8) {
-                        ret += node.nodeType != 1 ? node.nodeValue : get_text(node);
-                    }
-                }
-                return ret;
-            }
-            function reading_time () {
-                var post_content = document.getElementById('js-post-content');
-                if (post_content) {
-                    var words = get_text(post_content),
-                        count = words.split(/\s+/).length,
-                        read_time = Math.ceil((count / 150)),
-                        read_time_node = document.createTextNode(read_time + ' min read');
-                    document.getElementById('js-reading-time').appendChild(read_time_node);
-                }
-            }
-
-        function no_schema_links () {
-            var links = document.querySelectorAll('.js-remove-domain-schema');
-            if (links) {
-                for (i = 0; i < links.length; ++i) {
-                    var link = links[i],
-                        text = link.innerHTML,
-                        no_schema = text.replace(/.*?:\/\//g, "");
-                    link.innerHTML = no_schema;
-                }
-            }
-        }
-
-        window.onload = function () {
-            no_schema_links();
-
-            reading_time();
-        }
-    </script>
-
-    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js?v="></script> <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment-with-locales.min.js?v="></script> <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js?v="></script> 
-      <script type="text/javascript">
-        jQuery( document ).ready(function() {
-          // change date with ago
-          jQuery('ago.ago').each(function(){
-            var element = jQuery(this).parent();
-            element.html( moment(element.text()).fromNow());
-          });
-        });
-
-        hljs.initHighlightingOnLoad();
-      </script>
-
-        <script>
-            $(function(){
-                var share_modal = $("#share_modal"),
-                    update_social_links = true;
-
-                $("#btn_share").click(function(){
-                    var that = $(this);
-                    share_modal.fadeIn(200);
-                    return false;
-                });
-
-                share_modal.click(function(e){
-                    if (e.target.className == "wrap" || e.target.id == "share_modal") {
-                        share_modal.fadeOut(200);
-                    }
-                    return false;
-                });
-
-                share_modal.find("div.inner > header > a.close").click(function(){
-                    share_modal.fadeOut(200);
-                    return false;
-                });
-            });
-        </script>
-
-
-    <script>
-    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-    ga('create', 'UA-85700184-1', 'auto');
-    ga('send', 'pageview');
-
-    </script>
-
-</body>
+        </main>
+        <footer class="footer text-muted">
+            <div class="container">
+                <p class="float-right">
+                    <a href="#"><i class="fa fa-arrow-up" aria-hidden="true"></i>
+ Back to top</a>
+                </p>
+                <p>Made with <i class="fa fa-heart" aria-hidden="true"></i> by Gérald Quintana</p>
+        </footer>
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+    </body>
 </html>

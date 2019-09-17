@@ -1,60 +1,37 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-
-    <title>Testing a Java and Elasticsearch 5.0 application</title>
-    <meta name="description" content="" />
-
-    <meta name="HandheldFriendly" content="True" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <link rel="shortcut icon" href="https://gquintana.github.io/favicon.ico">
-
-    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:400,700,400italic,700italic|Open+Sans:400italic,700italic,700,400">
-    <link rel="stylesheet" type="text/css" href="//gquintana.github.io/themes/roon/assets/css/screen.css?v=1483906556763" />
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/idea.min.css" />
-
-    <link rel="canonical" href="https://gquintana.github.io/2016/11/30/Testing-a-Java-and-Elasticsearch-50-application.html" />
-    <meta name="referrer" content="origin" />
-    
-    <meta property="og:site_name" content="JRald" />
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="Testing a Java and Elasticsearch 5.0 application" />
-    <meta property="og:description" content="A long time ago, I wrote this article in french explaining how to test a Java application talking to Elasticsearch. At that time (Elasticsearch 1.x), it was easy to start en embedded Elasticsearch, it was a oneliner: Node node &#x3D; NodeBuilder.nodeBuilder().node(); Starting with Elasticsearch 5.0, it&amp;#8217;" />
-    <meta property="og:url" content="https://gquintana.github.io/2016/11/30/Testing-a-Java-and-Elasticsearch-50-application.html" />
-    <meta property="article:tag" content="elasticsearch" />
-    
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="Testing a Java and Elasticsearch 5.0 application" />
-    <meta name="twitter:description" content="A long time ago, I wrote this article in french explaining how to test a Java application talking to Elasticsearch. At that time (Elasticsearch 1.x), it was easy to start en embedded Elasticsearch, it was a oneliner: Node node &#x3D; NodeBuilder.nodeBuilder().node(); Starting with Elasticsearch 5.0, it&amp;#8217;" />
-    <meta name="twitter:url" content="https://gquintana.github.io/2016/11/30/Testing-a-Java-and-Elasticsearch-50-application.html" />
-    
-    <script type="application/ld+json">
-null
-    </script>
-
-    <meta name="generator" content="HubPress" />
-    <link rel="alternate" type="application/rss+xml" title="JRald" href="https://gquintana.github.io/rss/" />
-</head>
-<body class="post-template tag-elasticsearch  ">
-
-    
-
-
-    <article role="main" class="image">
-        <header>
-            <a href="https://gquintana.github.io" id="home_link">«</a>
-            <div class="meta"><time datetime="2016-11-30"><a href="https://gquintana.github.io/2016/11/30/Testing-a-Java-and-Elasticsearch-50-application.html">November 30, 2016</a></time> <span class="count" id="js-reading-time"></span></div>
-            <h1>
-                    <img src="../../..//images/logos/elasticsearch.png">
-                Testing a Java and Elasticsearch 5.0 application
-            </h1>
+<!doctype html>
+<!--[if IE 9]>
+<html class="lt-ie10" lang="en"> <![endif]-->
+<html class="no-js" lang="en" data-useragent="Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0)">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Testing a Java and Elasticsearch 5.0 application</title>
+        <meta name="description" content="How to test a Java application based on Elasticsearch.">
+        <meta name="author" content="Gérald Quintana">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="/css/coderay.css">
+        <link rel="stylesheet" href="/css/asciidoc.css">
+        <link rel="stylesheet"
+              href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/default.min.css">
+    </head>
+    <body>
+        <header class="container sticky-top">
+            <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+                 <a class="navbar-brand" href="/">JRald blog</a>
+            </nav>
         </header>
+        <main class="container position-relative " role="main">
+            <div>
+    <h1>Testing a Java and Elasticsearch 5.0 application</h1>
+    <div>
+        <img class="rounded float-right" src="../../../images/logos/elasticsearch.png"/>
+        <h5>
+            <span>2016-11-30</span>
+            <span class="badge badge-secondary">elasticsearch</span> 
+        </h5>
 
-        <div class="text" id="js-post-content">
-            <div id="preamble">
+        <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>A long time ago, I wrote <a href="https://blog.zenika.com/2013/04/29/integrer-elasticsearch-dans-une-application-java/">this article in french</a> explaining
@@ -63,7 +40,7 @@ At that time (Elasticsearch 1.x), it was easy to start en embedded Elasticsearch
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">Node node = NodeBuilder.nodeBuilder().node();</code></pre>
+<pre class="CodeRay highlight"><code data-lang="java">Node node = NodeBuilder.nodeBuilder().node();</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -78,7 +55,7 @@ Most solutions described in this article can probably apply to other languages: 
 </div>
 </div>
 <div class="sect1">
-<h2 id="_elasticsearch_testing_framework">Elasticsearch Testing framework</h2>
+<h2 id="elasticsearch_testing_framework">Elasticsearch Testing framework</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>This test framework is used by the Elastic team to test Elasticsearch itself.
@@ -87,12 +64,12 @@ This library can be downloaded as a Maven dependency:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-xml" data-lang="xml">&lt;dependency&gt;
-  &lt;groupId&gt;org.elasticsearch.test&lt;/groupId&gt;
-  &lt;artifactId&gt;framework&lt;/artifactId&gt;
-  &lt;version&gt;5.0.1&lt;/version&gt;
-  &lt;scope&gt;test&lt;/scope&gt;
-&lt;/dependency&gt;</code></pre>
+<pre class="CodeRay highlight"><code data-lang="xml"><span class="tag">&lt;dependency&gt;</span>
+  <span class="tag">&lt;groupId&gt;</span>org.elasticsearch.test<span class="tag">&lt;/groupId&gt;</span>
+  <span class="tag">&lt;artifactId&gt;</span>framework<span class="tag">&lt;/artifactId&gt;</span>
+  <span class="tag">&lt;version&gt;</span>5.0.1<span class="tag">&lt;/version&gt;</span>
+  <span class="tag">&lt;scope&gt;</span>test<span class="tag">&lt;/scope&gt;</span>
+<span class="tag">&lt;/dependency&gt;</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -100,7 +77,7 @@ This library can be downloaded as a Maven dependency:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">public class CustomerDaoTests extends ESIntegTestCase {
+<pre class="CodeRay highlight"><code data-lang="java"><span class="directive">public</span> <span class="type">class</span> <span class="class">CustomerDaoTests</span> <span class="directive">extends</span> ESIntegTestCase {
 
 }</code></pre>
 </div>
@@ -146,7 +123,7 @@ java.security.AccessControlException: access denied ("java.lang.RuntimePermissio
 </div>
 </div>
 <div class="sect1">
-<h2 id="_elasticsearch_scripting">Elasticsearch scripting</h2>
+<h2 id="elasticsearch_scripting">Elasticsearch scripting</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>From now on, we will start a real Elasticsearch process,
@@ -163,9 +140,9 @@ This script can later be ran from CI configuration, before running the build scr
 <div class="listingblock">
 <div class="title">elasticsearch-start.sh</div>
 <div class="content">
-<pre class="highlight"><code class="language-shell" data-lang="shell">#!/usr/bin/env bash
+<pre class="CodeRay highlight"><code data-lang="shell">#!/usr/bin/env bash
 
-TARGET_DIR="$(dirname $0)/target"
+TARGET_DIR=&quot;$(dirname $0)/target&quot;
 ES_VERSION=5.0.0
 ES_DIR=${TARGET_DIR}/elasticsearch-${ES_VERSION}
 mkdir -p ${TARGET_DIR}
@@ -179,7 +156,7 @@ cd ${ES_DIR}
 bin/elasticsearch -d -p pid                                                     <i class="conum" data-value="3"></i><b>(3)</b>
 
 sleep 10s
-curl "http://localhost:9200/_cluster/health?wait_for_status=yellow&amp;timeout=30s" <i class="conum" data-value="4"></i><b>(4)</b></code></pre>
+curl &quot;http://localhost:9200/_cluster/health?wait_for_status=yellow&amp;timeout=30s&quot; <i class="conum" data-value="4"></i><b>(4)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -209,26 +186,26 @@ We could rewrite it using Ant, <a href="https://github.com/elastic/elasticsearch
 <div class="listingblock">
 <div class="title">build.xml</div>
 <div class="content">
-<pre class="highlight"><code class="language-xml" data-lang="xml">&lt;target name="elasticsearch-start" &gt;
-    &lt;get src="https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${es.version}.tar.gz"
-         dest="${target.dir}/elasticsearch-${es.version}.tar.gz"
-         verbose="true" skipexisting="true"
-    /&gt;
-    &lt;untar src="${target.dir}/elasticsearch-${es.version}.tar.gz" dest="${target.dir}" compression="gzip"/&gt;
-    &lt;exec executable="cmd" failonerror="true" osfamily="winnt" dir="${es.dir}"&gt;
-        &lt;arg value="/c"/&gt;
-        &lt;arg value="bin/elasticsearch.bat"/&gt;
-    &lt;/exec&gt;
-    &lt;exec executable="sh" failonerror="true" osfamily="unix" dir="${es.dir}"&gt;
-        &lt;arg value="bin/elasticsearch"/&gt;
-        &lt;arg value="-d"/&gt;
-        &lt;arg value="-p"/&gt;
-        &lt;arg value="pid"/&gt;
-    &lt;/exec&gt;
-    &lt;waitfor maxwait="30" maxwaitunit="second" checkevery="10" checkeveryunit="second"&gt;
-        &lt;http url="http://localhost:9200/_cluster/health?wait_for_status=yellow&amp;amp;timeout=5s"/&gt;
-    &lt;/waitfor&gt;
-&lt;/target&gt;</code></pre>
+<pre class="CodeRay highlight"><code data-lang="xml"><span class="tag">&lt;target</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">elasticsearch-start</span><span class="delimiter">&quot;</span></span> <span class="tag">&gt;</span>
+    <span class="tag">&lt;get</span> <span class="attribute-name">src</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${es.version}.tar.gz</span><span class="delimiter">&quot;</span></span>
+         <span class="attribute-name">dest</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">${target.dir}/elasticsearch-${es.version}.tar.gz</span><span class="delimiter">&quot;</span></span>
+         <span class="attribute-name">verbose</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">skipexisting</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span>
+    <span class="tag">/&gt;</span>
+    <span class="tag">&lt;untar</span> <span class="attribute-name">src</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">${target.dir}/elasticsearch-${es.version}.tar.gz</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">dest</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">${target.dir}</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">compression</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">gzip</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;exec</span> <span class="attribute-name">executable</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">cmd</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">failonerror</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">osfamily</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">winnt</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">dir</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">${es.dir}</span><span class="delimiter">&quot;</span></span><span class="tag">&gt;</span>
+        <span class="tag">&lt;arg</span> <span class="attribute-name">value</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">/c</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+        <span class="tag">&lt;arg</span> <span class="attribute-name">value</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">bin/elasticsearch.bat</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;/exec&gt;</span>
+    <span class="tag">&lt;exec</span> <span class="attribute-name">executable</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">sh</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">failonerror</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">osfamily</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">unix</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">dir</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">${es.dir}</span><span class="delimiter">&quot;</span></span><span class="tag">&gt;</span>
+        <span class="tag">&lt;arg</span> <span class="attribute-name">value</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">bin/elasticsearch</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+        <span class="tag">&lt;arg</span> <span class="attribute-name">value</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">-d</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+        <span class="tag">&lt;arg</span> <span class="attribute-name">value</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">-p</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+        <span class="tag">&lt;arg</span> <span class="attribute-name">value</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pid</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;/exec&gt;</span>
+    <span class="tag">&lt;waitfor</span> <span class="attribute-name">maxwait</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">30</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">maxwaitunit</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">second</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">checkevery</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">10</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">checkeveryunit</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">second</span><span class="delimiter">&quot;</span></span><span class="tag">&gt;</span>
+        <span class="tag">&lt;http</span> <span class="attribute-name">url</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">http://localhost:9200/_cluster/health?wait_for_status=yellow</span><span class="entity">&amp;amp;</span><span class="content">timeout=5s</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;/waitfor&gt;</span>
+<span class="tag">&lt;/target&gt;</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -242,92 +219,92 @@ Maven starts Elasticsearch, runs integration tests and finally stops Elasticsear
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-xml" data-lang="xml">        &lt;profile&gt;
-            &lt;id&gt;ant&lt;/id&gt;
-            &lt;properties&gt;
-                &lt;elasticsearch.url&gt;http://localhost:9200&lt;/elasticsearch.url&gt;
-            &lt;/properties&gt;
-            &lt;build&gt;
-                &lt;plugins&gt;
-                    &lt;plugin&gt;
-                        &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
-                        &lt;artifactId&gt;maven-dependency-plugin&lt;/artifactId&gt;
-                        &lt;version&gt;2.10&lt;/version&gt;
-                        &lt;executions&gt;
-                            &lt;execution&gt;
-                                &lt;id&gt;get-es&lt;/id&gt;
-                                &lt;phase&gt;pre-integration-test&lt;/phase&gt;
-                                &lt;goals&gt;
-                                    &lt;goal&gt;copy&lt;/goal&gt;
-                                &lt;/goals&gt;
-                                &lt;configuration&gt;
-                                    &lt;artifactItems&gt;
-                                        &lt;artifactItem&gt;
-                                            &lt;groupId&gt;org.elasticsearch.distribution.zip&lt;/groupId&gt;
-                                            &lt;artifactId&gt;elasticsearch&lt;/artifactId&gt;
-                                            &lt;version&gt;${elasticsearch.version}&lt;/version&gt;
-                                            &lt;type&gt;zip&lt;/type&gt;
-                                        &lt;/artifactItem&gt;
-                                    &lt;/artifactItems&gt;
-                                    &lt;outputDirectory&gt;${project.build.directory}/it&lt;/outputDirectory&gt;
-                                &lt;/configuration&gt;
-                            &lt;/execution&gt;
-                        &lt;/executions&gt;
-                    &lt;/plugin&gt;
-                    &lt;plugin&gt;
-                        &lt;artifactId&gt;maven-antrun-plugin&lt;/artifactId&gt;
-                        &lt;version&gt;1.8&lt;/version&gt;
-                        &lt;executions&gt;
-                            &lt;execution&gt;
-                                &lt;id&gt;start-es&lt;/id&gt;
-                                &lt;phase&gt;pre-integration-test&lt;/phase&gt;
-                                &lt;goals&gt;
-                                    &lt;goal&gt;run&lt;/goal&gt;
-                                &lt;/goals&gt;
-                                &lt;configuration&gt;
-                                    &lt;target&gt;
-                                        &lt;property name="target.dir" value="${project.build.directory}"/&gt;
-                                        &lt;property name="elasticsearch.version" value="${elasticsearch.version}"/&gt;
-                                        &lt;ant antfile="${basedir}/it.xml" target="start"/&gt;
-                                    &lt;/target&gt;
-                                &lt;/configuration&gt;
-                            &lt;/execution&gt;
-                            &lt;execution&gt;
-                                &lt;id&gt;stop-es&lt;/id&gt;
-                                &lt;phase&gt;post-integration-test&lt;/phase&gt;
-                                &lt;goals&gt;
-                                    &lt;goal&gt;run&lt;/goal&gt;
-                                &lt;/goals&gt;
-                                &lt;configuration&gt;
-                                    &lt;target&gt;
-                                        &lt;property name="target.dir" value="${project.build.directory}"/&gt;
-                                        &lt;property name="elasticsearch.version" value="${elasticsearch.version}"/&gt;
-                                        &lt;ant antfile="${basedir}/it.xml" target="stop"/&gt;
-                                    &lt;/target&gt;
-                                &lt;/configuration&gt;
-                            &lt;/execution&gt;
-                        &lt;/executions&gt;
-                    &lt;/plugin&gt;
-                    &lt;plugin&gt;
-                        &lt;artifactId&gt;maven-failsafe-plugin&lt;/artifactId&gt;
-                        &lt;version&gt;2.19.1&lt;/version&gt;
-                        &lt;executions&gt;
-                            &lt;execution&gt;
-                                &lt;goals&gt;
-                                    &lt;goal&gt;integration-test&lt;/goal&gt;
-                                    &lt;goal&gt;verify&lt;/goal&gt;
-                                &lt;/goals&gt;
-                            &lt;/execution&gt;
-                        &lt;/executions&gt;
-                    &lt;/plugin&gt;
-                &lt;/plugins&gt;
-            &lt;/build&gt;
-        &lt;/profile&gt;</code></pre>
+<pre class="CodeRay highlight"><code data-lang="xml">        <span class="tag">&lt;profile&gt;</span>
+            <span class="tag">&lt;id&gt;</span>ant<span class="tag">&lt;/id&gt;</span>
+            <span class="tag">&lt;properties&gt;</span>
+                <span class="tag">&lt;elasticsearch.url&gt;</span>http://localhost:9200<span class="tag">&lt;/elasticsearch.url&gt;</span>
+            <span class="tag">&lt;/properties&gt;</span>
+            <span class="tag">&lt;build&gt;</span>
+                <span class="tag">&lt;plugins&gt;</span>
+                    <span class="tag">&lt;plugin&gt;</span>
+                        <span class="tag">&lt;groupId&gt;</span>org.apache.maven.plugins<span class="tag">&lt;/groupId&gt;</span>
+                        <span class="tag">&lt;artifactId&gt;</span>maven-dependency-plugin<span class="tag">&lt;/artifactId&gt;</span>
+                        <span class="tag">&lt;version&gt;</span>2.10<span class="tag">&lt;/version&gt;</span>
+                        <span class="tag">&lt;executions&gt;</span>
+                            <span class="tag">&lt;execution&gt;</span>
+                                <span class="tag">&lt;id&gt;</span>get-es<span class="tag">&lt;/id&gt;</span>
+                                <span class="tag">&lt;phase&gt;</span>pre-integration-test<span class="tag">&lt;/phase&gt;</span>
+                                <span class="tag">&lt;goals&gt;</span>
+                                    <span class="tag">&lt;goal&gt;</span>copy<span class="tag">&lt;/goal&gt;</span>
+                                <span class="tag">&lt;/goals&gt;</span>
+                                <span class="tag">&lt;configuration&gt;</span>
+                                    <span class="tag">&lt;artifactItems&gt;</span>
+                                        <span class="tag">&lt;artifactItem&gt;</span>
+                                            <span class="tag">&lt;groupId&gt;</span>org.elasticsearch.distribution.zip<span class="tag">&lt;/groupId&gt;</span>
+                                            <span class="tag">&lt;artifactId&gt;</span>elasticsearch<span class="tag">&lt;/artifactId&gt;</span>
+                                            <span class="tag">&lt;version&gt;</span>${elasticsearch.version}<span class="tag">&lt;/version&gt;</span>
+                                            <span class="tag">&lt;type&gt;</span>zip<span class="tag">&lt;/type&gt;</span>
+                                        <span class="tag">&lt;/artifactItem&gt;</span>
+                                    <span class="tag">&lt;/artifactItems&gt;</span>
+                                    <span class="tag">&lt;outputDirectory&gt;</span>${project.build.directory}/it<span class="tag">&lt;/outputDirectory&gt;</span>
+                                <span class="tag">&lt;/configuration&gt;</span>
+                            <span class="tag">&lt;/execution&gt;</span>
+                        <span class="tag">&lt;/executions&gt;</span>
+                    <span class="tag">&lt;/plugin&gt;</span>
+                    <span class="tag">&lt;plugin&gt;</span>
+                        <span class="tag">&lt;artifactId&gt;</span>maven-antrun-plugin<span class="tag">&lt;/artifactId&gt;</span>
+                        <span class="tag">&lt;version&gt;</span>1.8<span class="tag">&lt;/version&gt;</span>
+                        <span class="tag">&lt;executions&gt;</span>
+                            <span class="tag">&lt;execution&gt;</span>
+                                <span class="tag">&lt;id&gt;</span>start-es<span class="tag">&lt;/id&gt;</span>
+                                <span class="tag">&lt;phase&gt;</span>pre-integration-test<span class="tag">&lt;/phase&gt;</span>
+                                <span class="tag">&lt;goals&gt;</span>
+                                    <span class="tag">&lt;goal&gt;</span>run<span class="tag">&lt;/goal&gt;</span>
+                                <span class="tag">&lt;/goals&gt;</span>
+                                <span class="tag">&lt;configuration&gt;</span>
+                                    <span class="tag">&lt;target&gt;</span>
+                                        <span class="tag">&lt;property</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">target.dir</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">value</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">${project.build.directory}</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+                                        <span class="tag">&lt;property</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">elasticsearch.version</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">value</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">${elasticsearch.version}</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+                                        <span class="tag">&lt;ant</span> <span class="attribute-name">antfile</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">${basedir}/it.xml</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">target</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">start</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+                                    <span class="tag">&lt;/target&gt;</span>
+                                <span class="tag">&lt;/configuration&gt;</span>
+                            <span class="tag">&lt;/execution&gt;</span>
+                            <span class="tag">&lt;execution&gt;</span>
+                                <span class="tag">&lt;id&gt;</span>stop-es<span class="tag">&lt;/id&gt;</span>
+                                <span class="tag">&lt;phase&gt;</span>post-integration-test<span class="tag">&lt;/phase&gt;</span>
+                                <span class="tag">&lt;goals&gt;</span>
+                                    <span class="tag">&lt;goal&gt;</span>run<span class="tag">&lt;/goal&gt;</span>
+                                <span class="tag">&lt;/goals&gt;</span>
+                                <span class="tag">&lt;configuration&gt;</span>
+                                    <span class="tag">&lt;target&gt;</span>
+                                        <span class="tag">&lt;property</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">target.dir</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">value</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">${project.build.directory}</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+                                        <span class="tag">&lt;property</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">elasticsearch.version</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">value</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">${elasticsearch.version}</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+                                        <span class="tag">&lt;ant</span> <span class="attribute-name">antfile</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">${basedir}/it.xml</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">target</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">stop</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+                                    <span class="tag">&lt;/target&gt;</span>
+                                <span class="tag">&lt;/configuration&gt;</span>
+                            <span class="tag">&lt;/execution&gt;</span>
+                        <span class="tag">&lt;/executions&gt;</span>
+                    <span class="tag">&lt;/plugin&gt;</span>
+                    <span class="tag">&lt;plugin&gt;</span>
+                        <span class="tag">&lt;artifactId&gt;</span>maven-failsafe-plugin<span class="tag">&lt;/artifactId&gt;</span>
+                        <span class="tag">&lt;version&gt;</span>2.19.1<span class="tag">&lt;/version&gt;</span>
+                        <span class="tag">&lt;executions&gt;</span>
+                            <span class="tag">&lt;execution&gt;</span>
+                                <span class="tag">&lt;goals&gt;</span>
+                                    <span class="tag">&lt;goal&gt;</span>integration-test<span class="tag">&lt;/goal&gt;</span>
+                                    <span class="tag">&lt;goal&gt;</span>verify<span class="tag">&lt;/goal&gt;</span>
+                                <span class="tag">&lt;/goals&gt;</span>
+                            <span class="tag">&lt;/execution&gt;</span>
+                        <span class="tag">&lt;/executions&gt;</span>
+                    <span class="tag">&lt;/plugin&gt;</span>
+                <span class="tag">&lt;/plugins&gt;</span>
+            <span class="tag">&lt;/build&gt;</span>
+        <span class="tag">&lt;/profile&gt;</span></code></pre>
 </div>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-shell" data-lang="shell">$ mvn -Pant install
+<pre class="CodeRay highlight"><code data-lang="shell">$ mvn -Pant install
 
 ------------------------------------------------------------------------
 Building Testing with Elasticsearch 5.0 0.0.1-SNAPSHOT
@@ -395,7 +372,7 @@ tweak the <code>elasticsearch.yml</code> configuration file or set some environm
 </div>
 </div>
 <div class="sect1">
-<h2 id="_elasticsearch_in_a_container">Elasticsearch in a container</h2>
+<h2 id="elasticsearch_in_a_container">Elasticsearch in a container</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>We can delegate the downloading, starting and stopping logic to Docker.
@@ -403,8 +380,8 @@ Starting Elasticsearch in a container is nearly as easy as:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-shell" data-lang="shell">docker run -d --name elasticsearch-5.0 -v /usr/share/elasticsearch/data:$PWD/target/data -P elasticsearch:5.0.1
-curl "http://172.17.0.1:9200/_cluster/health?wait_for_status=yellow&amp;timeout=30s"
+<pre class="CodeRay highlight"><code data-lang="shell">docker run -d --name elasticsearch-5.0 -v /usr/share/elasticsearch/data:$PWD/target/data -P elasticsearch:5.0.1
+curl &quot;http://172.17.0.1:9200/_cluster/health?wait_for_status=yellow&amp;timeout=30s&quot;
 
 # Run tests here...
 
@@ -424,77 +401,77 @@ Once you&#8217;re familiar with Docker, you can run the Elasticsearch container 
 <p><a href="https://github.com/fabric8io/docker-maven-plugin">Docker Maven plugin</a>:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-xml" data-lang="xml">        &lt;profile&gt;
-            &lt;id&gt;docker&lt;/id&gt;
-            &lt;properties&gt;
-                &lt;elasticsearch.url&gt;http://172.17.0.1:9200&lt;/elasticsearch.url&gt;
-            &lt;/properties&gt;
-            &lt;build&gt;
-                &lt;plugins&gt;
-                    &lt;plugin&gt;
-                        &lt;groupId&gt;io.fabric8&lt;/groupId&gt;
-                        &lt;artifactId&gt;docker-maven-plugin&lt;/artifactId&gt;
-                        &lt;version&gt;0.18.1&lt;/version&gt;
-                        &lt;configuration&gt;
-                            &lt;images&gt;
-                                &lt;image&gt;
-                                    &lt;alias&gt;elasticsearch5&lt;/alias&gt;
-                                    &lt;name&gt;elasticsearch:5.0.1&lt;/name&gt;
-                                    &lt;run&gt;
-                                        &lt;volumes&gt;
-                                            &lt;bind&gt;
-                                                &lt;volume&gt;/usr/share/elasticsearch/data:${project.build.directory}/data&lt;/volume&gt;
-                                            &lt;/bind&gt;
-                                        &lt;/volumes&gt;
-                                        &lt;env&gt;
-                                            &lt;ES_JAVA_OPTS&gt;-Xmx1g -Xms1g&lt;/ES_JAVA_OPTS&gt;
-                                        &lt;/env&gt;
-                                        &lt;ports&gt;
-                                            &lt;port&gt;9200:9200&lt;/port&gt;
-                                        &lt;/ports&gt;
-                                        &lt;wait&gt;
-                                            &lt;http&gt;
-                                                &lt;url&gt;${elasticsearch.url}/_cluster/health?wait_for_status=yellow&amp;amp;timeout=30s&lt;/url&gt;
-                                                &lt;method&gt;GET&lt;/method&gt;
-                                                &lt;status&gt;200&lt;/status&gt;
-                                            &lt;/http&gt;
-                                        &lt;/wait&gt;
-                                    &lt;/run&gt;
-                                &lt;/image&gt;
-                            &lt;/images&gt;
-                        &lt;/configuration&gt;
-                        &lt;executions&gt;
-                            &lt;execution&gt;
-                                &lt;id&gt;docker-start&lt;/id&gt;
-                                &lt;phase&gt;pre-integration-test&lt;/phase&gt;
-                                &lt;goals&gt;
-                                    &lt;goal&gt;start&lt;/goal&gt;
-                                &lt;/goals&gt;
-                            &lt;/execution&gt;
-                            &lt;execution&gt;
-                                &lt;id&gt;docker-stop&lt;/id&gt;
-                                &lt;phase&gt;post-integration-test&lt;/phase&gt;
-                                &lt;goals&gt;
-                                    &lt;goal&gt;stop&lt;/goal&gt;
-                                &lt;/goals&gt;
-                            &lt;/execution&gt;
-                        &lt;/executions&gt;
-                    &lt;/plugin&gt;
-                    &lt;plugin&gt;
-                        &lt;artifactId&gt;maven-failsafe-plugin&lt;/artifactId&gt;
-                        &lt;version&gt;2.19.1&lt;/version&gt;
-                        &lt;executions&gt;
-                            &lt;execution&gt;
-                                &lt;goals&gt;
-                                    &lt;goal&gt;integration-test&lt;/goal&gt;
-                                    &lt;goal&gt;verify&lt;/goal&gt;
-                                &lt;/goals&gt;
-                            &lt;/execution&gt;
-                        &lt;/executions&gt;
-                    &lt;/plugin&gt;
-                &lt;/plugins&gt;
-            &lt;/build&gt;
-        &lt;/profile&gt;</code></pre>
+<pre class="CodeRay highlight"><code data-lang="xml">        <span class="tag">&lt;profile&gt;</span>
+            <span class="tag">&lt;id&gt;</span>docker<span class="tag">&lt;/id&gt;</span>
+            <span class="tag">&lt;properties&gt;</span>
+                <span class="tag">&lt;elasticsearch.url&gt;</span>http://172.17.0.1:9200<span class="tag">&lt;/elasticsearch.url&gt;</span>
+            <span class="tag">&lt;/properties&gt;</span>
+            <span class="tag">&lt;build&gt;</span>
+                <span class="tag">&lt;plugins&gt;</span>
+                    <span class="tag">&lt;plugin&gt;</span>
+                        <span class="tag">&lt;groupId&gt;</span>io.fabric8<span class="tag">&lt;/groupId&gt;</span>
+                        <span class="tag">&lt;artifactId&gt;</span>docker-maven-plugin<span class="tag">&lt;/artifactId&gt;</span>
+                        <span class="tag">&lt;version&gt;</span>0.18.1<span class="tag">&lt;/version&gt;</span>
+                        <span class="tag">&lt;configuration&gt;</span>
+                            <span class="tag">&lt;images&gt;</span>
+                                <span class="tag">&lt;image&gt;</span>
+                                    <span class="tag">&lt;alias&gt;</span>elasticsearch5<span class="tag">&lt;/alias&gt;</span>
+                                    <span class="tag">&lt;name&gt;</span>elasticsearch:5.0.1<span class="tag">&lt;/name&gt;</span>
+                                    <span class="tag">&lt;run&gt;</span>
+                                        <span class="tag">&lt;volumes&gt;</span>
+                                            <span class="tag">&lt;bind&gt;</span>
+                                                <span class="tag">&lt;volume&gt;</span>/usr/share/elasticsearch/data:${project.build.directory}/data<span class="tag">&lt;/volume&gt;</span>
+                                            <span class="tag">&lt;/bind&gt;</span>
+                                        <span class="tag">&lt;/volumes&gt;</span>
+                                        <span class="tag">&lt;env&gt;</span>
+                                            <span class="tag">&lt;ES_JAVA_OPTS&gt;</span>-Xmx1g -Xms1g<span class="tag">&lt;/ES_JAVA_OPTS&gt;</span>
+                                        <span class="tag">&lt;/env&gt;</span>
+                                        <span class="tag">&lt;ports&gt;</span>
+                                            <span class="tag">&lt;port&gt;</span>9200:9200<span class="tag">&lt;/port&gt;</span>
+                                        <span class="tag">&lt;/ports&gt;</span>
+                                        <span class="tag">&lt;wait&gt;</span>
+                                            <span class="tag">&lt;http&gt;</span>
+                                                <span class="tag">&lt;url&gt;</span>${elasticsearch.url}/_cluster/health?wait_for_status=yellow<span class="entity">&amp;amp;</span>timeout=30s<span class="tag">&lt;/url&gt;</span>
+                                                <span class="tag">&lt;method&gt;</span>GET<span class="tag">&lt;/method&gt;</span>
+                                                <span class="tag">&lt;status&gt;</span>200<span class="tag">&lt;/status&gt;</span>
+                                            <span class="tag">&lt;/http&gt;</span>
+                                        <span class="tag">&lt;/wait&gt;</span>
+                                    <span class="tag">&lt;/run&gt;</span>
+                                <span class="tag">&lt;/image&gt;</span>
+                            <span class="tag">&lt;/images&gt;</span>
+                        <span class="tag">&lt;/configuration&gt;</span>
+                        <span class="tag">&lt;executions&gt;</span>
+                            <span class="tag">&lt;execution&gt;</span>
+                                <span class="tag">&lt;id&gt;</span>docker-start<span class="tag">&lt;/id&gt;</span>
+                                <span class="tag">&lt;phase&gt;</span>pre-integration-test<span class="tag">&lt;/phase&gt;</span>
+                                <span class="tag">&lt;goals&gt;</span>
+                                    <span class="tag">&lt;goal&gt;</span>start<span class="tag">&lt;/goal&gt;</span>
+                                <span class="tag">&lt;/goals&gt;</span>
+                            <span class="tag">&lt;/execution&gt;</span>
+                            <span class="tag">&lt;execution&gt;</span>
+                                <span class="tag">&lt;id&gt;</span>docker-stop<span class="tag">&lt;/id&gt;</span>
+                                <span class="tag">&lt;phase&gt;</span>post-integration-test<span class="tag">&lt;/phase&gt;</span>
+                                <span class="tag">&lt;goals&gt;</span>
+                                    <span class="tag">&lt;goal&gt;</span>stop<span class="tag">&lt;/goal&gt;</span>
+                                <span class="tag">&lt;/goals&gt;</span>
+                            <span class="tag">&lt;/execution&gt;</span>
+                        <span class="tag">&lt;/executions&gt;</span>
+                    <span class="tag">&lt;/plugin&gt;</span>
+                    <span class="tag">&lt;plugin&gt;</span>
+                        <span class="tag">&lt;artifactId&gt;</span>maven-failsafe-plugin<span class="tag">&lt;/artifactId&gt;</span>
+                        <span class="tag">&lt;version&gt;</span>2.19.1<span class="tag">&lt;/version&gt;</span>
+                        <span class="tag">&lt;executions&gt;</span>
+                            <span class="tag">&lt;execution&gt;</span>
+                                <span class="tag">&lt;goals&gt;</span>
+                                    <span class="tag">&lt;goal&gt;</span>integration-test<span class="tag">&lt;/goal&gt;</span>
+                                    <span class="tag">&lt;goal&gt;</span>verify<span class="tag">&lt;/goal&gt;</span>
+                                <span class="tag">&lt;/goals&gt;</span>
+                            <span class="tag">&lt;/execution&gt;</span>
+                        <span class="tag">&lt;/executions&gt;</span>
+                    <span class="tag">&lt;/plugin&gt;</span>
+                <span class="tag">&lt;/plugins&gt;</span>
+            <span class="tag">&lt;/build&gt;</span>
+        <span class="tag">&lt;/profile&gt;</span></code></pre>
 </div>
 </div>
 </li>
@@ -537,212 +514,61 @@ Most of these libraries are based on Spotify&#8217;s <a href="https://github.com
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">@ClassRule
-public static DockerRule elasticsearchRule = DockerRule.builder()
-        .imageName("elasticsearch:5.0.1")
-        .mountFrom("/usr/share/elasticsearch/data").to(dataDir())
-        .env("ES_JAVA_OPTS","-Xmx1g -Xms1g")
-        .expose("9200", "9200")
-        .waitForMessage("started")
-        .waitForHttpPing(9200)
+<pre class="CodeRay highlight"><code data-lang="java"><span class="annotation">@ClassRule</span>
+<span class="directive">public</span> <span class="directive">static</span> DockerRule elasticsearchRule = DockerRule.builder()
+        .imageName(<span class="string"><span class="delimiter">&quot;</span><span class="content">elasticsearch:5.0.1</span><span class="delimiter">&quot;</span></span>)
+        .mountFrom(<span class="string"><span class="delimiter">&quot;</span><span class="content">/usr/share/elasticsearch/data</span><span class="delimiter">&quot;</span></span>).to(dataDir())
+        .env(<span class="string"><span class="delimiter">&quot;</span><span class="content">ES_JAVA_OPTS</span><span class="delimiter">&quot;</span></span>,<span class="string"><span class="delimiter">&quot;</span><span class="content">-Xmx1g -Xms1g</span><span class="delimiter">&quot;</span></span>)
+        .expose(<span class="string"><span class="delimiter">&quot;</span><span class="content">9200</span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">9200</span><span class="delimiter">&quot;</span></span>)
+        .waitForMessage(<span class="string"><span class="delimiter">&quot;</span><span class="content">started</span><span class="delimiter">&quot;</span></span>)
+        .waitForHttpPing(<span class="integer">9200</span>)
         .build();</code></pre>
 </div>
 </div>
 </div>
 </div>
-        </div>
-
-        <menu>
-            <a href="" id="btn_share" class="btn" title="Share">
-                <span aria-hidden="true" data-icon="S"></span>
-                <strong>Share</strong>
-            </a>
-            <a href="http://twitter.com/share?text=Testing%20a%20Java%20and%20Elasticsearch%205.0%20application&url=https://gquintana.github.io/2016/11/30/Testing-a-Java-and-Elasticsearch-50-application.html" onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;" id="btn_comment" class="btn" target="_blank">
-                <span aria-hidden="true" data-icon="C"></span> Comment on Twitter
-            </a>
-        </menu>
-
-
-        <footer class="post-footer" role="contentinfo">
-
-            <div class="vcard">
-                <a href="https://gquintana.github.io/rss" id="btn_feed" class="btn" title="Feed" target="_blank">
-                    <span aria-hidden="true" data-icon=")"></span>
-                    <strong>Feed</strong>
-                </a>
-
-                <a href="https://gquintana.github.io/author/gquintana/" class="photo">
-                    <span style="background-image: url('https://avatars.githubusercontent.com/u/755587?v&#x3D;3');">
-                        <img src="https://avatars.githubusercontent.com/u/755587?v&#x3D;3" alt="Gerald Quintana">
-                    </span>
-                </a>
-
-                <div class="details">
-                    <h4><a href="https://gquintana.github.io/author/gquintana/" class="url n">Gerald Quintana</a></h4>
-                    Lyon, France<br>
-                    
-                </div>
-            </div>
-
-            <div id="user_bio">
-                <div class="inner">
-                    
-                </div>
-            </div>
-
-        </footer>
-
-
-
-
-    <section class="post-comments">
-      <div id="disqus_thread"></div>
-      <script type="text/javascript">
-      var disqus_shortname = 'https-gquintana-github-io'; // required: replace example with your forum shortname
-      /* * * DON'T EDIT BELOW THIS LINE * * */
-      (function() {
-        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-      })();
-      </script>
-      <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-      <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
-    </section>
-
-
-    </article>
-
-    <div id="share_modal">
-        <div class="wrap">
-            <div class="inner">
-                <header>
-                    Share
-                    <a href="" class="close" title="Close">&times;</a>
-                </header>
-
-                <div class="roon-share-links">
-                    <a href="https://twitter.com/share" class="twitter-share-button" data-dnt="true">Tweet</a>
-                    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-
-                    <div id="fb-elems">
-                        <div id="fb-root"></div>
-                        <script>(function(d, s, id) {
-                        var js, fjs = d.getElementsByTagName(s)[0];
-                        if (d.getElementById(id)) return;
-                        js = d.createElement(s); js.id = id;
-                        js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=463438580397968";
-                        fjs.parentNode.insertBefore(js, fjs);
-                        }(document, 'script', 'facebook-jssdk'));</script>
-                        <div class="fb-like" data-send="false" data-layout="button_count" data-width="110" data-show-faces="false" data-font="arial"></div>
-                    </div>
-
-                    <div id="pinit-btn">
-                        <a href="//pinterest.com/pin/create/button/?url=https://gquintana.github.io/2016/11/30/Testing-a-Java-and-Elasticsearch-50-application.html&amp;description=Testing%20a%20Java%20and%20Elasticsearch%205.0%20application-JRald " data-pin-do="buttonPin" data-pin-config="beside"><img src="//assets.pinterest.com/images/pidgets/pin_it_button.png"></a>
-                        <script type="text/javascript" src="//assets.pinterest.com/js/pinit.js"></script>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
+    <div class="clearfix">
+        <h4>Other posts</h4>
+        <ul>
+            
+                <li>2019-07-03
+                    <a href="/2019/07/03/Kafka-integration-tests.html">Kafka integration tests</a>
+                </li>
+            
+                <li>2019-05-17
+                    <a href="/2019/05/17/Logging-configuration.html">Logging configuration</a>
+                </li>
+            
+                <li>2019-04-25
+                    <a href="/2019/04/25/Ansible-collection-processing.html">Ansible collection processing</a>
+                </li>
+            
+                <li>2017-12-01
+                    <a href="/2017/12/01/Structured-logging-with-SL-FJ-and-Logback.html">Structured logging with SLF4J and Logback</a>
+                </li>
+            
+                <li>2017-09-30
+                    <a href="/2017/09/30/Log-collection-in-AWS-land.html">Log collection in AWS land</a>
+                </li>
+            
+        </ul>
+    </div>
+</div>
 
-
-
-
-
-
-    <script>
-
-            function get_text(el) {
-                ret = "";
-                var length = el.childNodes.length;
-                for(var i = 0; i < length; i++) {
-                    var node = el.childNodes[i];
-                    if(node.nodeType != 8) {
-                        ret += node.nodeType != 1 ? node.nodeValue : get_text(node);
-                    }
-                }
-                return ret;
-            }
-            function reading_time () {
-                var post_content = document.getElementById('js-post-content');
-                if (post_content) {
-                    var words = get_text(post_content),
-                        count = words.split(/\s+/).length,
-                        read_time = Math.ceil((count / 150)),
-                        read_time_node = document.createTextNode(read_time + ' min read');
-                    document.getElementById('js-reading-time').appendChild(read_time_node);
-                }
-            }
-
-        function no_schema_links () {
-            var links = document.querySelectorAll('.js-remove-domain-schema');
-            if (links) {
-                for (i = 0; i < links.length; ++i) {
-                    var link = links[i],
-                        text = link.innerHTML,
-                        no_schema = text.replace(/.*?:\/\//g, "");
-                    link.innerHTML = no_schema;
-                }
-            }
-        }
-
-        window.onload = function () {
-            no_schema_links();
-
-            reading_time();
-        }
-    </script>
-
-    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js?v="></script> <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment-with-locales.min.js?v="></script> <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js?v="></script> 
-      <script type="text/javascript">
-        jQuery( document ).ready(function() {
-          // change date with ago
-          jQuery('ago.ago').each(function(){
-            var element = jQuery(this).parent();
-            element.html( moment(element.text()).fromNow());
-          });
-        });
-
-        hljs.initHighlightingOnLoad();
-      </script>
-
-        <script>
-            $(function(){
-                var share_modal = $("#share_modal"),
-                    update_social_links = true;
-
-                $("#btn_share").click(function(){
-                    var that = $(this);
-                    share_modal.fadeIn(200);
-                    return false;
-                });
-
-                share_modal.click(function(e){
-                    if (e.target.className == "wrap" || e.target.id == "share_modal") {
-                        share_modal.fadeOut(200);
-                    }
-                    return false;
-                });
-
-                share_modal.find("div.inner > header > a.close").click(function(){
-                    share_modal.fadeOut(200);
-                    return false;
-                });
-            });
-        </script>
-
-
-    <script>
-    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-    ga('create', 'UA-85700184-1', 'auto');
-    ga('send', 'pageview');
-
-    </script>
-
-</body>
+        </main>
+        <footer class="footer text-muted">
+            <div class="container">
+                <p class="float-right">
+                    <a href="#"><i class="fa fa-arrow-up" aria-hidden="true"></i>
+ Back to top</a>
+                </p>
+                <p>Made with <i class="fa fa-heart" aria-hidden="true"></i> by Gérald Quintana</p>
+        </footer>
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+    </body>
 </html>

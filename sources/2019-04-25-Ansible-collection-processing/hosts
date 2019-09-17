@@ -1,7 +1,0 @@
-[all]
-h1 ansible_host="127.0.0.1"
-h2 ansible_host="127.0.0.2"
-h3 ansible_host="127.0.0.3"
-
-[one]
-h1

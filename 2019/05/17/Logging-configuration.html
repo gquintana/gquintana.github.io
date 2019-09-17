@@ -1,82 +1,37 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-
-    <title>Logging configuration</title>
-    <meta name="description" content="" />
-
-    <meta name="HandheldFriendly" content="True" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <link rel="shortcut icon" href="https://gquintana.github.io/favicon.ico">
-
-    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:400,700,400italic,700italic|Open+Sans:400italic,700italic,700,400">
-    <link rel="stylesheet" type="text/css" href="//gquintana.github.io/themes/roon/assets/css/screen.css?v=1559931906610" />
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/idea.min.css" />
-
-    <link rel="canonical" href="https://gquintana.github.io/2019/05/17/Logging-configuration.html" />
-    <meta name="referrer" content="origin" />
-    
-    <meta property="og:site_name" content="JRald" />
-    <meta property="og:type" content="article" />
-    <meta property="og:title" content="Logging configuration" />
-    <meta property="og:description" content="There is nothing fundamentally new in this article. It&amp;#8217;s just a quick reminder (to myself) about Java logging framework configuration. The configuration files will contain: Console aka stdout output Rolling file output with both date and size rolling policies. Rotating the file every day is practical because it" />
-    <meta property="og:url" content="https://gquintana.github.io/2019/05/17/Logging-configuration.html" />
-    <meta property="og:image" content="/images/logos/java.png" />
-    <meta property="article:published_time" content="2019-05-17T00:00:00.000Z" />
-    <meta property="article:tag" content="java" />
-    
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Logging configuration" />
-    <meta name="twitter:description" content="There is nothing fundamentally new in this article. It&amp;#8217;s just a quick reminder (to myself) about Java logging framework configuration. The configuration files will contain: Console aka stdout output Rolling file output with both date and size rolling policies. Rotating the file every day is practical because it" />
-    <meta name="twitter:url" content="https://gquintana.github.io/2019/05/17/Logging-configuration.html" />
-    <meta name="twitter:image:src" content="/images/logos/java.png" />
-    
-    <script type="application/ld+json">
-{
-    "@context": "http://schema.org",
-    "@type": "Article",
-    "publisher": "JRald",
-    "author": {
-        "@type": "Person",
-        "name": "Gerald Quintana",
-        "image": "https://avatars3.githubusercontent.com/u/755587?v=4",
-        "url": "https://gquintana.github.io/author/gquintana/"
-    },
-    "headline": "Logging configuration",
-    "url": "https://gquintana.github.io/2019/05/17/Logging-configuration.html",
-    "datePublished": "2019-05-17T00:00:00.000Z",
-    "image": "/images/logos/java.png",
-    "keywords": "java",
-    "description": "There is nothing fundamentally new in this article. It&amp;#8217;s just a quick reminder (to myself) about Java logging framework configuration. The configuration files will contain: Console aka stdout output Rolling file output with both date and size rolling policies. Rotating the file every day is practical because it"
-}
-    </script>
-
-    <meta name="generator" content="HubPress" />
-    <link rel="alternate" type="application/rss+xml" title="JRald" href="https://gquintana.github.io/rss/" />
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.10.0/styles/atom-one-dark.min.css">
-    
-        <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
-</head>
-<body class="post-template tag-java  ">
-
-    
-
-
-    <article role="main" class="image">
-        <header>
-            <a href="https://gquintana.github.io" id="home_link">«</a>
-            <div class="meta"><time datetime="2019-05-17"><a href="https://gquintana.github.io/2019/05/17/Logging-configuration.html">May 17, 2019</a></time> <span class="count" id="js-reading-time"></span></div>
-            <h1>
-                    <img src="../../..//images/logos/java.png">
-                Logging configuration
-            </h1>
+<!doctype html>
+<!--[if IE 9]>
+<html class="lt-ie10" lang="en"> <![endif]-->
+<html class="no-js" lang="en" data-useragent="Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0)">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Logging configuration</title>
+        <meta name="description" content="Logging configuration code snippets for common libraries like Logback or Log4J.">
+        <meta name="author" content="Gérald Quintana">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="/css/coderay.css">
+        <link rel="stylesheet" href="/css/asciidoc.css">
+        <link rel="stylesheet"
+              href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/default.min.css">
+    </head>
+    <body>
+        <header class="container sticky-top">
+            <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+                 <a class="navbar-brand" href="/">JRald blog</a>
+            </nav>
         </header>
+        <main class="container position-relative " role="main">
+            <div>
+    <h1>Logging configuration</h1>
+    <div>
+        <img class="rounded float-right" src="../../../images/logos/java.png"/>
+        <h5>
+            <span>2019-05-17</span>
+            <span class="badge badge-secondary">java</span> 
+        </h5>
 
-        <div class="text" id="js-post-content">
-            <div id="preamble">
+        <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>There is nothing fundamentally new in this article.
@@ -106,16 +61,16 @@ Rotating when the file reaches a given size allows to protect against disk flood
 </div>
 </div>
 <div class="sect1">
-<h2 id="_logback">Logback</h2>
+<h2 id="logback">Logback</h2>
 <div class="sectionbody">
 <div class="listingblock">
 <div class="title">pom.xml</div>
 <div class="content">
-<pre class="highlight"><code class="language-xml" data-lang="xml">        &lt;dependency&gt;
-            &lt;groupId&gt;ch.qos.logback&lt;/groupId&gt;
-            &lt;artifactId&gt;logback-classic&lt;/artifactId&gt;
-            &lt;scope&gt;runtime&lt;/scope&gt;
-        &lt;/dependency&gt;</code></pre>
+<pre class="CodeRay highlight"><code data-lang="xml">        <span class="tag">&lt;dependency&gt;</span>
+            <span class="tag">&lt;groupId&gt;</span>ch.qos.logback<span class="tag">&lt;/groupId&gt;</span>
+            <span class="tag">&lt;artifactId&gt;</span>logback-classic<span class="tag">&lt;/artifactId&gt;</span>
+            <span class="tag">&lt;scope&gt;</span>runtime<span class="tag">&lt;/scope&gt;</span>
+        <span class="tag">&lt;/dependency&gt;</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -124,37 +79,37 @@ Rotating when the file reaches a given size allows to protect against disk flood
 <div class="listingblock">
 <div class="title">logback.xml</div>
 <div class="content">
-<pre class="highlight"><code class="language-xml" data-lang="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;configuration debug="true"&gt;<i class="conum" data-value="1"></i><b>(1)</b>
-    &lt;!-- Properties --&gt;
-    &lt;property name="log.dir" value="target/log" /&gt;<i class="conum" data-value="2"></i><b>(2)</b>
+<pre class="CodeRay highlight"><code data-lang="xml"><span class="preprocessor">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
+<span class="tag">&lt;configuration</span> <span class="attribute-name">debug</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">&gt;</span><i class="conum" data-value="1"></i><b>(1)</b>
+    <span class="comment">&lt;!-- Properties --&gt;</span>
+    <span class="tag">&lt;property</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">log.dir</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">value</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">target/log</span><span class="delimiter">&quot;</span></span> <span class="tag">/&gt;</span><i class="conum" data-value="2"></i><b>(2)</b>
 
-    &lt;!-- Appenders --&gt;
-    &lt;appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender"&gt;
-        &lt;encoder&gt;<i class="conum" data-value="3"></i><b>(3)</b>
-            &lt;pattern&gt;%date{HH:mm:ss.SSS} %-5level [%thread] %logger{1} - %msg%n&lt;/pattern&gt;
-        &lt;/encoder&gt;
-    &lt;/appender&gt;
-    &lt;appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender"&gt;
-        &lt;file&gt;blog.log&lt;/file&gt;
-        &lt;rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy"&gt;
-            &lt;fileNamePattern&gt;${log.dir}/blog.%d{yyyy-MM-dd}-%i.log&lt;/fileNamePattern&gt;
-            &lt;maxFileSize&gt;10MB&lt;/maxFileSize&gt;
-            &lt;maxHistory&gt;10&lt;/maxHistory&gt;
-            &lt;totalSizeCap&gt;100MB&lt;/totalSizeCap&gt;
-        &lt;/rollingPolicy&gt;
-        &lt;encoder&gt;<i class="conum" data-value="4"></i><b>(4)</b>
-            &lt;pattern&gt;%date{ISO8601} %-5level [%thread] %logger - %msg%n&lt;/pattern&gt;
-        &lt;/encoder&gt;
-    &lt;/appender&gt;
+    <span class="comment">&lt;!-- Appenders --&gt;</span>
+    <span class="tag">&lt;appender</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">CONSOLE</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">class</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">ch.qos.logback.core.ConsoleAppender</span><span class="delimiter">&quot;</span></span><span class="tag">&gt;</span>
+        <span class="tag">&lt;encoder&gt;</span><i class="conum" data-value="3"></i><b>(3)</b>
+            <span class="tag">&lt;pattern&gt;</span>%date{HH:mm:ss.SSS} %-5level [%thread] %logger{1} - %msg%n<span class="tag">&lt;/pattern&gt;</span>
+        <span class="tag">&lt;/encoder&gt;</span>
+    <span class="tag">&lt;/appender&gt;</span>
+    <span class="tag">&lt;appender</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">FILE</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">class</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">ch.qos.logback.core.rolling.RollingFileAppender</span><span class="delimiter">&quot;</span></span><span class="tag">&gt;</span>
+        <span class="tag">&lt;file&gt;</span>blog.log<span class="tag">&lt;/file&gt;</span>
+        <span class="tag">&lt;rollingPolicy</span> <span class="attribute-name">class</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy</span><span class="delimiter">&quot;</span></span><span class="tag">&gt;</span>
+            <span class="tag">&lt;fileNamePattern&gt;</span>${log.dir}/blog.%d{yyyy-MM-dd}-%i.log<span class="tag">&lt;/fileNamePattern&gt;</span>
+            <span class="tag">&lt;maxFileSize&gt;</span>10MB<span class="tag">&lt;/maxFileSize&gt;</span>
+            <span class="tag">&lt;maxHistory&gt;</span>10<span class="tag">&lt;/maxHistory&gt;</span>
+            <span class="tag">&lt;totalSizeCap&gt;</span>100MB<span class="tag">&lt;/totalSizeCap&gt;</span>
+        <span class="tag">&lt;/rollingPolicy&gt;</span>
+        <span class="tag">&lt;encoder&gt;</span><i class="conum" data-value="4"></i><b>(4)</b>
+            <span class="tag">&lt;pattern&gt;</span>%date{ISO8601} %-5level [%thread] %logger - %msg%n<span class="tag">&lt;/pattern&gt;</span>
+        <span class="tag">&lt;/encoder&gt;</span>
+    <span class="tag">&lt;/appender&gt;</span>
 
-    &lt;!-- Loggers --&gt;
-    &lt;logger name="com.github.gquintana.logging" level="DEBUG"/&gt;
-    &lt;root level="DEBUG"&gt;
-        &lt;appender-ref ref="CONSOLE"/&gt;
-        &lt;appender-ref ref="FILE"/&gt;
-    &lt;/root&gt;
-&lt;/configuration&gt;</code></pre>
+    <span class="comment">&lt;!-- Loggers --&gt;</span>
+    <span class="tag">&lt;logger</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">com.github.gquintana.logging</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">level</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">DEBUG</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;root</span> <span class="attribute-name">level</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">DEBUG</span><span class="delimiter">&quot;</span></span><span class="tag">&gt;</span>
+        <span class="tag">&lt;appender-ref</span> <span class="attribute-name">ref</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">CONSOLE</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+        <span class="tag">&lt;appender-ref</span> <span class="attribute-name">ref</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">FILE</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;/root&gt;</span>
+<span class="tag">&lt;/configuration&gt;</span></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -186,21 +141,21 @@ Rotating when the file reaches a given size allows to protect against disk flood
 </div>
 </div>
 <div class="sect1">
-<h2 id="_log4j2">Log4J2</h2>
+<h2 id="log4j2">Log4J2</h2>
 <div class="sectionbody">
 <div class="listingblock">
 <div class="title">pom.xml</div>
 <div class="content">
-<pre class="highlight"><code class="language-xml" data-lang="xml">        &lt;dependency&gt;
-            &lt;groupId&gt;org.apache.logging.log4j&lt;/groupId&gt;
-            &lt;artifactId&gt;log4j-slf4j-impl&lt;/artifactId&gt;
-            &lt;scope&gt;runtime&lt;/scope&gt;
-        &lt;/dependency&gt;
-        &lt;dependency&gt;
-            &lt;groupId&gt;org.apache.logging.log4j&lt;/groupId&gt;
-            &lt;artifactId&gt;log4j-core&lt;/artifactId&gt;
-            &lt;scope&gt;runtime&lt;/scope&gt;
-        &lt;/dependency&gt;</code></pre>
+<pre class="CodeRay highlight"><code data-lang="xml">        <span class="tag">&lt;dependency&gt;</span>
+            <span class="tag">&lt;groupId&gt;</span>org.apache.logging.log4j<span class="tag">&lt;/groupId&gt;</span>
+            <span class="tag">&lt;artifactId&gt;</span>log4j-slf4j-impl<span class="tag">&lt;/artifactId&gt;</span>
+            <span class="tag">&lt;scope&gt;</span>runtime<span class="tag">&lt;/scope&gt;</span>
+        <span class="tag">&lt;/dependency&gt;</span>
+        <span class="tag">&lt;dependency&gt;</span>
+            <span class="tag">&lt;groupId&gt;</span>org.apache.logging.log4j<span class="tag">&lt;/groupId&gt;</span>
+            <span class="tag">&lt;artifactId&gt;</span>log4j-core<span class="tag">&lt;/artifactId&gt;</span>
+            <span class="tag">&lt;scope&gt;</span>runtime<span class="tag">&lt;/scope&gt;</span>
+        <span class="tag">&lt;/dependency&gt;</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -209,43 +164,43 @@ Rotating when the file reaches a given size allows to protect against disk flood
 <div class="listingblock">
 <div class="title">log4j2.xml</div>
 <div class="content">
-<pre class="highlight"><code class="language-xml" data-lang="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;Configuration status="trace"&gt;<i class="conum" data-value="1"></i><b>(1)</b>
-    &lt;!-- Properties --&gt;
-    &lt;Properties&gt;<i class="conum" data-value="2"></i><b>(2)</b>
-        &lt;Property name="logDir"&gt;${sys:log.dir:-target/log}&lt;/Property&gt;
-    &lt;/Properties&gt;
+<pre class="CodeRay highlight"><code data-lang="xml"><span class="preprocessor">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
+<span class="tag">&lt;Configuration</span> <span class="attribute-name">status</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">trace</span><span class="delimiter">&quot;</span></span><span class="tag">&gt;</span><i class="conum" data-value="1"></i><b>(1)</b>
+    <span class="comment">&lt;!-- Properties --&gt;</span>
+    <span class="tag">&lt;Properties&gt;</span><i class="conum" data-value="2"></i><b>(2)</b>
+        <span class="tag">&lt;Property</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">logDir</span><span class="delimiter">&quot;</span></span><span class="tag">&gt;</span>${sys:log.dir:-target/log}<span class="tag">&lt;/Property&gt;</span>
+    <span class="tag">&lt;/Properties&gt;</span>
 
-    &lt;!-- Appenders --&gt;
-    &lt;Appenders&gt;
-        &lt;Console name="CONSOLE"&gt;<i class="conum" data-value="3"></i><b>(3)</b>
-            &lt;PatternLayout pattern="%date{HH:mm:ss.SSS} %-5level [%thread] %logger{1} - %msg%n"/&gt;
-        &lt;/Console&gt;
-        &lt;RollingFile name="FILE"
-                     fileName="${logDir}/blog.log"
-                     filePattern="${logDir}/blog.%d{yyyy-MM-dd}-%i.log.gz"&gt;
-            &lt;PatternLayout&gt;<i class="conum" data-value="4"></i><b>(4)</b>
-                &lt;Pattern&gt;%d{ISO8601} %-5level [%thread] %logger %m%n&lt;/Pattern&gt;
-            &lt;/PatternLayout&gt;
-            &lt;Policies&gt;
-                &lt;TimeBasedTriggeringPolicy/&gt;
-                &lt;SizeBasedTriggeringPolicy size="1m" /&gt;
-            &lt;/Policies&gt;
-            &lt;Strategies&gt;
-                &lt;DefaultRolloverStrategy max="10"/&gt;
-            &lt;/Strategies&gt;
-        &lt;/RollingFile&gt;
-    &lt;/Appenders&gt;
+    <span class="comment">&lt;!-- Appenders --&gt;</span>
+    <span class="tag">&lt;Appenders&gt;</span>
+        <span class="tag">&lt;Console</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">CONSOLE</span><span class="delimiter">&quot;</span></span><span class="tag">&gt;</span><i class="conum" data-value="3"></i><b>(3)</b>
+            <span class="tag">&lt;PatternLayout</span> <span class="attribute-name">pattern</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">%date{HH:mm:ss.SSS} %-5level [%thread] %logger{1} - %msg%n</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+        <span class="tag">&lt;/Console&gt;</span>
+        <span class="tag">&lt;RollingFile</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">FILE</span><span class="delimiter">&quot;</span></span>
+                     <span class="attribute-name">fileName</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">${logDir}/blog.log</span><span class="delimiter">&quot;</span></span>
+                     <span class="attribute-name">filePattern</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">${logDir}/blog.%d{yyyy-MM-dd}-%i.log.gz</span><span class="delimiter">&quot;</span></span><span class="tag">&gt;</span>
+            <span class="tag">&lt;PatternLayout&gt;</span><i class="conum" data-value="4"></i><b>(4)</b>
+                <span class="tag">&lt;Pattern&gt;</span>%d{ISO8601} %-5level [%thread] %logger %m%n<span class="tag">&lt;/Pattern&gt;</span>
+            <span class="tag">&lt;/PatternLayout&gt;</span>
+            <span class="tag">&lt;Policies&gt;</span>
+                <span class="tag">&lt;TimeBasedTriggeringPolicy</span><span class="tag">/&gt;</span>
+                <span class="tag">&lt;SizeBasedTriggeringPolicy</span> <span class="attribute-name">size</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">1m</span><span class="delimiter">&quot;</span></span> <span class="tag">/&gt;</span>
+            <span class="tag">&lt;/Policies&gt;</span>
+            <span class="tag">&lt;Strategies&gt;</span>
+                <span class="tag">&lt;DefaultRolloverStrategy</span> <span class="attribute-name">max</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">10</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+            <span class="tag">&lt;/Strategies&gt;</span>
+        <span class="tag">&lt;/RollingFile&gt;</span>
+    <span class="tag">&lt;/Appenders&gt;</span>
 
-    &lt;!-- Loggers --&gt;
-    &lt;Loggers&gt;
-        &lt;Logger name="com.github.gquintana.logging" level="debug"/&gt;
-        &lt;Root level="info"&gt;
-            &lt;AppenderRef ref="CONSOLE"/&gt;
-            &lt;AppenderRef ref="FILE"/&gt;
-        &lt;/Root&gt;
-    &lt;/Loggers&gt;
-&lt;/Configuration&gt;</code></pre>
+    <span class="comment">&lt;!-- Loggers --&gt;</span>
+    <span class="tag">&lt;Loggers&gt;</span>
+        <span class="tag">&lt;Logger</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">com.github.gquintana.logging</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">level</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">debug</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+        <span class="tag">&lt;Root</span> <span class="attribute-name">level</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">info</span><span class="delimiter">&quot;</span></span><span class="tag">&gt;</span>
+            <span class="tag">&lt;AppenderRef</span> <span class="attribute-name">ref</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">CONSOLE</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+            <span class="tag">&lt;AppenderRef</span> <span class="attribute-name">ref</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">FILE</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+        <span class="tag">&lt;/Root&gt;</span>
+    <span class="tag">&lt;/Loggers&gt;</span>
+<span class="tag">&lt;/Configuration&gt;</span></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -278,7 +233,7 @@ See <a href="https://logging.apache.org/log4j/2.x/manual/configuration.html#Prop
 </div>
 </div>
 <div class="sect1">
-<h2 id="_log4j1">Log4J1</h2>
+<h2 id="log4j1">Log4J1</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Even if it&#8217;s deprecated, let&#8217;s end with the venerable Log4J v1 library.</p>
@@ -286,16 +241,16 @@ See <a href="https://logging.apache.org/log4j/2.x/manual/configuration.html#Prop
 <div class="listingblock">
 <div class="title">pom.xml</div>
 <div class="content">
-<pre class="highlight"><code class="language-xml" data-lang="xml">        &lt;dependency&gt;
-            &lt;groupId&gt;log4j&lt;/groupId&gt;
-            &lt;artifactId&gt;log4j&lt;/artifactId&gt;
-            &lt;scope&gt;runtime&lt;/scope&gt;
-        &lt;/dependency&gt;
-        &lt;dependency&gt;
-            &lt;groupId&gt;org.slf4j&lt;/groupId&gt;
-            &lt;artifactId&gt;slf4j-log4j12&lt;/artifactId&gt;
-            &lt;scope&gt;runtime&lt;/scope&gt;
-        &lt;/dependency&gt;</code></pre>
+<pre class="CodeRay highlight"><code data-lang="xml">        <span class="tag">&lt;dependency&gt;</span>
+            <span class="tag">&lt;groupId&gt;</span>log4j<span class="tag">&lt;/groupId&gt;</span>
+            <span class="tag">&lt;artifactId&gt;</span>log4j<span class="tag">&lt;/artifactId&gt;</span>
+            <span class="tag">&lt;scope&gt;</span>runtime<span class="tag">&lt;/scope&gt;</span>
+        <span class="tag">&lt;/dependency&gt;</span>
+        <span class="tag">&lt;dependency&gt;</span>
+            <span class="tag">&lt;groupId&gt;</span>org.slf4j<span class="tag">&lt;/groupId&gt;</span>
+            <span class="tag">&lt;artifactId&gt;</span>slf4j-log4j12<span class="tag">&lt;/artifactId&gt;</span>
+            <span class="tag">&lt;scope&gt;</span>runtime<span class="tag">&lt;/scope&gt;</span>
+        <span class="tag">&lt;/dependency&gt;</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -304,31 +259,31 @@ See <a href="https://logging.apache.org/log4j/2.x/manual/configuration.html#Prop
 <div class="listingblock">
 <div class="title">log4j.xml</div>
 <div class="content">
-<pre class="highlight"><code class="language-xml" data-lang="xml">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;
-&lt;!DOCTYPE log4j:configuration SYSTEM "log4j.dtd"&gt;
-&lt;log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/" debug="true"&gt;<i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="CodeRay highlight"><code data-lang="xml"><span class="preprocessor">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;</span>
+<span class="doctype">&lt;!DOCTYPE log4j:configuration SYSTEM &quot;log4j.dtd&quot;&gt;</span>
+<span class="tag">&lt;log4j:configuration</span> <span class="attribute-name">xmlns:log4j</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">http://jakarta.apache.org/log4j/</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">debug</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">&gt;</span><i class="conum" data-value="1"></i><b>(1)</b>
     <i class="conum" data-value="2"></i><b>(2)</b>
-    &lt;!-- Appenders --&gt;
-    &lt;appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender"&gt;
-        &lt;layout class="org.apache.log4j.PatternLayout"&gt;<i class="conum" data-value="3"></i><b>(3)</b>
-            &lt;param name="ConversionPattern" value="%d{HH:mm:ss.SSS} %-5p %c{1} - %m%n"/&gt;
-        &lt;/layout&gt;
-    &lt;/appender&gt;
-    &lt;appender name="FILE" class="org.apache.log4j.RollingFileAppender"&gt;<i class="conum" data-value="4"></i><b>(4)</b>
-        &lt;param name="File" value="${log.dir}/blog.log"/&gt;
-        &lt;param name="MaxFileSize" value="10MB"/&gt;
-        &lt;param name="MaxBackupIndex" value="10"/&gt;
-        &lt;layout class="org.apache.log4j.PatternLayout"&gt;<i class="conum" data-value="5"></i><b>(5)</b>
-            &lt;param name="ConversionPattern" value="%d{ISO8601} %-5p [%t] %c - %m%n"/&gt;
-        &lt;/layout&gt;
-    &lt;/appender&gt;
-    &lt;!-- Loggers --&gt;
-    &lt;root&gt;
-        &lt;priority value="INFO"/&gt;
-        &lt;appender-ref ref="CONSOLE"/&gt;
-        &lt;appender-ref ref="FILE"/&gt;
-    &lt;/root&gt;
-&lt;/log4j:configuration&gt;</code></pre>
+    <span class="comment">&lt;!-- Appenders --&gt;</span>
+    <span class="tag">&lt;appender</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">CONSOLE</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">class</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">org.apache.log4j.ConsoleAppender</span><span class="delimiter">&quot;</span></span><span class="tag">&gt;</span>
+        <span class="tag">&lt;layout</span> <span class="attribute-name">class</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">org.apache.log4j.PatternLayout</span><span class="delimiter">&quot;</span></span><span class="tag">&gt;</span><i class="conum" data-value="3"></i><b>(3)</b>
+            <span class="tag">&lt;param</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">ConversionPattern</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">value</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">%d{HH:mm:ss.SSS} %-5p %c{1} - %m%n</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+        <span class="tag">&lt;/layout&gt;</span>
+    <span class="tag">&lt;/appender&gt;</span>
+    <span class="tag">&lt;appender</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">FILE</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">class</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">org.apache.log4j.RollingFileAppender</span><span class="delimiter">&quot;</span></span><span class="tag">&gt;</span><i class="conum" data-value="4"></i><b>(4)</b>
+        <span class="tag">&lt;param</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">File</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">value</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">${log.dir}/blog.log</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+        <span class="tag">&lt;param</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">MaxFileSize</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">value</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">10MB</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+        <span class="tag">&lt;param</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">MaxBackupIndex</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">value</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">10</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+        <span class="tag">&lt;layout</span> <span class="attribute-name">class</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">org.apache.log4j.PatternLayout</span><span class="delimiter">&quot;</span></span><span class="tag">&gt;</span><i class="conum" data-value="5"></i><b>(5)</b>
+            <span class="tag">&lt;param</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">ConversionPattern</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">value</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">%d{ISO8601} %-5p [%t] %c - %m%n</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+        <span class="tag">&lt;/layout&gt;</span>
+    <span class="tag">&lt;/appender&gt;</span>
+    <span class="comment">&lt;!-- Loggers --&gt;</span>
+    <span class="tag">&lt;root&gt;</span>
+        <span class="tag">&lt;priority</span> <span class="attribute-name">value</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">INFO</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+        <span class="tag">&lt;appender-ref</span> <span class="attribute-name">ref</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">CONSOLE</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+        <span class="tag">&lt;appender-ref</span> <span class="attribute-name">ref</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">FILE</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;/root&gt;</span>
+<span class="tag">&lt;/log4j:configuration&gt;</span></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -364,199 +319,48 @@ Even with this extension, one can not mix size and time rollover.</td>
 </div>
 </div>
 </div>
-        </div>
-
-        <menu>
-            <a href="" id="btn_share" class="btn" title="Share">
-                <span aria-hidden="true" data-icon="S"></span>
-                <strong>Share</strong>
-            </a>
-            <a href="http://twitter.com/share?text=Logging%20configuration&url=https://gquintana.github.io/2019/05/17/Logging-configuration.html" onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;" id="btn_comment" class="btn" target="_blank">
-                <span aria-hidden="true" data-icon="C"></span> Comment on Twitter
-            </a>
-        </menu>
-
-
-        <footer class="post-footer" role="contentinfo">
-
-            <div class="vcard">
-                <a href="https://gquintana.github.io/rss" id="btn_feed" class="btn" title="Feed" target="_blank">
-                    <span aria-hidden="true" data-icon=")"></span>
-                    <strong>Feed</strong>
-                </a>
-
-                <a href="https://gquintana.github.io/author/gquintana/" class="photo">
-                    <span style="background-image: url('https://avatars3.githubusercontent.com/u/755587?v&#x3D;4');">
-                        <img src="https://avatars3.githubusercontent.com/u/755587?v&#x3D;4" alt="Gerald Quintana">
-                    </span>
-                </a>
-
-                <div class="details">
-                    <h4><a href="https://gquintana.github.io/author/gquintana/" class="url n">Gerald Quintana</a></h4>
-                    Lyon, France<br>
-                    
-                </div>
-            </div>
-
-            <div id="user_bio">
-                <div class="inner">
-                    
-                </div>
-            </div>
-
-        </footer>
-
-
-
-
-    <section class="post-comments">
-      <div id="disqus_thread"></div>
-      <script type="text/javascript">
-      var disqus_shortname = 'https-gquintana-github-io'; // required: replace example with your forum shortname
-      /* * * DON'T EDIT BELOW THIS LINE * * */
-      (function() {
-        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-      })();
-      </script>
-      <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-      <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
-    </section>
-
-
-    </article>
-
-    <div id="share_modal">
-        <div class="wrap">
-            <div class="inner">
-                <header>
-                    Share
-                    <a href="" class="close" title="Close">&times;</a>
-                </header>
-
-                <div class="roon-share-links">
-                    <a href="https://twitter.com/share" class="twitter-share-button" data-dnt="true">Tweet</a>
-                    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-
-                    <div id="fb-elems">
-                        <div id="fb-root"></div>
-                        <script>(function(d, s, id) {
-                        var js, fjs = d.getElementsByTagName(s)[0];
-                        if (d.getElementById(id)) return;
-                        js = d.createElement(s); js.id = id;
-                        js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=463438580397968";
-                        fjs.parentNode.insertBefore(js, fjs);
-                        }(document, 'script', 'facebook-jssdk'));</script>
-                        <div class="fb-like" data-send="false" data-layout="button_count" data-width="110" data-show-faces="false" data-font="arial"></div>
-                    </div>
-
-                    <div id="pinit-btn">
-                        <a href="//pinterest.com/pin/create/button/?url=https://gquintana.github.io/2019/05/17/Logging-configuration.html&amp;description=Logging%20configuration-JRald " data-pin-do="buttonPin" data-pin-config="beside"><img src="//assets.pinterest.com/images/pidgets/pin_it_button.png"></a>
-                        <script type="text/javascript" src="//assets.pinterest.com/js/pinit.js"></script>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
+    <div class="clearfix">
+        <h4>Other posts</h4>
+        <ul>
+            
+                <li>2019-07-03
+                    <a href="/2019/07/03/Kafka-integration-tests.html">Kafka integration tests</a>
+                </li>
+            
+                <li>2019-05-17
+                    <a href="/2019/05/17/Logging-configuration.html">Logging configuration</a>
+                </li>
+            
+                <li>2019-04-25
+                    <a href="/2019/04/25/Ansible-collection-processing.html">Ansible collection processing</a>
+                </li>
+            
+                <li>2017-12-01
+                    <a href="/2017/12/01/Structured-logging-with-SL-FJ-and-Logback.html">Structured logging with SLF4J and Logback</a>
+                </li>
+            
+                <li>2017-09-30
+                    <a href="/2017/09/30/Log-collection-in-AWS-land.html">Log collection in AWS land</a>
+                </li>
+            
+        </ul>
+    </div>
+</div>
 
-
-
-
-
-
-    <script>
-
-            function get_text(el) {
-                ret = "";
-                var length = el.childNodes.length;
-                for(var i = 0; i < length; i++) {
-                    var node = el.childNodes[i];
-                    if(node.nodeType != 8) {
-                        ret += node.nodeType != 1 ? node.nodeValue : get_text(node);
-                    }
-                }
-                return ret;
-            }
-            function reading_time () {
-                var post_content = document.getElementById('js-post-content');
-                if (post_content) {
-                    var words = get_text(post_content),
-                        count = words.split(/\s+/).length,
-                        read_time = Math.ceil((count / 150)),
-                        read_time_node = document.createTextNode(read_time + ' min read');
-                    document.getElementById('js-reading-time').appendChild(read_time_node);
-                }
-            }
-
-        function no_schema_links () {
-            var links = document.querySelectorAll('.js-remove-domain-schema');
-            if (links) {
-                for (i = 0; i < links.length; ++i) {
-                    var link = links[i],
-                        text = link.innerHTML,
-                        no_schema = text.replace(/.*?:\/\//g, "");
-                    link.innerHTML = no_schema;
-                }
-            }
-        }
-
-        window.onload = function () {
-            no_schema_links();
-
-            reading_time();
-        }
-    </script>
-
-    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js?v="></script> <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment-with-locales.min.js?v="></script> <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.10.0/highlight.min.js?v="></script> 
-      <script type="text/javascript">
-        jQuery( document ).ready(function() {
-          // change date with ago
-          jQuery('ago.ago').each(function(){
-            var element = jQuery(this).parent();
-            element.html( moment(element.text()).fromNow());
-          });
-        });
-
-        hljs.initHighlightingOnLoad();
-      </script>
-
-        <script>
-            $(function(){
-                var share_modal = $("#share_modal"),
-                    update_social_links = true;
-
-                $("#btn_share").click(function(){
-                    var that = $(this);
-                    share_modal.fadeIn(200);
-                    return false;
-                });
-
-                share_modal.click(function(e){
-                    if (e.target.className == "wrap" || e.target.id == "share_modal") {
-                        share_modal.fadeOut(200);
-                    }
-                    return false;
-                });
-
-                share_modal.find("div.inner > header > a.close").click(function(){
-                    share_modal.fadeOut(200);
-                    return false;
-                });
-            });
-        </script>
-
-
-    <script>
-    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-    ga('create', 'UA-85700184-1', 'auto');
-    ga('send', 'pageview');
-
-    </script>
-
-</body>
+        </main>
+        <footer class="footer text-muted">
+            <div class="container">
+                <p class="float-right">
+                    <a href="#"><i class="fa fa-arrow-up" aria-hidden="true"></i>
+ Back to top</a>
+                </p>
+                <p>Made with <i class="fa fa-heart" aria-hidden="true"></i> by Gérald Quintana</p>
+        </footer>
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+    </body>
 </html>

@@ -1,63 +1,37 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-
-    <title>Ansible and rolling upgrades</title>
-    <meta name="description" content="" />
-
-    <meta name="HandheldFriendly" content="True" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <link rel="shortcut icon" href="https://gquintana.github.io/favicon.ico">
-
-    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:400,700,400italic,700italic|Open+Sans:400italic,700italic,700,400">
-    <link rel="stylesheet" type="text/css" href="//gquintana.github.io/themes/roon/assets/css/screen.css?v=1504040073426" />
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/idea.min.css" />
-
-    <link rel="canonical" href="https://gquintana.github.io/2017/07/15/Ansible-and-rolling-upgrades.html" />
-    <meta name="referrer" content="origin" />
-    
-    <meta property="og:site_name" content="JRald" />
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="Ansible and rolling upgrades" />
-    <meta property="og:description" content="Ansible is a nice tool to deploy distributed systems like Elasticsearch, Kafka, Cassandra and the like. These systems are built with high availability in mind and can tolerate partial failures. However, upgrading these softwares, or updating their configuration, requires restarting each member of the cluster. Care must be taken when" />
-    <meta property="og:url" content="https://gquintana.github.io/2017/07/15/Ansible-and-rolling-upgrades.html" />
-    <meta property="article:tag" content="ansible" />
-    <meta property="article:tag" content=" elasticsearch" />
-    <meta property="article:tag" content=" kafka" />
-    <meta property="article:tag" content=" cassandra" />
-    
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="Ansible and rolling upgrades" />
-    <meta name="twitter:description" content="Ansible is a nice tool to deploy distributed systems like Elasticsearch, Kafka, Cassandra and the like. These systems are built with high availability in mind and can tolerate partial failures. However, upgrading these softwares, or updating their configuration, requires restarting each member of the cluster. Care must be taken when" />
-    <meta name="twitter:url" content="https://gquintana.github.io/2017/07/15/Ansible-and-rolling-upgrades.html" />
-    
-    <script type="application/ld+json">
-null
-    </script>
-
-    <meta name="generator" content="HubPress" />
-    <link rel="alternate" type="application/rss+xml" title="JRald" href="https://gquintana.github.io/rss/" />
-</head>
-<body class="post-template tag-ansible tag-elasticsearch tag-kafka tag-cassandra  ">
-
-    
-
-
-    <article role="main" class="image">
-        <header>
-            <a href="https://gquintana.github.io" id="home_link">«</a>
-            <div class="meta"><time datetime="2017-07-15"><a href="https://gquintana.github.io/2017/07/15/Ansible-and-rolling-upgrades.html">July 15, 2017</a></time> <span class="count" id="js-reading-time"></span></div>
-            <h1>
-                    <img src="../../..//images/logos/ansible.png">
-                Ansible and rolling upgrades
-            </h1>
+<!doctype html>
+<!--[if IE 9]>
+<html class="lt-ie10" lang="en"> <![endif]-->
+<html class="no-js" lang="en" data-useragent="Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0)">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Ansible and rolling upgrades</title>
+        <meta name="description" content="How to upgrade a distributed system with Ansible.">
+        <meta name="author" content="Gérald Quintana">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="/css/coderay.css">
+        <link rel="stylesheet" href="/css/asciidoc.css">
+        <link rel="stylesheet"
+              href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/default.min.css">
+    </head>
+    <body>
+        <header class="container sticky-top">
+            <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+                 <a class="navbar-brand" href="/">JRald blog</a>
+            </nav>
         </header>
+        <main class="container position-relative " role="main">
+            <div>
+    <h1>Ansible and rolling upgrades</h1>
+    <div>
+        <img class="rounded float-right" src="../../../images/logos/ansible.png"/>
+        <h5>
+            <span>2017-07-15</span>
+            <span class="badge badge-secondary">ansible</span> <span class="badge badge-secondary">elasticsearch</span> <span class="badge badge-secondary">kafka</span> <span class="badge badge-secondary">cassandra</span> 
+        </h5>
 
-        <div class="text" id="js-post-content">
-            <div id="preamble">
+        <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>Ansible is a nice tool to deploy distributed systems like Elasticsearch, Kafka, Cassandra and the like.
@@ -76,7 +50,7 @@ To guarantee availability, you can&#8217;t stop all hosts at the same time: you 
 </div>
 </div>
 <div class="sect1">
-<h2 id="_the_problem">The problem</h2>
+<h2 id="the_problem">The problem</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Let&#8217;s take the Elasticsearch example to explain Ansible basics.</p>
@@ -89,10 +63,10 @@ Once declared, this role is applied to all hosts belonging to the <code>elastics
 <div class="listingblock">
 <div class="title">playbook.yml</div>
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">- hosts: elasticsearch
-  any_errors_fatal: true
-  roles:
-    - role: elasticsearch</code></pre>
+<pre class="CodeRay highlight"><code data-lang="yaml">- <span class="string"><span class="content">hosts: elasticsearch</span></span>
+  <span class="key">any_errors_fatal</span>: <span class="string"><span class="content">true</span></span>
+  <span class="key">roles</span>:
+    - <span class="string"><span class="content">role: elasticsearch</span></span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -101,14 +75,14 @@ Once declared, this role is applied to all hosts belonging to the <code>elastics
 <div class="listingblock">
 <div class="title">roles/elasticsearch/tasks/main.yml</div>
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">...
-- name: Stop service
-  become: true
-  service:
-    name: elasticsearch
-    state: stopped
-    enabled: true
-...</code></pre>
+<pre class="CodeRay highlight"><code data-lang="yaml"><span class="head"><span class="head">...</span></span>
+- <span class="string"><span class="content">name: Stop service</span></span>
+  <span class="key">become</span>: <span class="string"><span class="content">true</span></span>
+  <span class="key">service</span>:
+    <span class="key">name</span>: <span class="string"><span class="content">elasticsearch</span></span>
+    <span class="key">state</span>: <span class="string"><span class="content">stopped</span></span>
+    <span class="key">enabled</span>: <span class="string"><span class="content">true</span></span>
+<span class="head"><span class="head">...</span></span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -119,10 +93,10 @@ To fix this problem, the role can be ran in serial instead of parallel:</p>
 <div class="listingblock">
 <div class="title">deploy.yml</div>
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">- hosts: es
-  serial: 1 # Force serial execution
-  roles:
-    - role: elasticsearch</code></pre>
+<pre class="CodeRay highlight"><code data-lang="yaml">- <span class="string"><span class="content">hosts: es</span></span>
+  <span class="key">serial</span>: <span class="string"><span class="content">1</span></span> <span class="comment"># Force serial execution</span>
+  <span class="key">roles</span>:
+    - <span class="string"><span class="content">role: elasticsearch</span></span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -132,7 +106,7 @@ Bigger clusters mean longer deployment times.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_refactoring_the_role">Refactoring the role</h2>
+<h2 id="refactoring_the_role">Refactoring the role</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>The main idea to improve speed is to split the role into multiple steps, and do as much as possible in parallel:</p>
@@ -172,8 +146,8 @@ Finally, the role entry point <code>main.yml</code> will include the appropriate
 <div class="listingblock">
 <div class="title">roles/elasticsearch/tasks/main.yml</div>
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">- name: "Running step {{ elasticsearch_step }}"
-  include: "{{ elasticsearch_step }}.yml"</code></pre>
+<pre class="CodeRay highlight"><code data-lang="yaml">- <span class="string"><span class="content">name: &quot;Running step {{ elasticsearch_step }}&quot;</span></span>
+  <span class="key">include</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">{{ elasticsearch_step }}.yml</span><span class="delimiter">&quot;</span></span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -185,15 +159,15 @@ Finally, the role entry point <code>main.yml</code> will include the appropriate
 <div class="listingblock">
 <div class="title">roles/elasticsearch/tasks/all.yml</div>
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">- include: "before.yml"
-- include: "stop_start.yml"
-- include: "after.yml"</code></pre>
+<pre class="CodeRay highlight"><code data-lang="yaml">- <span class="string"><span class="content">include: &quot;before.yml&quot;</span></span>
+- <span class="string"><span class="content">include: &quot;stop_start.yml&quot;</span></span>
+- <span class="string"><span class="content">include: &quot;after.yml&quot;</span></span></code></pre>
 </div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_refactoring_the_playbook">Refactoring the playbook</h2>
+<h2 id="refactoring_the_playbook">Refactoring the playbook</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Now, in the playbook we will call the role 3 times, each individual step being called independently.</p>
@@ -201,27 +175,27 @@ Finally, the role entry point <code>main.yml</code> will include the appropriate
 <div class="listingblock">
 <div class="title">playbook.yml</div>
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml"># In parallel
-- hosts: elasticsearch
-  any_errors_fatal: true
-  roles:
-    - role: elasticsearch
-      elasticsearch_step: "before"
+<pre class="CodeRay highlight"><code data-lang="yaml"><span class="comment"># In parallel</span>
+- <span class="string"><span class="content">hosts: elasticsearch</span></span>
+  <span class="key">any_errors_fatal</span>: <span class="string"><span class="content">true</span></span>
+  <span class="key">roles</span>:
+    - <span class="string"><span class="content">role: elasticsearch</span></span>
+      <span class="key">elasticsearch_step</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">before</span><span class="delimiter">&quot;</span></span>
 
-# In serial
-- hosts: elasticsearch
-  any_errors_fatal: true
-  serial: 1
-  roles:
-    - role: elasticsearch
-      elasticsearch_step: "stop_start"
+<span class="comment"># In serial</span>
+- <span class="string"><span class="content">hosts: elasticsearch</span></span>
+  <span class="key">any_errors_fatal</span>: <span class="string"><span class="content">true</span></span>
+  <span class="key">serial</span>: <span class="string"><span class="content">1</span></span>
+  <span class="key">roles</span>:
+    - <span class="string"><span class="content">role: elasticsearch</span></span>
+      <span class="key">elasticsearch_step</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">stop_start</span><span class="delimiter">&quot;</span></span>
 
-# In parallel
-- hosts: elasticsearch
-  any_errors_fatal: true
-  roles:
-    - role: elasticsearch
-      elasticsearch_step: "after"</code></pre>
+<span class="comment"># In parallel</span>
+- <span class="string"><span class="content">hosts: elasticsearch</span></span>
+  <span class="key">any_errors_fatal</span>: <span class="string"><span class="content">true</span></span>
+  <span class="key">roles</span>:
+    - <span class="string"><span class="content">role: elasticsearch</span></span>
+      <span class="key">elasticsearch_step</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">after</span><span class="delimiter">&quot;</span></span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -231,16 +205,16 @@ In this particular case, this role can still be used, and the <code>stop_start</
 <div class="listingblock">
 <div class="title">playbook.yml</div>
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml"># New cluster
-- hosts: elasticsearch
-  any_errors_fatal: true
-  roles:
-    - role: elasticsearch
-      elasticsearch_step: "before"
-    - role: elasticsearch
-      elasticsearch_step: "stop_start"
-    - role: elasticsearch
-      elasticsearch_step: "after"</code></pre>
+<pre class="CodeRay highlight"><code data-lang="yaml"><span class="comment"># New cluster</span>
+- <span class="string"><span class="content">hosts: elasticsearch</span></span>
+  <span class="key">any_errors_fatal</span>: <span class="string"><span class="content">true</span></span>
+  <span class="key">roles</span>:
+    - <span class="string"><span class="content">role: elasticsearch</span></span>
+      <span class="key">elasticsearch_step</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">before</span><span class="delimiter">&quot;</span></span>
+    - <span class="string"><span class="content">role: elasticsearch</span></span>
+      <span class="key">elasticsearch_step</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">stop_start</span><span class="delimiter">&quot;</span></span>
+    - <span class="string"><span class="content">role: elasticsearch</span></span>
+      <span class="key">elasticsearch_step</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">after</span><span class="delimiter">&quot;</span></span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -249,12 +223,12 @@ In this particular case, this role can still be used, and the <code>stop_start</
 <div class="listingblock">
 <div class="title">playbook.yml</div>
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml"># New cluster
-- hosts: elasticsearch
-  any_errors_fatal: true
-  roles:
-    - role: elasticsearch
-      elasticsearch_step: "all"</code></pre>
+<pre class="CodeRay highlight"><code data-lang="yaml"><span class="comment"># New cluster</span>
+- <span class="string"><span class="content">hosts: elasticsearch</span></span>
+  <span class="key">any_errors_fatal</span>: <span class="string"><span class="content">true</span></span>
+  <span class="key">roles</span>:
+    - <span class="string"><span class="content">role: elasticsearch</span></span>
+      <span class="key">elasticsearch_step</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">all</span><span class="delimiter">&quot;</span></span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -265,7 +239,7 @@ you can stop&#8217;n&#8217;start nodes two by two, three by three&#8230;&#8203;<
 </div>
 </div>
 <div class="sect1">
-<h2 id="_unreloaded_configuration">Unreloaded configuration</h2>
+<h2 id="unreloaded_configuration">Unreloaded configuration</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Most of the time, I am only running the Ansible playbook to change settings that don&#8217;t need nodes to be restarted.
@@ -275,9 +249,9 @@ A a result, the <code>before</code> step should mark whether the <code>stop_star
 <div class="listingblock">
 <div class="title">roles/elasticsearch/tasks/before.yml</div>
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">- set_fact:
-    elasticsearch_restart_needed: True
-  when: ...</code></pre>
+<pre class="CodeRay highlight"><code data-lang="yaml">- <span class="string"><span class="content">set_fact:</span><span class="content">
+    elasticsearch_restart_needed: True</span></span>
+  <span class="key">when</span>: <span class="string"><span class="content">...</span></span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -290,19 +264,19 @@ Node specific configuration (<code>elasticsearch.yml</code>, Kafka <code>server.
 <div class="listingblock">
 <div class="title">playbook.yml</div>
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">- hosts: elasticsearch
-  any_errors_fatal: true
-  serial: 1
-  roles:
-    - role: elasticsearch
-      elasticsearch_step: "stop_start"
-  when: elasticsearch_restart_needed defined and elasticsearch_restart_needed</code></pre>
+<pre class="CodeRay highlight"><code data-lang="yaml">- <span class="string"><span class="content">hosts: elasticsearch</span></span>
+  <span class="key">any_errors_fatal</span>: <span class="string"><span class="content">true</span></span>
+  <span class="key">serial</span>: <span class="string"><span class="content">1</span></span>
+  <span class="key">roles</span>:
+    - <span class="string"><span class="content">role: elasticsearch</span></span>
+      <span class="key">elasticsearch_step</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">stop_start</span><span class="delimiter">&quot;</span></span>
+  <span class="key">when</span>: <span class="string"><span class="content">elasticsearch_restart_needed defined and elasticsearch_restart_needed</span></span></code></pre>
 </div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_cluster_wide_configuration">Cluster wide configuration</h2>
+<h2 id="cluster_wide_configuration">Cluster wide configuration</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>In distributed systems, some configuration must be done only once for the whole cluster.
@@ -328,13 +302,13 @@ Obviously, it must be ran in the <code>after</code> step, once the cluster is st
 <div class="listingblock">
 <div class="title">roles/elasticsearch/tasks/after.yml</div>
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml"># Configure article index
-- uri:
-    url: "http://{{ ansible_ssh_hostname }}:9200/article"
+<pre class="CodeRay highlight"><code data-lang="yaml"><span class="comment"># Configure article index</span>
+- <span class="string"><span class="content">uri:</span><span class="content">
+    url: &quot;http://{{ ansible_ssh_hostname }}:9200/article&quot;
     method: PUT
     body_format: json
-    body: "{{ lookup('file','article_setting.json') }}"
-  run_once: true</code></pre>
+    body: &quot;{{ lookup('file','article_setting.json') }}&quot;</span></span>
+  <span class="key">run_once</span>: <span class="string"><span class="content">true</span></span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -342,199 +316,48 @@ Obviously, it must be ran in the <code>after</code> step, once the cluster is st
 </div>
 </div>
 </div>
-        </div>
-
-        <menu>
-            <a href="" id="btn_share" class="btn" title="Share">
-                <span aria-hidden="true" data-icon="S"></span>
-                <strong>Share</strong>
-            </a>
-            <a href="http://twitter.com/share?text=Ansible%20and%20rolling%20upgrades&url=https://gquintana.github.io/2017/07/15/Ansible-and-rolling-upgrades.html" onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;" id="btn_comment" class="btn" target="_blank">
-                <span aria-hidden="true" data-icon="C"></span> Comment on Twitter
-            </a>
-        </menu>
-
-
-        <footer class="post-footer" role="contentinfo">
-
-            <div class="vcard">
-                <a href="https://gquintana.github.io/rss" id="btn_feed" class="btn" title="Feed" target="_blank">
-                    <span aria-hidden="true" data-icon=")"></span>
-                    <strong>Feed</strong>
-                </a>
-
-                <a href="https://gquintana.github.io/author/gquintana/" class="photo">
-                    <span style="background-image: url('https://avatars3.githubusercontent.com/u/755587?v&#x3D;4');">
-                        <img src="https://avatars3.githubusercontent.com/u/755587?v&#x3D;4" alt="Gerald Quintana">
-                    </span>
-                </a>
-
-                <div class="details">
-                    <h4><a href="https://gquintana.github.io/author/gquintana/" class="url n">Gerald Quintana</a></h4>
-                    Lyon, France<br>
-                    
-                </div>
-            </div>
-
-            <div id="user_bio">
-                <div class="inner">
-                    
-                </div>
-            </div>
-
-        </footer>
-
-
-
-
-    <section class="post-comments">
-      <div id="disqus_thread"></div>
-      <script type="text/javascript">
-      var disqus_shortname = 'https-gquintana-github-io'; // required: replace example with your forum shortname
-      /* * * DON'T EDIT BELOW THIS LINE * * */
-      (function() {
-        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-      })();
-      </script>
-      <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-      <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
-    </section>
-
-
-    </article>
-
-    <div id="share_modal">
-        <div class="wrap">
-            <div class="inner">
-                <header>
-                    Share
-                    <a href="" class="close" title="Close">&times;</a>
-                </header>
-
-                <div class="roon-share-links">
-                    <a href="https://twitter.com/share" class="twitter-share-button" data-dnt="true">Tweet</a>
-                    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-
-                    <div id="fb-elems">
-                        <div id="fb-root"></div>
-                        <script>(function(d, s, id) {
-                        var js, fjs = d.getElementsByTagName(s)[0];
-                        if (d.getElementById(id)) return;
-                        js = d.createElement(s); js.id = id;
-                        js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=463438580397968";
-                        fjs.parentNode.insertBefore(js, fjs);
-                        }(document, 'script', 'facebook-jssdk'));</script>
-                        <div class="fb-like" data-send="false" data-layout="button_count" data-width="110" data-show-faces="false" data-font="arial"></div>
-                    </div>
-
-                    <div id="pinit-btn">
-                        <a href="//pinterest.com/pin/create/button/?url=https://gquintana.github.io/2017/07/15/Ansible-and-rolling-upgrades.html&amp;description=Ansible%20and%20rolling%20upgrades-JRald " data-pin-do="buttonPin" data-pin-config="beside"><img src="//assets.pinterest.com/images/pidgets/pin_it_button.png"></a>
-                        <script type="text/javascript" src="//assets.pinterest.com/js/pinit.js"></script>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
+    <div class="clearfix">
+        <h4>Other posts</h4>
+        <ul>
+            
+                <li>2019-07-03
+                    <a href="/2019/07/03/Kafka-integration-tests.html">Kafka integration tests</a>
+                </li>
+            
+                <li>2019-05-17
+                    <a href="/2019/05/17/Logging-configuration.html">Logging configuration</a>
+                </li>
+            
+                <li>2019-04-25
+                    <a href="/2019/04/25/Ansible-collection-processing.html">Ansible collection processing</a>
+                </li>
+            
+                <li>2017-12-01
+                    <a href="/2017/12/01/Structured-logging-with-SL-FJ-and-Logback.html">Structured logging with SLF4J and Logback</a>
+                </li>
+            
+                <li>2017-09-30
+                    <a href="/2017/09/30/Log-collection-in-AWS-land.html">Log collection in AWS land</a>
+                </li>
+            
+        </ul>
+    </div>
+</div>
 
-
-
-
-
-
-    <script>
-
-            function get_text(el) {
-                ret = "";
-                var length = el.childNodes.length;
-                for(var i = 0; i < length; i++) {
-                    var node = el.childNodes[i];
-                    if(node.nodeType != 8) {
-                        ret += node.nodeType != 1 ? node.nodeValue : get_text(node);
-                    }
-                }
-                return ret;
-            }
-            function reading_time () {
-                var post_content = document.getElementById('js-post-content');
-                if (post_content) {
-                    var words = get_text(post_content),
-                        count = words.split(/\s+/).length,
-                        read_time = Math.ceil((count / 150)),
-                        read_time_node = document.createTextNode(read_time + ' min read');
-                    document.getElementById('js-reading-time').appendChild(read_time_node);
-                }
-            }
-
-        function no_schema_links () {
-            var links = document.querySelectorAll('.js-remove-domain-schema');
-            if (links) {
-                for (i = 0; i < links.length; ++i) {
-                    var link = links[i],
-                        text = link.innerHTML,
-                        no_schema = text.replace(/.*?:\/\//g, "");
-                    link.innerHTML = no_schema;
-                }
-            }
-        }
-
-        window.onload = function () {
-            no_schema_links();
-
-            reading_time();
-        }
-    </script>
-
-    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js?v="></script> <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment-with-locales.min.js?v="></script> <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js?v="></script> 
-      <script type="text/javascript">
-        jQuery( document ).ready(function() {
-          // change date with ago
-          jQuery('ago.ago').each(function(){
-            var element = jQuery(this).parent();
-            element.html( moment(element.text()).fromNow());
-          });
-        });
-
-        hljs.initHighlightingOnLoad();
-      </script>
-
-        <script>
-            $(function(){
-                var share_modal = $("#share_modal"),
-                    update_social_links = true;
-
-                $("#btn_share").click(function(){
-                    var that = $(this);
-                    share_modal.fadeIn(200);
-                    return false;
-                });
-
-                share_modal.click(function(e){
-                    if (e.target.className == "wrap" || e.target.id == "share_modal") {
-                        share_modal.fadeOut(200);
-                    }
-                    return false;
-                });
-
-                share_modal.find("div.inner > header > a.close").click(function(){
-                    share_modal.fadeOut(200);
-                    return false;
-                });
-            });
-        </script>
-
-
-    <script>
-    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-    ga('create', 'UA-85700184-1', 'auto');
-    ga('send', 'pageview');
-
-    </script>
-
-</body>
+        </main>
+        <footer class="footer text-muted">
+            <div class="container">
+                <p class="float-right">
+                    <a href="#"><i class="fa fa-arrow-up" aria-hidden="true"></i>
+ Back to top</a>
+                </p>
+                <p>Made with <i class="fa fa-heart" aria-hidden="true"></i> by Gérald Quintana</p>
+        </footer>
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+    </body>
 </html>
