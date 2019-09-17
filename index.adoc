@@ -1,5 +1,0 @@
-= JRald Blog
-:showtitle:
-:page-title: JRald Blog
-:page-description: A forkable blog-ready Jekyll site using AsciiDoc
-:page-layout: index
