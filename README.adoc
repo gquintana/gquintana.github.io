@@ -1,0 +1,5 @@
+= JRald Blog
+
+This my blog based on https://github.com/asciidoctor/jekyll-asciidoc-quickstart[jekyll-asciidoc-quickstart].
+All articles are writen using https://asciidoctor.org/[AsciiDoc].
+Icons from https://fontawesome.com/v4.7.0/icons/[Font Awesome 4.7]
