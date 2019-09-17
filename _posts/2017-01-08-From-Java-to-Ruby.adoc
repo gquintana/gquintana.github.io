@@ -1,0 +1,309 @@
+# From Java to Ruby
+:page-tags: [7li7w, ruby]
+:source_dir: ../sources/2017-01-08-From-Java-to-Ruby
+:page-image: /images/logos/ruby.png
+:published_at: 2017-01-08
+:page-layout: post
+:page-description: "First impression of the Ruby Language."
+
+One of my 2017 resolutions is to try different languages and see how they compare to Java.
+This is inspired by the https://pragprog.com/book/btlang/seven-languages-in-seven-weeks[7 languages in 7 weeks] book by Bruce A. Tate.
+I don't expect to learn a new language each week though, since it took me several weeks only for the first one.
+
+The first language I've tried is Ruby.
+I've already seen Ruby used many times: Vagrant configuration, Logstash plugins, FluentD plugins, web applications like Kibana 2...
+But I don't have any experience in Ruby development.
+So I used the http://rubykoans.com/[Ruby Koans] to teach myself Ruby.
+
+## The good
+
+### Syntactic sugar everywhere
+
+Ruby has a lot of syntactic sugar which makes code really easy to read, and short to write.
+
+The first example deals with arrays:
+[source,ruby]
+----
+a=["one","two","three","four"]
+puts a[1..-2] # <1>
+
+first, *tail = a # <2>
+----
+<1> Prints two and three whose indices are between 1 and length-2
+<2> The array is destructured: `first` contains one and `tail` an array of two, three, four
+
+The second example shows the templating system in strings:
+[source,ruby]
+----
+i=4
+puts "Square root of #{i} is #{Math.sqrt(i)}" # <1>
+----
+<1> Prints _Square root of 4 is 2.0_
+
+Now let's see getters and setters.
+By default attributes a private, while methods are public:
+[source,ruby]
+----
+include::{source_dir}/getter_setter.rb[]
+----
+<1> Declare a getter, `return` is optional
+<2> Declare a setter, notice this funny method name `name=`
+<3> Call the setter
+<4> Call the getter
+
+I'll show later that getters and setters can be generated.
+
+### Meta programming
+
+Ruby has a powerful API similar to Java reflection:
+[source,ruby]
+----
+include::{source_dir}/reflect.rb[]
+----
+As the `say` method is not implemented, the `method_missing` is called.
+You will notice that a method call is made of a `method_name`, an array of `arguments`, and a code `block` (I'll tell more on that later).
+----
+Hello
+Call say with ["Goodbye"]
+----
+The above example shows how to generate methods in an existing class.
+With this API, creating a proxy to wrap an object and do some kind of AOP is simple:
+[source,ruby]
+----
+include::{source_dir}/proxy.rb[]
+----
+<1> Check whether the target object has the method or not
+<2> Call the method on the target object.
+<3> Wrap the string in a proxy
+----
+Before upcase []
+After upcase: HELLO WORLD!
+HELLO WORLD!
+----
+
+
+## The bad
+
+### Strings
+
+Strings are mutable:
+[source, ruby]
+----
+hi = "Hello "
+hi << "world"
+----
+The above example is similar to a Java `StringBuilder`: at the end `hi` contains `Hello world`.
+I know that having immutable Strings in Java allows many optimizations in the JVM, I wonder what's the performance penalty of having mutable strings.
+
+Multiline strings is something I miss in Java, but Ruby's syntax is rather strange.
+They are delimited with `%{ ... }` or `%! ... !` or ...:
+[source, ruby]
+----
+multiline = %{
+First line
+Second line
+}
+----
+
+### Unless
+
+I am not a big fan of the `unless` keyword which does the contrary of `if`
+[source,ruby]
+----
+include::{source_dir}/control.rb[tags=unless1]
+----
+<1> Is the same as `if !rude`
+
+Sticking to the `if` keyword looks like better option to me.
+
+However, I have to admit that this syntax is not as bad:
+[source,ruby]
+----
+include::{source_dir}/control.rb[tags=unless2]
+----
+
+### Functional programming
+
+Doing functional programming with Ruby is clearly possible.
+But it doesn't look natural to me.
+
+First the lambda functions syntax could be simpler:
+[source,ruby]
+----
+include::{source_dir}/functional.rb[tags=simple]
+----
+<1> Means x -> 2 * x
+<2> The `call` method is used to invoke the function
+<3> the `{ ... }` delimiter can be replaced by `do ... end` for multiline functions
+
+Then, passing functions to methods uses a special feature.
+Methods can receive a block of code as a special argument,
+this block is then called using the `yield` keyword.
+[source,ruby]
+----
+class Demo
+  def say_hello
+    if block_given?
+      message = yield("Hello World!") # <2>
+    else
+      message = "Hello World!"
+    end
+    puts message
+  end
+  def yell_hello
+    say_hello { |s| s.upcase } # <1>
+  end
+end
+----
+<1> Invoke the `say_hello` method if a block of code
+<2> Invoke the block and pass it some parameters
+
+I first wondered why the block wasn't passed as other method arguments,
+and why it was handled as a special argument.
+The reason is probably that it allows do "sandwich code":
+[source,ruby]
+----
+open(file_name) do |file| # <1>
+  # Do something with opened file
+end # <2>
+----
+<1> Open the file named `file_name` and make it available to the block.
+<2> Close the file
+
+The `open` method takes two arguments the file name and the code block dealing with the file.
+In the end, this looks like Java's try-with-resources statement.
+
+### Open classes
+
+Classes are open which means, anyone can add a method to any class, even system ones:
+[source,ruby]
+----
+class ::Integer      # <1>
+  def even?          # <2>
+    (self % 2) == 0
+  end
+end
+
+puts 1.even?         # <3>
+----
+<1> Let's add a method to integers
+<2> Funny fact: in Ruby's naming conventions method returning a boolean should end with `?`
+<3> Prints `false`
+
+While it can be useful, placed in wrong hands, this weapon may be harmful.
+Yet existing methods can not be replaced.
+
+### Building and packaging
+
+Ruby libraries and applications are packaged as _Gems_ which are Zip archives
+containing code and metadata, a bit like Java's Jar files.
+
+To start a Ruby project, 4 tools are needed:
+
+* *Ruby*: there are multiple versions and variants (MRI, JRuby...) to choose from.
+  *https://rvm.io[RVM]* (Ruby Version Manager) is an optional tool to install
+  and activate the appropriate one.
+* *Gem* is the tool to download gems from http://rubygems.org
+  (which is a sort of Maven Central repository)
+  and unzip them in the local repository.
+  It's a package manager like Yum, NPM...
+* *http://bundler.io[Bundler]* takes a bill of materials,
+  the list of dependencies for the project,
+  and runs Gem to download and install them.
+* *http://www.rubyrake.org[Rake]*
+  (Ruby Make) is Ruby build tool, it can process files, run unit tests...
+
+And 2 files are need to describe a project:
+
+* *Gemfile* contains the list of Gems needed to build and run the project. It's used by Bundler.
+[source,ruby]
+----
+include::{source_dir}/fizzbuzz/Gemfile[]
+----
+* *Rakefile* describes how to build the project. It's Rake configuration file.
+[source,ruby]
+----
+include::{source_dir}/fizzbuzz/Rakefile[]
+----
+
+For the newcomer, starting a project is not a trivial task.
+I had to read each tool documentation independently,
+look for an example of each config file and assemble the whole.
+
+## The odd
+
+Objects have a numeric Id which can be used for reference comparison:
+[source,ruby]
+----
+o=Object.new
+puts o.object_id # <1>
+----
+<1> The object Id is a numeric value, for instance 4376500
+
+### Symbols
+
+I had hard time understanding the concept of *Symbol*.
+
+A symbol is a kind of immutable and unique string which can be used as a constant or as a label.
+[source, ruby]
+----
+color = :red
+color = :blue
+----
+In this example, `red` and `blue` are symbols used as enum values.
+
+Symbols are used with meta programming to identify methods, attributes and so forth:
+[source, ruby]
+----
+class Person
+  attr_reader :id  <1>
+  attr_accessor :name <2>
+end
+----
+<1> The `id` attribute is read-only, it has a setter
+<2> The `name` attribute is read/write, it has a getter and a setter
+
+Symbols are also used as hash map keys because they are unique:
+[source, ruby]
+----
+ages = { :bob => 23, :john => 35 }
+ages = { bob: 23, john: 35}
+----
+Since Ruby 2, the two above hashes are identical.
+
+
+### Modules
+
+Modules are a bit like Java packages, they are used as namespaces.
+
+The weird part, is that a module can contain classes and a class can contain modules:
+[source, ruby]
+----
+module Demo # <1>
+  class Thing
+    module Nameable # <2>
+      def set_name(name)
+        @name = name
+      end
+    end
+  end
+  class Pet < Thing
+    include Thing::Nameable
+  end
+end
+
+medor = Demo::Pet.new
+medor.set_name("Médor") # <3>
+----
+<1> The `Demo` module is used as a _container_ for `Thing` and `Pet` classes.
+<2> The `Nameable` module is used as a _mixin_.
+<3> The `Pet` class as `set_name` method.
+
+In fact a module and a class are close concepts, a class is a module which can be instiated.
+
+## Conclusion
+
+Ruby is close to Java because it has the same OOP roots: both are inspired by Smalltalk,
+both were born in the nineties.
+
+I don't pretend to be a Ruby expert at all, if I wrote something wrong, tell me.

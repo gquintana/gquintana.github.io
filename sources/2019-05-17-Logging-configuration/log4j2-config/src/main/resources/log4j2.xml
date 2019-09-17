@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="trace"><!--1-->
+    <!-- Properties -->
+    <Properties><!--2-->
+        <Property name="logDir">${sys:log.dir:-target/log}</Property>
+    </Properties>
+
+    <!-- Appenders -->
+    <Appenders>
+        <Console name="CONSOLE"><!--3-->
+            <PatternLayout pattern="%date{HH:mm:ss.SSS} %-5level [%thread] %logger{1} - %msg%n"/>
+        </Console>
+        <RollingFile name="FILE"
+                     fileName="${logDir}/blog.log"
+                     filePattern="${logDir}/blog.%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout><!--4-->
+                <Pattern>%d{ISO8601} %-5level [%thread] %logger %m%n</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="1m" />
+            </Policies>
+            <Strategies>
+                <DefaultRolloverStrategy max="10"/>
+            </Strategies>
+        </RollingFile>
+    </Appenders>
+
+    <!-- Loggers -->
+    <Loggers>
+        <Logger name="com.github.gquintana.logging" level="debug"/>
+        <Root level="info">
+            <AppenderRef ref="CONSOLE"/>
+            <AppenderRef ref="FILE"/>
+        </Root>
+    </Loggers>
+</Configuration>
+

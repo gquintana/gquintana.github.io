@@ -1,0 +1,16 @@
+# First post
+:page-tags: [mood]
+:published_at: 2016-08-23
+:page-image: /images/logos/hubpress.png
+:page-layout: post
+:page-description: This my first blog post about using HubPress.
+
+This is my first post on this blog.
+
+I am trying out http://hubpress.io[HubPress.io] and I'm just amazed:
+
+- 5 minutes to setup un blog site on GitHub.
+- A neat backoffice to administrate it
+- Posts written in AsciiDoc with live preview.
+- Built with cool tech: React, Redux,
+- Mostly built in France: cock-a-doodle-doo
