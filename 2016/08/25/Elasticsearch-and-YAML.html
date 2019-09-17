@@ -1,0 +1,202 @@
+<!doctype html>
+<!--[if IE 9]>
+<html class="lt-ie10" lang="en"> <![endif]-->
+<html class="no-js" lang="en" data-useragent="Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0)">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Elasticsearch and YAML</title>
+        <meta name="description" content="Gérald's technical blog about Java, Kafka, Elasticsearch, DevOps...">
+        <meta name="author" content="Gérald Quintana">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="/css/coderay.css">
+        <link rel="stylesheet" href="/css/asciidoc.css">
+        <link rel="stylesheet"
+              href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/default.min.css">
+    </head>
+    <body>
+        <header class="container sticky-top">
+            <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+                 <a class="navbar-brand" href="/">JRald blog</a>
+            </nav>
+        </header>
+        <main class="container position-relative " role="main">
+            <div>
+    <h1>Elasticsearch and YAML</h1>
+    <div>
+        <img class="rounded float-right" src="../../../images/logos/elasticsearch.png"/>
+        <h5>
+            <span>2016-08-25</span>
+            <span class="badge badge-secondary">elasticsearch</span> 
+        </h5>
+
+        <div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Most examples in Elasticsearch documentation are using JSON to represent documents, requests and responses.
+Writing JSON is not that hard but you sometimes become Raiders of the Lost Curly Brace.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://upload.wikimedia.org/wikipedia/en/4/4c/Raiders_of_the_Lost_Ark.jpg" alt="Raiders of the Lost Ark">
+</div>
+</div>
+<div class="paragraph">
+<p>Do you know that you can replace JSON by YAML?</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="in_responses">In responses</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You can add <code>format=yaml</code> in the query params:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>curl -XGET http://localhost:9200/logstash-*/_search?format=yaml
+
+---
+took: 13
+timed_out: false
+_shards:
+  total: 15
+  successful: 15
+  failed: 0
+hits:
+  total: 2382
+  max_score: 1.0
+  hits:
+  - _index: "logstash-2016.06.22"
+    _type: "test"
+    _id: "AVV36B3vd6qInGJw3x0r"
+    _score: 1.0
+    _source:
+      '@timestamp': "2016-06-22T11:39:07.431Z"
+  - _index: "logstash-2016.06.22"
+    _type: "test"
+    _id: "AVV36Cfrd6qInGJw3x0u"
+    _score: 1.0
+    _source:
+      '@timestamp': "2016-06-22T11:38:42.000Z"</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can also use the <code>Content-Type: application/yaml</code> HTTP header:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>curl -XGET -H "Content-Type: application/yaml" http://localhost:9200/_cluster/health
+
+---
+cluster_name: "elasticsearch"
+status: "yellow"
+timed_out: false
+number_of_nodes: 1
+number_of_data_nodes: 1
+...</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>While using YAML format for responses you don&#8217;t have to use the <code>pretty=true</code> query param,
+as YAML is naturally indented and human readable.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="in_requests">In requests</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Just start your request body with <code>---</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>curl -XPOST http://localhost:9200/_search -d '---
+query:
+  match:
+    message: "Elasticsearch"
+'</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This gets pretty handy when dealing with mappings and settings:</p>
+</div>
+<div class="listingblock">
+<div class="title">movie.mapping.yaml</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="yaml"><span class="head"><span class="head">---</span></span>
+<span class="key">properties</span>:
+  <span class="key">title</span>:
+    <span class="key">type</span>: <span class="string"><span class="content">string</span></span>
+  <span class="key">tags</span>:
+    <span class="key">type</span>: <span class="string"><span class="content">string</span></span>
+    <span class="key">index</span>: <span class="string"><span class="content">not_analyzed</span></span>
+  <span class="key">year</span>:
+    <span class="key">type</span>: <span class="string"><span class="content">date</span></span>
+    <span class="key">format</span>: <span class="string"><span class="content">year</span></span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>curl -XPUT http://localhost:9200/movies/_mappings/movie --data-binary @movie.mapping.yaml</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="limits">Limits</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Some requests like <code>_bulk</code> request may not accept YAML.</p>
+</div>
+<div class="paragraph">
+<p>Sense (Kibana Console) and other Elasticsearch UIs do not handle YAML properly.</p>
+</div>
+</div>
+</div>
+    </div>
+    <div class="clearfix">
+        <h4>Other posts</h4>
+        <ul>
+            
+                <li>2019-07-03
+                    <a href="/2019/07/03/Kafka-integration-tests.html">Kafka integration tests</a>
+                </li>
+            
+                <li>2019-05-17
+                    <a href="/2019/05/17/Logging-configuration.html">Logging configuration</a>
+                </li>
+            
+                <li>2019-04-25
+                    <a href="/2019/04/25/Ansible-collection-processing.html">Ansible collection processing</a>
+                </li>
+            
+                <li>2017-12-01
+                    <a href="/2017/12/01/Structured-logging-with-SL-FJ-and-Logback.html">Structured logging with SLF4J and Logback</a>
+                </li>
+            
+                <li>2017-09-30
+                    <a href="/2017/09/30/Log-collection-in-AWS-land.html">Log collection in AWS land</a>
+                </li>
+            
+        </ul>
+    </div>
+</div>
+
+        </main>
+        <footer class="footer text-muted">
+            <div class="container">
+                <p class="float-right">
+                    <a href="#"><i class="fa fa-arrow-up" aria-hidden="true"></i>
+ Back to top</a>
+                </p>
+                <p>Made with <i class="fa fa-heart" aria-hidden="true"></i> by Gérald Quintana</p>
+        </footer>
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+    </body>
+</html>
