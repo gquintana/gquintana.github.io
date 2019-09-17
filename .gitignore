@@ -8,3 +8,4 @@ _site/
 *.log
 .bundle/
 Gemfile.lock
+vendor/
