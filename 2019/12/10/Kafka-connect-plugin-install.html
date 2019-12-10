@@ -1,0 +1,246 @@
+<!doctype html>
+<!--[if IE 9]>
+<html class="lt-ie10" lang="en"> <![endif]-->
+<html class="no-js" lang="en" data-useragent="Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0)">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Kafka connect plugin install</title>
+        <meta name="description" content="How to install a Kafka connect plugin without confluent-hub">
+        <meta name="author" content="Gérald Quintana">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="/css/coderay.css">
+        <link rel="stylesheet" href="/css/asciidoc2.css">
+        <link rel="stylesheet"
+              href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/default.min.css">
+    </head>
+    <body>
+        <header class="container sticky-top">
+            <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+                 <a class="navbar-brand" href="/"><h1>JRald blog</h1></a>
+                 <h2>
+                     <a href="https://twitter.com/gerald_quintana"><i class="fa fa-twitter"></i></a>
+                     <a href="https://github.com/gquintana"><i class="fa fa-github"></i></a>
+                 </h2>
+            </nav>
+        </header>
+        <main class="container position-relative " role="main">
+            <div>
+    <h1>Kafka connect plugin install</h1>
+    <div>
+        <img class="rounded float-right" src="../../../images/logos/kafka.png"/>
+        <h5>
+            <span>2019-12-10</span>
+            <span class="badge badge-secondary">java</span> <span class="badge badge-secondary">kafka</span> 
+        </h5>
+
+        <div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>You want to use a Kafka Connect plugin with stock Apache Kafka,
+or you can not use the confluent-hub tool because your server is behind
+a firewall. Then this blog post is for you.</p>
+</div>
+<div class="paragraph">
+<p>I&#8217;ll show how to get Kafka Connect JDBC running without using <code>confluent-hub install</code>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="download">Download</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>First, use the <a href="https://www.confluent.io/hub/">Confluent Hub</a> to find Kafka connect plugins.
+Once you&#8217;ve found the plugin you were looking for, you should check the Licensing.
+Most plugins created by Confluent Inc use the <a href="https://www.confluent.io/confluent-community-license/">Confluent Community License</a>
+and are mostly open source.</p>
+</div>
+<div class="paragraph">
+<p>When you click on the Download button, you&#8217;ll have to provide an email to get the plugin zip file.
+You won&#8217;t be able to use your personal gmail.com address:
+you&#8217;ll have to use something looking more professional.
+I guess Confluent sales are not interested in individuals who can&#8217;t afford expensive license fees.</p>
+</div>
+<div class="paragraph">
+<p>I&#8217;ll take the Kafka Connect JDBC plugin as an example.
+Once you&#8217;ve shown your passport to Confluent toll, you&#8217;ll get a <code>confluentinc-kafka-connect-jdbc-5.3.1.zip</code>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="install">Install</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Unzip the <code>confluentinc-kafka-connect-jdbc-5.3.1.zip</code> and you&#8217;ll get a <code>confluentinc-kafka-connect-jdbc-5.3.1</code> containing:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>lib</code> contains binaries Jar files</p>
+</li>
+<li>
+<p><code>etc</code> contains sample configuration files</p>
+</li>
+<li>
+<p><code>doc</code> contains some documentation and the license file</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Then in your Kafka folder (<code>/opt/kafka_2.12-2.3.1</code>):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="shell">$ cd /opt/kafka_2.12-2.3.1
+$ mkdir plugins <i class="conum" data-value="1"></i><b>(1)</b>
+$ cd plugins
+$ ln -s /opt/confluentinc-kafka-connect-jdbc-5.3.1/lib jdbc <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Create a <code>plugins</code> folder to contain plugins</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Link the <code>lib</code> folder of the plugin in the <code>plugins</code> folder</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="configure">Configure</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In the Kafka Connect configuration file <code>connect-standalone.properties</code> (or <code>connect-distributed.properties</code>),
+reference the <code>plugins</code> folder:</p>
+</div>
+<div class="listingblock">
+<div class="title">connect-standalone.properties</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="ini">bootstrap.servers=localhost:9092
+
+plugin.path=/opt/kafka_2.12-2.3.1/plugins <i class="conum" data-value="1"></i><b>(1)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Path to the <code>plugins</code> folder</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Finally use the sample config files in <code>confluentinc-kafka-connect-jdbc-5.3.1/etc</code> to create your own:</p>
+</div>
+<div class="listingblock">
+<div class="title">thing-jdbc-sink.properties</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="ini">name=thing-jdbc-sink
+connector.class=io.confluent.connect.jdbc.JdbcSinkConnector
+tasks.max=1
+topics=thing <i class="conum" data-value="1"></i><b>(1)</b>
+connection.url=jdbc:sqlite:thing.db <i class="conum" data-value="2"></i><b>(2)</b>
+auto.create=true</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Input topic containing Avro values. This means you&#8217;ll need the Avro Converter plugin and the Confluent Schema Registry as well.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Output database</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="run">Run</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To run Kafka Connect in standalone mode just run it with above config files:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="shell">$ bin/connect-standalone.sh config/connect-standalone.properties config/thing-jdbc-sink.properties</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To check the connector is properly running, you can cUrl the REST API:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="shell">$ curl -s http://127.0.1.1:8083/connectors/thing-jdbc-sink/status |jq '.'
+{
+  &quot;name&quot;: &quot;thing-jdbc-sink&quot;,
+  &quot;connector&quot;: {
+    &quot;state&quot;: &quot;RUNNING&quot;,
+    &quot;worker_id&quot;: &quot;127.0.1.1:8083&quot;
+  },
+  &quot;tasks&quot;: [
+    {
+      &quot;id&quot;: 0,
+      &quot;state&quot;: &quot;RUNNING&quot;,
+      &quot;worker_id&quot;: &quot;127.0.1.1:8083&quot;
+    }
+  ],
+  &quot;type&quot;: &quot;sink&quot;
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+    </div>
+    <div class="clearfix">
+        <h4>Other posts</h4>
+        <ul>
+            
+                <li>2019-12-10
+                    <a href="/2019/12/10/Kafka-connect-plugin-install.html">Kafka connect plugin install</a>
+                </li>
+            
+                <li>2019-07-03
+                    <a href="/2019/07/03/Kafka-integration-tests.html">Kafka integration tests</a>
+                </li>
+            
+                <li>2019-05-17
+                    <a href="/2019/05/17/Logging-configuration.html">Logging configuration</a>
+                </li>
+            
+                <li>2019-04-25
+                    <a href="/2019/04/25/Ansible-collection-processing.html">Ansible collection processing</a>
+                </li>
+            
+                <li>2017-12-01
+                    <a href="/2017/12/01/Structured-logging-with-SL-FJ-and-Logback.html">Structured logging with SLF4J and Logback</a>
+                </li>
+            
+        </ul>
+    </div>
+</div>
+
+        </main>
+        <footer class="footer text-muted">
+            <div class="container">
+                <p class="float-right">
+                    <a href="#"><i class="fa fa-arrow-up" aria-hidden="true"></i>
+ Back to top</a>
+                </p>
+                <p>Made with <i class="fa fa-heart" aria-hidden="true"></i> by Gérald Quintana</p>
+        </footer>
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+    </body>
+</html>

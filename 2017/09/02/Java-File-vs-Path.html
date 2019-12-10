@@ -1,0 +1,268 @@
+<!doctype html>
+<!--[if IE 9]>
+<html class="lt-ie10" lang="en"> <![endif]-->
+<html class="no-js" lang="en" data-useragent="Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0)">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Java File vs Path</title>
+        <meta name="description" content="How to convert Java 7- File code to Java 8+ Path code">
+        <meta name="author" content="Gérald Quintana">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="/css/coderay.css">
+        <link rel="stylesheet" href="/css/asciidoc2.css">
+        <link rel="stylesheet"
+              href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/default.min.css">
+    </head>
+    <body>
+        <header class="container sticky-top">
+            <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+                 <a class="navbar-brand" href="/"><h1>JRald blog</h1></a>
+                 <h2>
+                     <a href="https://twitter.com/gerald_quintana"><i class="fa fa-twitter"></i></a>
+                     <a href="https://github.com/gquintana"><i class="fa fa-github"></i></a>
+                 </h2>
+            </nav>
+        </header>
+        <main class="container position-relative " role="main">
+            <div>
+    <h1>Java File vs Path</h1>
+    <div>
+        <img class="rounded float-right" src="../../../images/logos/java.png"/>
+        <h5>
+            <span>2017-09-02</span>
+            <span class="badge badge-secondary">java</span> 
+        </h5>
+
+        <div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>I&#8217;ve been using <code>java.io.File</code> and <code>java.io.File*Stream</code> since Java 1.1, a long time ago.
+Java 7 introduced a new file API named <strong>NIO2</strong> containing, among others, the <code>java.nio.file.Path</code> and <code>java.nio.file.Files</code> classes.
+It took me a while to lose my habits and embrace the new API.</p>
+</div>
+<div class="paragraph">
+<p>Spoiler: The most funny part of this article is at the end!</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="quick_comparison">Quick comparison</h2>
+<div class="sectionbody">
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">java.io.File (class)</th>
+<th class="tableblock halign-left valign-top">java.nio.file.Path (interface)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>file = new File("path/to/file.txt")</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>path = Paths.get("path/to/file.txt")</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>file = new File(parentFile, "file.txt")</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>path = parentPath.resolve("file.txt")</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>file.getFileName()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>path.getFileName().toString()</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>file.getParentFile()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>path.getParent()</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>file.mkdirs()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Files.createDirectories(path)</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>file.length()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Files.size(path)</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>file.exists()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Files.exists(path)</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>file.delete()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Files.delete(path)</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>new FileOutputStream(file)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Files.newOutputStream(path)</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>new FileInputStream(file)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Files.newInputStream(path)</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>file.listFiles(filter)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Files.list(path) .filter(filter) .collect(toList())</code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>Some additional notes:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>Path</code> throws <code>IOException</code> more often than <code>File</code>, and rarely return a <code>boolean</code> to tell if something was done (<code>mkdirs()</code>, <code>delete()</code>)</p>
+</li>
+<li>
+<p><code>File</code> is more object oriented than <code>Path</code>: I regret that <code>size()</code>, <code>exists()</code>&#8230;&#8203; methods are not on the <code>Path</code> interface. This is probably due to the fact that this API was added in Java 7, but default methods on interfaces were added later in Java 8.</p>
+</li>
+<li>
+<p><code>Path</code> based <code>InputStream</code>/`OutputStream`s are less expensive from a GC point view. Thanks <a href="https://twitter.com/thekittster/status/905326864251670532">@kittster</a> for mentionning <a href="https://www.cloudbees.com/blog/fileinputstream-fileoutputstream-considered-harmful">this article from Cloudbees</a>.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="one_liners">One liners</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>java.nio.file.Files</code> allows to read, write, copy files in a single line:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java">Files.write(Paths.get(<span class="string"><span class="delimiter">&quot;</span><span class="content">image.png</span><span class="delimiter">&quot;</span></span>), bytes); <i class="conum" data-value="1"></i><b>(1)</b>
+
+<span class="predefined-type">List</span>&lt;<span class="predefined-type">String</span>&gt; lines = Files.readAllLines(Paths.get(<span class="string"><span class="delimiter">&quot;</span><span class="content">letter.txt</span><span class="delimiter">&quot;</span></span>), StandardCharsets.UTF_8); <i class="conum" data-value="2"></i><b>(2)</b>
+
+Files.lines(Paths.get(<span class="string"><span class="delimiter">&quot;</span><span class="content">letter.txt</span><span class="delimiter">&quot;</span></span>), StandardCharsets.UTF_8)
+                .forEach(<span class="predefined-type">System</span>.out::println);</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Write a binary file</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Read a text file</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>This nearly makes Guava IO and Commons IO  useless. I regret that there isn&#8217;t any method out of the box to read/write a whole file as a single string.</p>
+</div>
+<div class="paragraph">
+<p>Many APIs (JAXB, Jackson to name a few) don&#8217;t use <code>Path`s to read/write files, the workaround is usually use an `InputStream</code> or an <code>OutputStream</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="keyword">try</span>(<span class="predefined-type">InputStream</span> inputStream = Files.newInputStream(path)) {
+  Thing thing = (Thing) unmarshaller.unmarshal(inputStream);
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="multiple_file_systems">Multiple file systems</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When the <code>File</code> is only for local files, <code>Path</code> can also be used to access remote files.
+A <code>Path</code> is associated to a <code>FileSystem</code>.</p>
+</div>
+<div class="paragraph">
+<p>To create a new <code>Path</code> instances, there is not constructor (<code>Path</code> is interface), we need to call a factory method. The above 2 lines are the same:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java">path = Paths.get(<span class="string"><span class="delimiter">&quot;</span><span class="content">path/to/file.txt</span><span class="delimiter">&quot;</span></span>);
+path = FileSystems.getDefault().getPath(<span class="string"><span class="delimiter">&quot;</span><span class="content">path/to/file.txt</span><span class="delimiter">&quot;</span></span>);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As the default file system is the local one, you get a path to a local file.
+Depending on the underlying file system, you&#8217;ll get a different implementation: <code>sun.nio.fs.UnixPath</code>, <code>sun.nio.fs.WindowsPath</code>&#8230;&#8203;</p>
+</div>
+<div class="paragraph">
+<p>With this trick in mind, we can read the content of a Zip file, as if we had extracted it:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="predefined-type">URI</span> zipUri = <span class="keyword">new</span> <span class="predefined-type">URI</span>(<span class="string"><span class="delimiter">&quot;</span><span class="content">jar:file:/path/to/archive.zip</span><span class="delimiter">&quot;</span></span>)
+<span class="keyword">try</span>(FileSystem zipFS = FileSystems.newFileSystem(zipUri, emptyMap())) { <i class="conum" data-value="1"></i><b>(1)</b>
+    Path zipPath = zipFS.getPath(<span class="string"><span class="delimiter">&quot;</span><span class="content">/archive</span><span class="delimiter">&quot;</span></span>) <i class="conum" data-value="2"></i><b>(2)</b>
+        Files.list(zipPath)
+                .map(Path::toString)
+                .forEach(<span class="predefined-type">System</span>.out::println);
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>"Mount" the Zip file as a file system</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td><code>zipPath</code> is of type <code>com.sun.nio.zipfs.ZipPath</code></td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>You can even plug additional file systems: <a href="http://docs.oracle.com/javase/7/docs/technotes/guides/io/fsp/zipfilesystemprovider.html">ZIP</a>, <a href="https://github.com/maddingo/nio-fs-provider">SFTP, SMB, WebDAV</a>, <a href="https://github.com/lucastheisen/jsch-nio">SSH/SCP</a>, <a href="https://github.com/Upplication/Amazon-S3-FileSystem-NIO2">Amazon S3</a>, <a href="https://github.com/google/jimfs">In memory</a>, <a href="https://github.com/damiencarol/jsr203-hadoop">HDFS</a>, &#8230;&#8203;
+This almost means you can read a remote file as if it were local.</p>
+</div>
+</div>
+</div>
+    </div>
+    <div class="clearfix">
+        <h4>Other posts</h4>
+        <ul>
+            
+                <li>2019-12-10
+                    <a href="/2019/12/10/Kafka-connect-plugin-install.html">Kafka connect plugin install</a>
+                </li>
+            
+                <li>2019-07-03
+                    <a href="/2019/07/03/Kafka-integration-tests.html">Kafka integration tests</a>
+                </li>
+            
+                <li>2019-05-17
+                    <a href="/2019/05/17/Logging-configuration.html">Logging configuration</a>
+                </li>
+            
+                <li>2019-04-25
+                    <a href="/2019/04/25/Ansible-collection-processing.html">Ansible collection processing</a>
+                </li>
+            
+                <li>2017-12-01
+                    <a href="/2017/12/01/Structured-logging-with-SL-FJ-and-Logback.html">Structured logging with SLF4J and Logback</a>
+                </li>
+            
+        </ul>
+    </div>
+</div>
+
+        </main>
+        <footer class="footer text-muted">
+            <div class="container">
+                <p class="float-right">
+                    <a href="#"><i class="fa fa-arrow-up" aria-hidden="true"></i>
+ Back to top</a>
+                </p>
+                <p>Made with <i class="fa fa-heart" aria-hidden="true"></i> by Gérald Quintana</p>
+        </footer>
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+    </body>
+</html>

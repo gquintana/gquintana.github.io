@@ -1,0 +1,301 @@
+<!doctype html>
+<!--[if IE 9]>
+<html class="lt-ie10" lang="en"> <![endif]-->
+<html class="no-js" lang="en" data-useragent="Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0)">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Testing Logstash configuration</title>
+        <meta name="description" content="Gérald's technical blog about Java, Kafka, Elasticsearch, DevOps...">
+        <meta name="author" content="Gérald Quintana">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="/css/coderay.css">
+        <link rel="stylesheet" href="/css/asciidoc2.css">
+        <link rel="stylesheet"
+              href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/default.min.css">
+    </head>
+    <body>
+        <header class="container sticky-top">
+            <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+                 <a class="navbar-brand" href="/"><h1>JRald blog</h1></a>
+                 <h2>
+                     <a href="https://twitter.com/gerald_quintana"><i class="fa fa-twitter"></i></a>
+                     <a href="https://github.com/gquintana"><i class="fa fa-github"></i></a>
+                 </h2>
+            </nav>
+        </header>
+        <main class="container position-relative " role="main">
+            <div>
+    <h1>Testing Logstash configuration</h1>
+    <div>
+        <img class="rounded float-right" src="../../../images/logos/logstash.png"/>
+        <h5>
+            <span>2016-09-07</span>
+            <span class="badge badge-secondary">logstash</span> 
+        </h5>
+
+        <div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>You wrote a piece of Logstash configuration which can parse some logs.
+You tested several corner cases to ensure the output in Elasticsearch was alright.
+How do you protect this clever configuration file against regressions?</p>
+</div>
+<div class="paragraph">
+<p>Unit testing to the rescue of course!</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="simple_example">Simple example</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>For the sake of simplicity, we will take an obvious example: access logs.
+The input looks like</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>172.17.0.1 - - [05/Sep/2016:20:06:17 +0000] "GET /images/logos/hubpress.png HTTP/1.1" 200 5432 "http://localhost/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/51.0.2704.79 Chrome/51.0.2704.79 Safari/537.36" "-"</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The output, once in Elasticsearch, should look like</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="json">{ <span class="key"><span class="delimiter">&quot;</span><span class="content">@version</span><span class="delimiter">&quot;</span></span>:<span class="string"><span class="delimiter">&quot;</span><span class="content">1</span><span class="delimiter">&quot;</span></span>,
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">@timestamp</span><span class="delimiter">&quot;</span></span>:<span class="string"><span class="delimiter">&quot;</span><span class="content">2016-09-05T20:06:17.000Z</span><span class="delimiter">&quot;</span></span>,
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">type</span><span class="delimiter">&quot;</span></span>:<span class="string"><span class="delimiter">&quot;</span><span class="content">nginx</span><span class="delimiter">&quot;</span></span>,
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">host</span><span class="delimiter">&quot;</span></span>:<span class="string"><span class="delimiter">&quot;</span><span class="content">nginx-server</span><span class="delimiter">&quot;</span></span>, <span class="key"><span class="delimiter">&quot;</span><span class="content">path</span><span class="delimiter">&quot;</span></span>:<span class="string"><span class="delimiter">&quot;</span><span class="content">/var/log/nginx/access.log</span><span class="delimiter">&quot;</span></span>,
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">clientip</span><span class="delimiter">&quot;</span></span>:<span class="string"><span class="delimiter">&quot;</span><span class="content">172.17.0.1</span><span class="delimiter">&quot;</span></span>, <span class="key"><span class="delimiter">&quot;</span><span class="content">ident</span><span class="delimiter">&quot;</span></span>:<span class="string"><span class="delimiter">&quot;</span><span class="content">-</span><span class="delimiter">&quot;</span></span>, <span class="key"><span class="delimiter">&quot;</span><span class="content">auth</span><span class="delimiter">&quot;</span></span>:<span class="string"><span class="delimiter">&quot;</span><span class="content">-</span><span class="delimiter">&quot;</span></span>,
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">verb</span><span class="delimiter">&quot;</span></span>:<span class="string"><span class="delimiter">&quot;</span><span class="content">GET</span><span class="delimiter">&quot;</span></span>,<span class="key"><span class="delimiter">&quot;</span><span class="content">request</span><span class="delimiter">&quot;</span></span>:<span class="string"><span class="delimiter">&quot;</span><span class="content">/images/logos/hubpress.png</span><span class="delimiter">&quot;</span></span>,<span class="key"><span class="delimiter">&quot;</span><span class="content">httpversion</span><span class="delimiter">&quot;</span></span>:<span class="string"><span class="delimiter">&quot;</span><span class="content">1.1</span><span class="delimiter">&quot;</span></span>,
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">response</span><span class="delimiter">&quot;</span></span>:<span class="integer">200</span>, <span class="key"><span class="delimiter">&quot;</span><span class="content">bytes</span><span class="delimiter">&quot;</span></span>:<span class="integer">5432</span>, <span class="key"><span class="delimiter">&quot;</span><span class="content">referrer</span><span class="delimiter">&quot;</span></span>:<span class="string"><span class="delimiter">&quot;</span><span class="char">\&quot;</span><span class="content">http://localhost/</span><span class="char">\&quot;</span><span class="delimiter">&quot;</span></span>,
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">agent</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="char">\&quot;</span><span class="content">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/51.0.2704.79 Chrome/51.0.2704.79 Safari/537.36</span><span class="char">\&quot;</span><span class="delimiter">&quot;</span></span>
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The configuration could look like</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="ruby">input {
+    file {
+        path =&gt; <span class="string"><span class="delimiter">&quot;</span><span class="content">/var/log/nginx/access*.log</span><span class="delimiter">&quot;</span></span>
+        type =&gt; <span class="string"><span class="delimiter">&quot;</span><span class="content">nginx</span><span class="delimiter">&quot;</span></span>
+    }
+}
+filter {
+    <span class="keyword">if</span> [type] == <span class="string"><span class="delimiter">&quot;</span><span class="content">nginx</span><span class="delimiter">&quot;</span></span> {
+        grok {
+            match =&gt; [ <span class="string"><span class="delimiter">&quot;</span><span class="content">message</span><span class="delimiter">&quot;</span></span> , <span class="string"><span class="delimiter">&quot;</span><span class="content">%{COMBINEDAPACHELOG}</span><span class="delimiter">&quot;</span></span>]
+        }
+        date {
+            match =&gt; [ <span class="string"><span class="delimiter">&quot;</span><span class="content">timestamp</span><span class="delimiter">&quot;</span></span> , <span class="string"><span class="delimiter">&quot;</span><span class="content">dd/MMM/YYYY:HH:mm:ss Z</span><span class="delimiter">&quot;</span></span> ]
+        }
+        mutate {
+            convert =&gt; [<span class="string"><span class="delimiter">&quot;</span><span class="content">response</span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">integer</span><span class="delimiter">&quot;</span></span>]
+            convert =&gt; [<span class="string"><span class="delimiter">&quot;</span><span class="content">bytes</span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">integer</span><span class="delimiter">&quot;</span></span>]
+        }
+    }
+}
+output {
+    elasticsearch {
+      hosts =&gt; [ <span class="string"><span class="delimiter">&quot;</span><span class="content">es-server</span><span class="delimiter">&quot;</span></span>]
+      index =&gt; <span class="string"><span class="delimiter">&quot;</span><span class="content">logstash-%{+YYYY.MM.dd}</span><span class="delimiter">&quot;</span></span>
+      document_type =&gt; <span class="string"><span class="delimiter">&quot;</span><span class="content">%{type}</span><span class="delimiter">&quot;</span></span>
+    }
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="split_the_file">Split the file</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In the above config file, the interesting part, the one containing logic is the filter part.
+In order to test it, the first thing to do is split this big file into small pieces:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>01_logstash_input_nginx.conf</code> contains the nginx file input</p>
+</li>
+<li>
+<p><code>02_logstash_filter_nginx.conf</code> contains the nginx filter section</p>
+</li>
+<li>
+<p><code>03_logstash_output.conf</code> contains the elasticsearch output</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>In production, you can load multiple config files as if they were a single one:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>logstash agent -f /etc/logstash.d/*.conf"</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>At test time, by picking a single configuration file <code>02_logstash_filter_nginx.conf</code>, the Nginx log parsing can be tested in isolation.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="write_the_unit_test">Write the unit test</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Now let&#8217;s test the <code>02_logstash_filter_nginx.conf</code> file alone and write a simple Ruby test case.
+As you may know, Logstash is written in JRuby.</p>
+</div>
+<div class="listingblock">
+<div class="title">02_logstash_filter_nginx_spec.rb</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="ruby"><span class="comment"># encoding: utf-8</span>
+require <span class="string"><span class="delimiter">&quot;</span><span class="content">logstash/devutils/rspec/spec_helper</span><span class="delimiter">&quot;</span></span>
+
+<span class="comment"># Load the configuration file</span>
+<span class="class-variable">@@configuration</span> = <span class="constant">String</span>.new
+<span class="class-variable">@@configuration</span> &lt;&lt; <span class="constant">File</span>.read(<span class="string"><span class="delimiter">&quot;</span><span class="content">conf/02_logstash_nginx_filter.conf</span><span class="delimiter">&quot;</span></span>)
+
+describe <span class="string"><span class="delimiter">&quot;</span><span class="content">Nginx filter</span><span class="delimiter">&quot;</span></span> <span class="keyword">do</span>
+
+  config(<span class="class-variable">@@configuration</span>) <i class="conum" data-value="1"></i><b>(1)</b>
+
+  <span class="comment"># Inject input event/message into the pipeline</span>
+  message = <span class="string"><span class="delimiter">&quot;</span><span class="content">172.17.0.1 - - [05/Sep/2016:20:06:17 +0000] </span><span class="char">\&quot;</span><span class="content">GET /images/logos/hubpress.png HTTP/1.1</span><span class="char">\&quot;</span><span class="content"> 200 5432 </span><span class="char">\&quot;</span><span class="content">http://localhost/</span><span class="char">\&quot;</span><span class="content"> </span><span class="char">\&quot;</span><span class="content">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/51.0.2704.79 Chrome/51.0.2704.79 Safari/537.36</span><span class="char">\&quot;</span><span class="content"> </span><span class="char">\&quot;</span><span class="content">-</span><span class="char">\&quot;</span><span class="delimiter">&quot;</span></span>
+  sample(<span class="string"><span class="delimiter">&quot;</span><span class="content">message</span><span class="delimiter">&quot;</span></span> =&gt; message, <span class="string"><span class="delimiter">&quot;</span><span class="content">type</span><span class="delimiter">&quot;</span></span> =&gt; <span class="string"><span class="delimiter">&quot;</span><span class="content">nginx</span><span class="delimiter">&quot;</span></span>) <span class="keyword">do</span> <i class="conum" data-value="2"></i><b>(2)</b>
+    <span class="comment"># Check the ouput event/message properties</span>
+    insist { subject.get(<span class="string"><span class="delimiter">&quot;</span><span class="content">type</span><span class="delimiter">&quot;</span></span>) } == <span class="string"><span class="delimiter">&quot;</span><span class="content">nginx</span><span class="delimiter">&quot;</span></span> <i class="conum" data-value="3"></i><b>(3)</b>
+    insist { subject.get(<span class="string"><span class="delimiter">&quot;</span><span class="content">@timestamp</span><span class="delimiter">&quot;</span></span>).to_iso8601 } == <span class="string"><span class="delimiter">&quot;</span><span class="content">2016-09-05T20:06:17.000Z</span><span class="delimiter">&quot;</span></span>
+    insist { subject.get(<span class="string"><span class="delimiter">&quot;</span><span class="content">verb</span><span class="delimiter">&quot;</span></span>) } == <span class="string"><span class="delimiter">&quot;</span><span class="content">GET</span><span class="delimiter">&quot;</span></span>
+    insist { subject.get(<span class="string"><span class="delimiter">&quot;</span><span class="content">request</span><span class="delimiter">&quot;</span></span>) } == <span class="string"><span class="delimiter">&quot;</span><span class="content">/images/logos/hubpress.png</span><span class="delimiter">&quot;</span></span>
+    insist { subject.get(<span class="string"><span class="delimiter">&quot;</span><span class="content">response</span><span class="delimiter">&quot;</span></span>) } == <span class="integer">200</span>
+    insist { subject.get(<span class="string"><span class="delimiter">&quot;</span><span class="content">bytes</span><span class="delimiter">&quot;</span></span>) } == <span class="integer">5432</span>
+    reject { subject.get(<span class="string"><span class="delimiter">&quot;</span><span class="content">tags</span><span class="delimiter">&quot;</span></span>).include?(<span class="string"><span class="delimiter">&quot;</span><span class="content">_grokparsefailure</span><span class="delimiter">&quot;</span></span>) }
+    reject { subject.get(<span class="string"><span class="delimiter">&quot;</span><span class="content">tags</span><span class="delimiter">&quot;</span></span>).include?(<span class="string"><span class="delimiter">&quot;</span><span class="content">_dateparsefailure</span><span class="delimiter">&quot;</span></span>) }
+  <span class="keyword">end</span>
+<span class="keyword">end</span></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Load configuration file</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Inject input event/message into the pipeline</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Check the ouput event/message properties</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>This test uses the JRuby testing framework called RSpec (<code>describe</code> method).
+The <code>config</code> and <code>sample</code> functions are located in the <a href="https://github.com/elastic/logstash-devutils">Logstash DevUtils</a> library.
+The <code>insist</code> and <code>reject</code> functions are part of the <a href="https://github.com/jordansissel/ruby-insist">Ruby Insist</a> assertion library.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="run_the_unit_tests">Run the unit tests</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>First we will need to download and install additional development libraries like those mentioned above.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ logstash-2.4.0/bin/logstash-plugin install --development
+Installing logstash-devutils, logstash-input-generator, logstash-codec-json, logstash-output-null, logstash-filter-mutate, flores, rspec, stud, pry, rspec-wait, childprocess, ftw, logstash-output-elasticsearch, rspec-sequencing, gmetric, gelf, timecop, jdbc-derby, docker-api, logstash-codec-plain, simplecov, coveralls, longshoreman, rumbster, logstash-filter-kv, logstash-filter-ruby, sinatra, webrick, poseidon, logstash-output-lumberjack, webmock, logstash-codec-line, logstash-filter-grok
+Installation successful</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now we can run the test, Logstash comes with a <code>rspec</code> command to run these spec files.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ logstash-2.4.0/bin/rspec 02_logstash_nginx_filter_spec.rb
+Using Accessor#strict_set for specs
+Run options: exclude {:redis=&gt;true, :socket=&gt;true, :performance=&gt;true, :couchdb=&gt;true, :elasticsearch=&gt;true, :elasticsearch_secure=&gt;true, :export_cypher=&gt;true, :integration=&gt;true, :windows=&gt;true}
+.
+
+Finished in 0.115 seconds (files took 0.784 seconds to load)
+1 example, 0 failures
+
+Randomized with seed 4384</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>rspec</code> command can also run multiple tests at once.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ logstash-2.4.0/bin/rspec spec -P '**/*_spec.rb'</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To prevent test dependencies, they are randomly ordered: This called randomized testing.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="give_me_the_code">Give me the code!</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>All the code shown in this article is available in <a href="https://github.com/gquintana/gquintana.github.io/tree/master/sources/2016-09-07-Testing-Logstash-configuration">Github</a>.</p>
+</div>
+</div>
+</div>
+    </div>
+    <div class="clearfix">
+        <h4>Other posts</h4>
+        <ul>
+            
+                <li>2019-12-10
+                    <a href="/2019/12/10/Kafka-connect-plugin-install.html">Kafka connect plugin install</a>
+                </li>
+            
+                <li>2019-07-03
+                    <a href="/2019/07/03/Kafka-integration-tests.html">Kafka integration tests</a>
+                </li>
+            
+                <li>2019-05-17
+                    <a href="/2019/05/17/Logging-configuration.html">Logging configuration</a>
+                </li>
+            
+                <li>2019-04-25
+                    <a href="/2019/04/25/Ansible-collection-processing.html">Ansible collection processing</a>
+                </li>
+            
+                <li>2017-12-01
+                    <a href="/2017/12/01/Structured-logging-with-SL-FJ-and-Logback.html">Structured logging with SLF4J and Logback</a>
+                </li>
+            
+        </ul>
+    </div>
+</div>
+
+        </main>
+        <footer class="footer text-muted">
+            <div class="container">
+                <p class="float-right">
+                    <a href="#"><i class="fa fa-arrow-up" aria-hidden="true"></i>
+ Back to top</a>
+                </p>
+                <p>Made with <i class="fa fa-heart" aria-hidden="true"></i> by Gérald Quintana</p>
+        </footer>
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+    </body>
+</html>

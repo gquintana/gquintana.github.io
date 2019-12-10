@@ -1,0 +1,330 @@
+<!doctype html>
+<!--[if IE 9]>
+<html class="lt-ie10" lang="en"> <![endif]-->
+<html class="no-js" lang="en" data-useragent="Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0)">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Securing remote JMX</title>
+        <meta name="description" content="Gérald's technical blog about Java, Kafka, Elasticsearch, DevOps...">
+        <meta name="author" content="Gérald Quintana">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="/css/coderay.css">
+        <link rel="stylesheet" href="/css/asciidoc2.css">
+        <link rel="stylesheet"
+              href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/default.min.css">
+    </head>
+    <body>
+        <header class="container sticky-top">
+            <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+                 <a class="navbar-brand" href="/"><h1>JRald blog</h1></a>
+                 <h2>
+                     <a href="https://twitter.com/gerald_quintana"><i class="fa fa-twitter"></i></a>
+                     <a href="https://github.com/gquintana"><i class="fa fa-github"></i></a>
+                 </h2>
+            </nav>
+        </header>
+        <main class="container position-relative " role="main">
+            <div>
+    <h1>Securing remote JMX</h1>
+    <div>
+        <img class="rounded float-right" src="../../../images/logos/java.png"/>
+        <h5>
+            <span>2016-09-01</span>
+            <span class="badge badge-secondary">java</span> 
+        </h5>
+
+        <div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Like it or not, JMX is one the main tools for JVM monitoring.
+If you are using Tomcat, Kafka or Cassandra you&#8217;ll have to setup JMX tools to monitor them.</p>
+</div>
+<div class="paragraph">
+<p>But JMX has several drawbacks:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>It&#8217;s based on the obsolete RMI protocol</p>
+</li>
+<li>
+<p>It can trigger harmful functions like garbage collection</p>
+</li>
+<li>
+<p>It can be used for nasty exploits like <a href="https://issues.apache.org/jira/browse/COLLECTIONS-580">invoking arbitrary code</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>So securing JMX is not an option.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="going_remote">Going remote</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>By default, JMX is only locally accessible and secure: It can be accessed through Unix sockets.
+This means you need to have access to the machine and run JMX tools with the same user as your application.
+It&#8217;s usually enough for development but not for production.</p>
+</div>
+<div class="paragraph">
+<p>To enable remote JMX, the documentations tells you turn on some JVM flags:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>java -Dcom.sun.management.jmxremote=true \
+     -Dcom.sun.management.jmxremote.port=31419 \
+     -Dcom.sun.management.jmxremote.ssl=false \
+     -Dcom.sun.management.jmxremote.authenticate=false \
+     Tomcat</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The JVM will starting listening on <strong>0.0.0.0:31419</strong> for JMX requests.
+Anybody will be able to plug any JMX tool (JConsole, JVisualVM, Mission Control&#8230;&#8203;) from a remote machine.</p>
+</div>
+<div class="paragraph">
+<p>If you have a firewall (IPTable or the like) to protect your server, and opened the 31419 TCP port,
+or connecting through a tunnel, the JMX tools may fail to connect to the server.
+At first, the JMX client connects to port <strong>31419</strong>, but gets redirected to a randomly chosen port (RMI WTF!).
+To prevent this behaviour and force the JVM to use a single port:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>java -Dcom.sun.management.jmxremote=true \
+     -Dcom.sun.management.jmxremote.port=31419 \
+     -Dcom.sun.management.jmxremote.rmi.port=31419 \
+     -Dcom.sun.management.jmxremote.ssl=false \
+     -Dcom.sun.management.jmxremote.authenticate=false \
+     Tomcat</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="file_based_authentication">File based authentication</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This configuration is nice for debugging but not secure at all.
+Let&#8217;s add authentication on this JMX connection.</p>
+</div>
+<div class="paragraph">
+<p>First create a <strong>password</strong> file, similar to <strong>/etc/password</strong>, containing login/password pairs:</p>
+</div>
+<div class="listingblock">
+<div class="title">jmxremote.password</div>
+<div class="content">
+<pre class="CodeRay highlight"><code>admin  adminpassword
+user   userpassword</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then create an <strong>access</strong> file, similar to <strong>/etc/groups</strong>, containing login/group pairs:</p>
+</div>
+<div class="listingblock">
+<div class="title">jmxremote.access</div>
+<div class="content">
+<pre class="CodeRay highlight"><code>admin readwrite <i class="conum" data-value="1"></i><b>(1)</b>
+user  readonly <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>admin has read/write access</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>user  has read-only access</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>These two files should have limited access rights.</p>
+</div>
+<div class="paragraph">
+<p>Finally, tell the JVM to use these files to authenticate users:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>java -Dcom.sun.management.jmxremote=true \
+     -Dcom.sun.management.jmxremote.port=31419 \
+     -Dcom.sun.management.jmxremote.rmi.port=31419 \
+     -Dcom.sun.management.jmxremote.ssl=false \
+     -Dcom.sun.management.jmxremote.password.file=/path/to/jmxremote.password \
+     -Dcom.sun.management.jmxremote.access.file=/path/to/jmxremote.access \
+     Tomcat</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="using_ssl">Using SSL</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>With this configuration, JVM tools have to provide a login and password to access to MBeans.
+But, the password is sent over the wire without encryption.
+Let&#8217;s connect to JMX though SSL.</p>
+</div>
+<div class="paragraph">
+<p>You may already known that, in the Java land,
+private keys and trusted certificates are stored in wallets known as <strong>keystores</strong>,
+and using the <strong>JKS</strong> file format.
+A tool named <strong>keytool</strong> provided with the JDK is used to import/export keys and certs in the keystore.</p>
+</div>
+<div class="paragraph">
+<p>Once the <strong>keystore</strong> (containing private key matching the server name along with certificate chain)
+and the <strong>truststore</strong> (containing trusted certificates) are built,
+just reference them:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>java -Dcom.sun.management.jmxremote=true \
+     -Dcom.sun.management.jmxremote.port=31419 \
+     -Dcom.sun.management.jmxremote.rmi.port=31419 \
+     -Dcom.sun.management.jmxremote.password.file=/path/to/jmxremote.password \
+     -Dcom.sun.management.jmxremote.access.file=/path/to/jmxremote.access \
+     -Dcom.sun.management.jmxremote.registry.ssl=true \
+     -Djavax.net.ssl.keyStore=/path/to/keystore.jks \
+     -Djavax.net.ssl.keyStorePassword=keystore_password \
+     -Djavax.net.ssl.trustStore=/path/to/truststore.jks \
+     -Djavax.net.ssl.trustStorePassword=truststore_password \
+     Tomcat</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To connect, the JMX tools using SSL, you&#8217;ll have to provide the trusted certificates.
+For instance, to start the <strong>JConsole</strong>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>jconsole \
+     -J-Djavax.net.ssl.trustStore=/path/to/truststore.jks \
+     -J-Djavax.net.ssl.trustStorePassword=truststore_password</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="jmx_configuration_file">JMX configuration file</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Again, this configuration has problem:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Having passwords on the command line is not a good option,
+because it&#8217;s easy to use <code>ps</code> command to grab them.</p>
+</li>
+<li>
+<p>Having some many options on the command like is not elegant</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s place all these options in a dedicated file:</p>
+</div>
+<div class="listingblock">
+<div class="title">jmxremote.properties</div>
+<div class="content">
+<pre>com.sun.management.jmxremote=true
+com.sun.management.jmxremote.port=31419
+com.sun.management.jmxremote.rmi.port=31419
+com.sun.management.jmxremote.password.file=/path/to/jmxremote.password
+com.sun.management.jmxremote.access.file=/path/to/jmxremote.access
+com.sun.management.jmxremote.registry.ssl=true
+com.sun.management.jmxremote.ssl.config.file=/path/to/jmxremote.properties <i class="conum" data-value="1"></i><b>(1)</b>
+
+javax.net.ssl.keyStore=/path/to/keystore.jks
+javax.net.ssl.keyStorePassword=keystore_password
+javax.net.ssl.trustStore=/path/to/truststore.jks
+javax.net.ssl.trustStorePassword=truststore_password</pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Path to file containing <code>javax.net.ssl.*</code> properties</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>And now, the command line sums up to</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>java -Dcom.sun.management.config.file=/path/to/jmxremote.properties \
+     Tomcat</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Such a JMX configuration file already exists in your JRE, it&#8217;s named <code>JRE/lib/management/management.properties</code>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="some_pointers">Some pointers</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://docs.oracle.com/javase/8/docs/technotes/guides/management/">Java 8 JMX</a></p>
+</li>
+<li>
+<p><a href="https://www.jtips.info/index.php?title=JMX/Remote">JTips</a> in French</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+    </div>
+    <div class="clearfix">
+        <h4>Other posts</h4>
+        <ul>
+            
+                <li>2019-12-10
+                    <a href="/2019/12/10/Kafka-connect-plugin-install.html">Kafka connect plugin install</a>
+                </li>
+            
+                <li>2019-07-03
+                    <a href="/2019/07/03/Kafka-integration-tests.html">Kafka integration tests</a>
+                </li>
+            
+                <li>2019-05-17
+                    <a href="/2019/05/17/Logging-configuration.html">Logging configuration</a>
+                </li>
+            
+                <li>2019-04-25
+                    <a href="/2019/04/25/Ansible-collection-processing.html">Ansible collection processing</a>
+                </li>
+            
+                <li>2017-12-01
+                    <a href="/2017/12/01/Structured-logging-with-SL-FJ-and-Logback.html">Structured logging with SLF4J and Logback</a>
+                </li>
+            
+        </ul>
+    </div>
+</div>
+
+        </main>
+        <footer class="footer text-muted">
+            <div class="container">
+                <p class="float-right">
+                    <a href="#"><i class="fa fa-arrow-up" aria-hidden="true"></i>
+ Back to top</a>
+                </p>
+                <p>Made with <i class="fa fa-heart" aria-hidden="true"></i> by Gérald Quintana</p>
+        </footer>
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+    </body>
+</html>

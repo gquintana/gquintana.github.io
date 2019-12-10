@@ -1,0 +1,367 @@
+<!doctype html>
+<!--[if IE 9]>
+<html class="lt-ie10" lang="en"> <![endif]-->
+<html class="no-js" lang="en" data-useragent="Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0)">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Ansible and rolling upgrades</title>
+        <meta name="description" content="How to upgrade a distributed system with Ansible.">
+        <meta name="author" content="Gérald Quintana">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="/css/coderay.css">
+        <link rel="stylesheet" href="/css/asciidoc2.css">
+        <link rel="stylesheet"
+              href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/default.min.css">
+    </head>
+    <body>
+        <header class="container sticky-top">
+            <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+                 <a class="navbar-brand" href="/"><h1>JRald blog</h1></a>
+                 <h2>
+                     <a href="https://twitter.com/gerald_quintana"><i class="fa fa-twitter"></i></a>
+                     <a href="https://github.com/gquintana"><i class="fa fa-github"></i></a>
+                 </h2>
+            </nav>
+        </header>
+        <main class="container position-relative " role="main">
+            <div>
+    <h1>Ansible and rolling upgrades</h1>
+    <div>
+        <img class="rounded float-right" src="../../../images/logos/ansible.png"/>
+        <h5>
+            <span>2017-07-15</span>
+            <span class="badge badge-secondary">ansible</span> <span class="badge badge-secondary">elasticsearch</span> <span class="badge badge-secondary">kafka</span> <span class="badge badge-secondary">cassandra</span> 
+        </h5>
+
+        <div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Ansible is a nice tool to deploy distributed systems like Elasticsearch, Kafka, Cassandra and the like.
+These systems are built with high availability in mind and can tolerate partial failures.
+However, upgrading these softwares, or updating their configuration, requires restarting each member of the cluster.
+Care must be taken when deploying changes to avoid complete unavailability.</p>
+</div>
+<div class="paragraph">
+<p>The aim of this article is to describe a pattern I discovered
+trying to improve the deployment speed of Ansible playbooks
+and yet being able to guarantee availability during this upgrade process.
+This is the story of two contradicting goals.
+To improve deployment speed, you need to deploy all hosts in parallel.
+To guarantee availability, you can&#8217;t stop all hosts at the same time: you must deploy each host one after the other.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="the_problem">The problem</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Let&#8217;s take the Elasticsearch example to explain Ansible basics.</p>
+</div>
+<div class="paragraph">
+<p>The tasks required to deploy Elasticsearch on each host of the cluster are gathered in an <code>elasticsearch</code> role.
+In short, the <code>elasticsearch</code> role is the recipe to install and update an Elasticsearch on a given machine.
+Once declared, this role is applied to all hosts belonging to the <code>elasticsearch</code> group in the Ansible playbook.</p>
+</div>
+<div class="listingblock">
+<div class="title">playbook.yml</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="yaml">- <span class="string"><span class="content">hosts: elasticsearch</span></span>
+  <span class="key">any_errors_fatal</span>: <span class="string"><span class="content">true</span></span>
+  <span class="key">roles</span>:
+    - <span class="string"><span class="content">role: elasticsearch</span></span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>At some point, the <code>elasticsearch</code> role will probably contain something to stop Elasticsearch in order for changes to be reloaded:</p>
+</div>
+<div class="listingblock">
+<div class="title">roles/elasticsearch/tasks/main.yml</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="yaml"><span class="head"><span class="head">...</span></span>
+- <span class="string"><span class="content">name: Stop service</span></span>
+  <span class="key">become</span>: <span class="string"><span class="content">true</span></span>
+  <span class="key">service</span>:
+    <span class="key">name</span>: <span class="string"><span class="content">elasticsearch</span></span>
+    <span class="key">state</span>: <span class="string"><span class="content">stopped</span></span>
+    <span class="key">enabled</span>: <span class="string"><span class="content">true</span></span>
+<span class="head"><span class="head">...</span></span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This naive Ansible playbook will stop all Elasticsearch nodes at the same time,
+making the whole cluster unavailable until enough nodes are started again.
+To fix this problem, the role can be ran in serial instead of parallel:</p>
+</div>
+<div class="listingblock">
+<div class="title">deploy.yml</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="yaml">- <span class="string"><span class="content">hosts: es</span></span>
+  <span class="key">serial</span>: <span class="string"><span class="content">1</span></span> <span class="comment"># Force serial execution</span>
+  <span class="key">roles</span>:
+    - <span class="string"><span class="content">role: elasticsearch</span></span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>But deploying every host, one after the other (in serial), takes a very long time and makes deployment endless.
+Bigger clusters mean longer deployment times.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="refactoring_the_role">Refactoring the role</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The main idea to improve speed is to split the role into multiple steps, and do as much as possible in parallel:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>In Parallel</strong>: Deploy system settings, software settings, software binaries.
+But don&#8217;t stop anything and don&#8217;t remove anything at this point.</p>
+</li>
+<li>
+<p><strong>In Serial</strong>:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Stop the node</p>
+</li>
+<li>
+<p>Install or upgrade the node as quickly as possible, do as few things as possible.</p>
+</li>
+<li>
+<p>Start the node</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><strong>In Parallel</strong>: finish applying settings on the running cluster and remove old files and binaries.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>For this purpose, describe each step in its own YAML file:
+<code>before.yml</code> for step 1, <code>stop_start.yml</code> for step 2 and <code>after.yml</code> for step 3.
+Finally, the role entry point <code>main.yml</code> will include the appropriate step using a variable named <code>elasticsearch_step</code>:</p>
+</div>
+<div class="listingblock">
+<div class="title">roles/elasticsearch/tasks/main.yml</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="yaml">- <span class="string"><span class="content">name: &quot;Running step {{ elasticsearch_step }}&quot;</span></span>
+  <span class="key">include</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">{{ elasticsearch_step }}.yml</span><span class="delimiter">&quot;</span></span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This little trick, will allow calling the <code>elasticsearch</code> role, yet running only a part of it.</p>
+</div>
+<div class="paragraph">
+<p>We can also create a fake step including all the steps, it will allow to run the whole role as before (more on that later):</p>
+</div>
+<div class="listingblock">
+<div class="title">roles/elasticsearch/tasks/all.yml</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="yaml">- <span class="string"><span class="content">include: &quot;before.yml&quot;</span></span>
+- <span class="string"><span class="content">include: &quot;stop_start.yml&quot;</span></span>
+- <span class="string"><span class="content">include: &quot;after.yml&quot;</span></span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="refactoring_the_playbook">Refactoring the playbook</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Now, in the playbook we will call the role 3 times, each individual step being called independently.</p>
+</div>
+<div class="listingblock">
+<div class="title">playbook.yml</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="yaml"><span class="comment"># In parallel</span>
+- <span class="string"><span class="content">hosts: elasticsearch</span></span>
+  <span class="key">any_errors_fatal</span>: <span class="string"><span class="content">true</span></span>
+  <span class="key">roles</span>:
+    - <span class="string"><span class="content">role: elasticsearch</span></span>
+      <span class="key">elasticsearch_step</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">before</span><span class="delimiter">&quot;</span></span>
+
+<span class="comment"># In serial</span>
+- <span class="string"><span class="content">hosts: elasticsearch</span></span>
+  <span class="key">any_errors_fatal</span>: <span class="string"><span class="content">true</span></span>
+  <span class="key">serial</span>: <span class="string"><span class="content">1</span></span>
+  <span class="key">roles</span>:
+    - <span class="string"><span class="content">role: elasticsearch</span></span>
+      <span class="key">elasticsearch_step</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">stop_start</span><span class="delimiter">&quot;</span></span>
+
+<span class="comment"># In parallel</span>
+- <span class="string"><span class="content">hosts: elasticsearch</span></span>
+  <span class="key">any_errors_fatal</span>: <span class="string"><span class="content">true</span></span>
+  <span class="key">roles</span>:
+    - <span class="string"><span class="content">role: elasticsearch</span></span>
+      <span class="key">elasticsearch_step</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">after</span><span class="delimiter">&quot;</span></span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To install a brand new cluster, there is nothing to stop, and we don&#8217;t fear anything.
+In this particular case, this role can still be used, and the <code>stop_start</code> step can be called in parallel:</p>
+</div>
+<div class="listingblock">
+<div class="title">playbook.yml</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="yaml"><span class="comment"># New cluster</span>
+- <span class="string"><span class="content">hosts: elasticsearch</span></span>
+  <span class="key">any_errors_fatal</span>: <span class="string"><span class="content">true</span></span>
+  <span class="key">roles</span>:
+    - <span class="string"><span class="content">role: elasticsearch</span></span>
+      <span class="key">elasticsearch_step</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">before</span><span class="delimiter">&quot;</span></span>
+    - <span class="string"><span class="content">role: elasticsearch</span></span>
+      <span class="key">elasticsearch_step</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">stop_start</span><span class="delimiter">&quot;</span></span>
+    - <span class="string"><span class="content">role: elasticsearch</span></span>
+      <span class="key">elasticsearch_step</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">after</span><span class="delimiter">&quot;</span></span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Or even simpler, we can use the fake <code>all</code> step:</p>
+</div>
+<div class="listingblock">
+<div class="title">playbook.yml</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="yaml"><span class="comment"># New cluster</span>
+- <span class="string"><span class="content">hosts: elasticsearch</span></span>
+  <span class="key">any_errors_fatal</span>: <span class="string"><span class="content">true</span></span>
+  <span class="key">roles</span>:
+    - <span class="string"><span class="content">role: elasticsearch</span></span>
+      <span class="key">elasticsearch_step</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">all</span><span class="delimiter">&quot;</span></span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You may have noticed the <code>serial</code> attribute is a number, I set to 1.
+For big clusters, and provided you have more than one replica of your data,
+you can stop&#8217;n&#8217;start nodes two by two, three by three&#8230;&#8203;</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="unreloaded_configuration">Unreloaded configuration</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Most of the time, I am only running the Ansible playbook to change settings that don&#8217;t need nodes to be restarted.
+To skip the expensive part, the trick is to detect in the <code>before</code> step whether nodes should be restarted or not.
+A a result, the <code>before</code> step should mark whether the <code>stop_start</code> is required:</p>
+</div>
+<div class="listingblock">
+<div class="title">roles/elasticsearch/tasks/before.yml</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="yaml">- <span class="string"><span class="content">set_fact:</span><span class="content">
+    elasticsearch_restart_needed: True</span></span>
+  <span class="key">when</span>: <span class="string"><span class="content">...</span></span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>On lucky days, you can skip the expensive <code>stop_start</code> step and have a quick and fully parallel deployment.</p>
+</div>
+<div class="paragraph">
+<p>Other days, when upgrading software version, or changing configuration which can not be hot reloaded, running the Ansible playbook will be slower.
+Node specific configuration (<code>elasticsearch.yml</code>, Kafka <code>server.properties</code>&#8230;&#8203;) is usually part of the problem as it requires node restart.</p>
+</div>
+<div class="listingblock">
+<div class="title">playbook.yml</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="yaml">- <span class="string"><span class="content">hosts: elasticsearch</span></span>
+  <span class="key">any_errors_fatal</span>: <span class="string"><span class="content">true</span></span>
+  <span class="key">serial</span>: <span class="string"><span class="content">1</span></span>
+  <span class="key">roles</span>:
+    - <span class="string"><span class="content">role: elasticsearch</span></span>
+      <span class="key">elasticsearch_step</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">stop_start</span><span class="delimiter">&quot;</span></span>
+  <span class="key">when</span>: <span class="string"><span class="content">elasticsearch_restart_needed defined and elasticsearch_restart_needed</span></span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="cluster_wide_configuration">Cluster wide configuration</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In distributed systems, some configuration must be done only once for the whole cluster.
+Here are some examples:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Elasticsearch</strong>: License, Users and grants, Indices, Mappings, Templates, Cluster settings (allocation awareness, minimum master nodes&#8230;&#8203;)</p>
+</li>
+<li>
+<p><strong>Kafka</strong>: Users and grants, Topics</p>
+</li>
+<li>
+<p><strong>Cassandra</strong>: Users and grants, Keyspaces, Tables</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This kind of configuration must be done on a running cluster, the cluster will probably replicate the change using internal specific mechanisms.
+Obviously, it must be ran in the <code>after</code> step, once the cluster is started and listening.</p>
+</div>
+<div class="listingblock">
+<div class="title">roles/elasticsearch/tasks/after.yml</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="yaml"><span class="comment"># Configure article index</span>
+- <span class="string"><span class="content">uri:</span><span class="content">
+    url: &quot;http://{{ ansible_ssh_hostname }}:9200/article&quot;
+    method: PUT
+    body_format: json
+    body: &quot;{{ lookup('file','article_setting.json') }}&quot;</span></span>
+  <span class="key">run_once</span>: <span class="string"><span class="content">true</span></span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The trick here is to use <code>run_once</code> to play this task on a single node.</p>
+</div>
+</div>
+</div>
+    </div>
+    <div class="clearfix">
+        <h4>Other posts</h4>
+        <ul>
+            
+                <li>2019-12-10
+                    <a href="/2019/12/10/Kafka-connect-plugin-install.html">Kafka connect plugin install</a>
+                </li>
+            
+                <li>2019-07-03
+                    <a href="/2019/07/03/Kafka-integration-tests.html">Kafka integration tests</a>
+                </li>
+            
+                <li>2019-05-17
+                    <a href="/2019/05/17/Logging-configuration.html">Logging configuration</a>
+                </li>
+            
+                <li>2019-04-25
+                    <a href="/2019/04/25/Ansible-collection-processing.html">Ansible collection processing</a>
+                </li>
+            
+                <li>2017-12-01
+                    <a href="/2017/12/01/Structured-logging-with-SL-FJ-and-Logback.html">Structured logging with SLF4J and Logback</a>
+                </li>
+            
+        </ul>
+    </div>
+</div>
+
+        </main>
+        <footer class="footer text-muted">
+            <div class="container">
+                <p class="float-right">
+                    <a href="#"><i class="fa fa-arrow-up" aria-hidden="true"></i>
+ Back to top</a>
+                </p>
+                <p>Made with <i class="fa fa-heart" aria-hidden="true"></i> by Gérald Quintana</p>
+        </footer>
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+    </body>
+</html>
