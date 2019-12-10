@@ -1,5 +1,5 @@
 = JRald Blog
 :showtitle:
 :page-title: JRald Blog
-:page-description: A forkable blog-ready Jekyll site using AsciiDoc
+:page-description: Gérald Quintana blog based on Jekyll and Asciidoc
 :page-layout: index

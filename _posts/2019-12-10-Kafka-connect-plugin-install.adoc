@@ -1,0 +1,107 @@
+= Kafka connect plugin install
+:page-image: /images/logos/kafka.png
+:published_at: 2019-12-10
+:page-tags: [java,kafka]
+:page-layout: post
+:page-description: "How to install a Kafka connect plugin without confluent-hub"
+
+You want to use a Kafka Connect plugin with stock Apache Kafka,
+or you can not use the confluent-hub tool because your server is behind
+a firewall. Then this blog post is for you.
+
+I'll show how to get Kafka Connect JDBC running without using `confluent-hub install`.
+
+== Download
+
+First, use the https://www.confluent.io/hub/[Confluent Hub] to find Kafka connect plugins.
+Once you've found the plugin you were looking for, you should check the Licensing.
+Most plugins created by Confluent Inc use the https://www.confluent.io/confluent-community-license/[Confluent Community License]
+and are mostly open source.
+
+When you click on the Download button, you'll have to provide an email to get the plugin zip file.
+You won't be able to use your personal gmail.com address:
+you'll have to use something looking more professional.
+I guess Confluent sales are not interested in individuals who can't afford expensive license fees.
+
+I'll take the Kafka Connect JDBC plugin as an example.
+Once you've shown your passport to Confluent toll, you'll get a `confluentinc-kafka-connect-jdbc-5.3.1.zip`.
+
+== Install
+
+Unzip the `confluentinc-kafka-connect-jdbc-5.3.1.zip` and you'll get a `confluentinc-kafka-connect-jdbc-5.3.1` containing:
+
+* `lib` contains binaries Jar files
+* `etc` contains sample configuration files
+* `doc` contains some documentation and the license file
+
+Then in your Kafka folder (`/opt/kafka_2.12-2.3.1`):
+
+[source,shell]
+----
+$ cd /opt/kafka_2.12-2.3.1
+$ mkdir plugins #<1>
+$ cd plugins
+$ ln -s /opt/confluentinc-kafka-connect-jdbc-5.3.1/lib jdbc #<2>
+----
+<1> Create a `plugins` folder to contain plugins
+<2> Link the `lib` folder of the plugin in the `plugins` folder
+
+== Configure
+
+In the Kafka Connect configuration file `connect-standalone.properties` (or `connect-distributed.properties`),
+reference the `plugins` folder:
+
+.connect-standalone.properties
+[source,ini]
+----
+bootstrap.servers=localhost:9092
+
+plugin.path=/opt/kafka_2.12-2.3.1/plugins #<1>
+----
+<1> Path to the `plugins` folder
+
+Finally use the sample config files in `confluentinc-kafka-connect-jdbc-5.3.1/etc` to create your own:
+
+.thing-jdbc-sink.properties
+[source,ini]
+----
+name=thing-jdbc-sink
+connector.class=io.confluent.connect.jdbc.JdbcSinkConnector
+tasks.max=1
+topics=thing #<1>
+connection.url=jdbc:sqlite:thing.db #<2>
+auto.create=true
+----
+<1> Input topic containing Avro values. This means you'll need the Avro Converter plugin and the Confluent Schema Registry as well.
+<2> Output database
+
+== Run
+
+To run Kafka Connect in standalone mode just run it with above config files:
+
+[source,shell]
+----
+$ bin/connect-standalone.sh config/connect-standalone.properties config/thing-jdbc-sink.properties
+----
+
+To check the connector is properly running, you can cUrl the REST API:
+
+[source,shell]
+----
+$ curl -s http://127.0.1.1:8083/connectors/thing-jdbc-sink/status |jq '.'
+{
+  "name": "thing-jdbc-sink",
+  "connector": {
+    "state": "RUNNING",
+    "worker_id": "127.0.1.1:8083"
+  },
+  "tasks": [
+    {
+      "id": 0,
+      "state": "RUNNING",
+      "worker_id": "127.0.1.1:8083"
+    }
+  ],
+  "type": "sink"
+}
+----
