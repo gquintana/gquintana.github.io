@@ -19,9 +19,6 @@ Most plugins created by Confluent Inc use the https://www.confluent.io/confluent
 and are mostly open source.
 
 When you click on the Download button, you'll have to provide an email to get the plugin zip file.
-You won't be able to use your personal gmail.com address:
-you'll have to use something looking more professional.
-I guess Confluent sales are not interested in individuals who can't afford expensive license fees.
 
 I'll take the Kafka Connect JDBC plugin as an example.
 Once you've shown your passport to Confluent toll, you'll get a `confluentinc-kafka-connect-jdbc-5.3.1.zip`.
