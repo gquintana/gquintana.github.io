@@ -1,0 +1,35 @@
+---
+application:
+  # DHT22 sensor connected to GPIO12.
+  pin: 12
+  database: dht22
+  period: 60
+logging:
+  version: 1
+  formatters:
+    brief:
+      format: '%(message)s'
+    default:
+      format: '%(asctime)s %(levelname)-8s %(name)-15s %(message)s'
+      datefmt: '%Y-%m-%d %H:%M:%S'
+  handlers:
+    console:
+      class: logging.StreamHandler
+      formatter: brief
+      stream: ext://sys.stdout
+    file:
+      class: logging.handlers.RotatingFileHandler
+      formatter: default
+      filename: /var/log/dht22/dht22.log
+      maxBytes: 1024
+      backupCount: 3
+  loggers:
+    DHT22Reader:
+      level: INFO
+    InfluxDBWriter:
+      level: INFO
+  root:
+    level: INFO
+    handlers:
+      - console
+      - file

@@ -1,0 +1,12 @@
+[Unit]
+Description=DHT22 Poller
+After=influxdb.service
+
+[Service]
+Type=simple
+User=pi
+ExecStart=/usr/bin/python3 /home/pi/dht22.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
