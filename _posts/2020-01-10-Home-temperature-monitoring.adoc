@@ -23,15 +23,18 @@ which brought me to the DHT22 and DS18B20 sensors.
 
 I bought the temperature module from https://www.az-delivery.com/products/dht22-temperatursensor-modul[AZ Delivery].
 It's a DHT22 (AM2302) temperature and humidity sensor soldered on tiny board with a small resistance.
-As a result, all you need is provided (even jumper wires), you don't need anything else (no breadboard or resistance).
+As a result, all you need is provided (even jumper wires), you don't need anything else: no breadboard, no resistance...
 AZ Delivery also provides some documentation about their product as a PDF https://www.az-delivery.com/products/dht-22-modul-kostenfreies-e-book[e-book].
 which explains how to plug this module on either an Arduino or a Raspberry.
+
+image::{image_dir}/raspberrypi-dht22.jpg[Raspberry Pi 3]
 
 I used the Raspberry Pi 3 I had, but a smaller or older board should be enough.
 
 == Software
 
 === Raspbian
+
 First I flashed a brand new Raspbian Buster on the micro SD card.
 The image can be downloaded https://www.raspberrypi.org/downloads/raspbian/[on Raspberry Pi web site].
 With https://www.raspberrypi.org/documentation/configuration/raspi-config.md[raspi-config] I configured the network (WiFi),
@@ -70,7 +73,7 @@ curl -s -v http://localhost:8086/ping
 
 === Grafana
 
-As Grafana is concerned, I just downloaded the .deb file and installed it as described
+As Grafana is concerned, I downloaded the .deb file and installed it as described
 on https://grafana.com/grafana/download?platform=arm[Grafana web site]
 [source,shell]
 ----
@@ -96,7 +99,8 @@ The default admin/admin user account can be changed in `/etc/grafana/grafana.ini
 The code reads temperature and humidity from the sensor every minute or so.
 And then writes the result in the InfluxDB database.
 
-I hesitated with Go language, but I chose Python because I immediately found simple examples.
+I hesitated to do it with Go language,
+but I chose Python because I immediately found simple code examples.
 
 === Python
 
@@ -131,9 +135,16 @@ The InfluxDB database can be created with `influx` CLI tool
 influx -execute 'create database dht22'
 ----
 
-The sources are here.
-There are 3 files:
+The sources are https://github.com/gquintana/gquintana.github.io/tree/develop/sources/2020-01-10-Home-temperature-monitoring[here],
+there are 3 files:
 
-* `dht22.py`: The Python code
-* `dht22.yml`: The config file
-* `dht22.service`: The service unit to place in `/etc/systemd/system`
+* `dht22.py`: The Python code to read DHT22 sensor and write the result into InfluxDB
+* `dht22.yml`: The config file telling where the sensor is plugged and which database to use.
+* `dht22.service`: The service unit to place in `/etc/systemd/system` to automatically start `dht22.py` when Raspberry Pi boots.
+
+I had 2 kinds of problems:
+
+. There were holes in the graphs because the polling loop was stuck for more than a minute.
+  At the moment, I ignore why.
+. The sensor returned out of range values (3200% humidity, -10°C inside).
+  So I added measure validation to avoid weird graphs.

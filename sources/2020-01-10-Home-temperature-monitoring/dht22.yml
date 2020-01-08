@@ -21,7 +21,7 @@ logging:
       class: logging.handlers.RotatingFileHandler
       formatter: default
       filename: /var/log/dht22/dht22.log
-      maxBytes: 1024
+      maxBytes: 1048576
       backupCount: 3
   loggers:
     DHT22Reader:
