@@ -1,0 +1,288 @@
+<!doctype html>
+<!--[if IE 9]>
+<html class="lt-ie10" lang="en"> <![endif]-->
+<html class="no-js" lang="en" data-useragent="Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0)">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Home temperature monitoring</title>
+        <meta name="description" content="Monitor your home temperature and humidity">
+        <meta name="author" content="Gérald Quintana">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="/css/coderay.css">
+        <link rel="stylesheet" href="/css/asciidoc2.css">
+        <link rel="stylesheet"
+              href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/default.min.css">
+    </head>
+    <body>
+        <header class="container sticky-top">
+            <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+                 <a class="navbar-brand" href="/"><h1>JRald blog</h1></a>
+                 <h2>
+                     <a href="https://twitter.com/gerald_quintana"><i class="fa fa-twitter"></i></a>
+                     <a href="https://github.com/gquintana"><i class="fa fa-github"></i></a>
+                 </h2>
+            </nav>
+        </header>
+        <main class="container position-relative " role="main">
+            <div>
+    <h1>Home temperature monitoring</h1>
+    <div>
+        <img class="rounded float-right" src="../../../images/logos/raspberrypi.png"/>
+        <h5>
+            <span>2020-01-10</span>
+            <span class="badge badge-secondary">python</span> <span class="badge badge-secondary">raspberrypi</span> <span class="badge badge-secondary">influxdb</span> <span class="badge badge-secondary">grafana</span> 
+        </h5>
+
+        <div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>I had an unused Raspberry Pi 3 and some free time during holidays.
+Here is what I built to monitor temperature and humidity.
+It&#8217;s just a working prototype but it was both simple and fun to do.</p>
+</div>
+<div class="paragraph">
+<p>I used Grafana and InfluxDB because both run on ARM and Raspberry,
+and are very easy to set up.
+Both use the Go language, so no specific runtime environment is needed.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/images/2020-01-10-Home-temperature-monitoring/grafana-dashboard.png" alt="Grafana Dashboard">
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="hardware">Hardware</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>It all started with the <a href="https://www.raspberryweather.com/">Raspberry Weather</a> web site,
+which brought me to the DHT22 and DS18B20 sensors.</p>
+</div>
+<div class="paragraph">
+<p>I bought the temperature module from <a href="https://www.az-delivery.com/products/dht22-temperatursensor-modul">AZ Delivery</a>.
+It&#8217;s a DHT22 (AM2302) temperature and humidity sensor soldered on tiny board with a small resistance.
+As a result, all you need is provided (even jumper wires), you don&#8217;t need anything else: no breadboard, no resistance&#8230;&#8203;
+AZ Delivery also provides some documentation about their product as a PDF <a href="https://www.az-delivery.com/products/dht-22-modul-kostenfreies-e-book">e-book</a>.
+which explains how to plug this module on either an Arduino or a Raspberry.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/images/2020-01-10-Home-temperature-monitoring/raspberrypi-dht22.jpg" alt="Raspberry Pi 3">
+</div>
+</div>
+<div class="paragraph">
+<p>I used the Raspberry Pi 3 I had, but a smaller or older board should be enough.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="software">Software</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="raspbian">Raspbian</h3>
+<div class="paragraph">
+<p>First I flashed a brand new Raspbian Buster on the micro SD card.
+The image can be downloaded <a href="https://www.raspberrypi.org/downloads/raspbian/">on Raspberry Pi web site</a>.
+With <a href="https://www.raspberrypi.org/documentation/configuration/raspi-config.md">raspi-config</a> I configured the network (WiFi),
+and enabled SSH.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="influxdb">InfluxDB</h3>
+<div class="paragraph">
+<p>Then I installed InfluxDB on the Raspbian, by adding the InfluxData Debian repository</p>
+</div>
+<div class="listingblock">
+<div class="title">/etc/apt/sources.list.d/influxdb.list</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="ini">deb https://repos.influxdata.com/debian buster stable</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="shell">curl -sL https://repos.influxdata.com/influxdb.key | sudo apt-key add -
+sudo apt-get update
+sudo apt-get install influxdb
+sudo systemctl start influxdb</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To check that InfluxDB is running, you can cUrl it:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="shell">curl -s -v http://localhost:8086/ping
+...
+&lt; HTTP/1.1 204 No Content
+&lt; Content-Type: application/json
+&lt; Request-Id: c28feb69-30bc-11ea-8628-b827eb3ca438
+&lt; X-Influxdb-Build: OSS
+&lt; X-Influxdb-Version: 1.7.9</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="grafana">Grafana</h3>
+<div class="paragraph">
+<p>As Grafana is concerned, I downloaded the .deb file and installed it as described
+on <a href="https://grafana.com/grafana/download?platform=arm">Grafana web site</a></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="shell">wget https://dl.grafana.com/oss/release/grafana-rpi_6.5.2_armhf.deb
+sudo dpkg -i grafana-rpi_6.5.2_armhf.deb</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Grafana service is not enabled nor started by default.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="shell">sudo systemctl daemon-reload
+sudo systemctl enable grafana-server
+sudo systemctl start grafana-server</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To check that Grafana is running, you can open a browser on <a href="http://myraspberry.local:3000" class="bare">http://myraspberry.local:3000</a>,
+and log in.
+The default admin/admin user account can be changed in <code>/etc/grafana/grafana.ini</code> config file.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="code">Code</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The code reads temperature and humidity from the sensor every minute or so.
+And then writes the result in the InfluxDB database.</p>
+</div>
+<div class="paragraph">
+<p>I hesitated to do it with Go language,
+but I chose Python because I immediately found simple code examples.</p>
+</div>
+<div class="sect2">
+<h3 id="python">Python</h3>
+<div class="paragraph">
+<p>To boostrap my Python environment, I installed several packages:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="shell">sudo apt-get install build-essential python3-dev python3-openssl \
+  python3-setuptools python3-pip python3-wheel python3-yaml python3-influxdb</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To read from my DHT22 sensor, I used the <a href="https://github.com/adafruit/Adafruit_Python_DHT">Adafruit_Python_DHT</a> package even if it&#8217;s deprecated.
+I&#8217;ll try to use the newer <a href="https://github.com/adafruit/Adafruit_CircuitPython_DHT">Adafruit_CircuitPython_DHT</a> package later.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="shell">sudo pip3 install Adafruit_DHT</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The code I wrote is based on provided <a href="https://github.com/adafruit/Adafruit_Python_DHT/tree/master/examples">code samples</a>.</p>
+</div>
+<div class="paragraph">
+<p>To write into the InfluxDB database I used the official Python client.
+Its documentation can be found <a href="https://influxdb-python.readthedocs.io/en/latest/">here</a>.
+The code I wrote is based on provided <a href="https://github.com/influxdata/influxdb-python/tree/master/examples">code samples</a>.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="sources">Sources</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The InfluxDB database can be created with <code>influx</code> CLI tool</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code>influx -execute 'create database dht22'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The sources are <a href="https://github.com/gquintana/gquintana.github.io/tree/develop/sources/2020-01-10-Home-temperature-monitoring">here</a>,
+there are 3 files:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>dht22.py</code>: The Python code to read DHT22 sensor and write the result into InfluxDB</p>
+</li>
+<li>
+<p><code>dht22.yml</code>: The config file telling where the sensor is plugged and which database to use.</p>
+</li>
+<li>
+<p><code>dht22.service</code>: The service unit to place in <code>/etc/systemd/system</code> to automatically start <code>dht22.py</code> when Raspberry Pi boots.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>I had 2 kinds of problems:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>There were holes in the graphs because the polling loop was stuck for more than a minute.
+At the moment, I ignore why.</p>
+</li>
+<li>
+<p>The sensor returned out of range values (3200% humidity, -10°C inside).
+So I added measure validation to avoid weird graphs.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+    </div>
+    <div class="clearfix">
+        <h4>Other posts</h4>
+        <ul>
+            
+                <li>2020-01-10
+                    <a href="/2020/01/10/Home-temperature-monitoring.html">Home temperature monitoring</a>
+                </li>
+            
+                <li>2019-12-10
+                    <a href="/2019/12/10/Kafka-connect-plugin-install.html">Kafka connect plugin install</a>
+                </li>
+            
+                <li>2019-07-03
+                    <a href="/2019/07/03/Kafka-integration-tests.html">Kafka integration tests</a>
+                </li>
+            
+                <li>2019-05-17
+                    <a href="/2019/05/17/Logging-configuration.html">Logging configuration</a>
+                </li>
+            
+                <li>2019-04-25
+                    <a href="/2019/04/25/Ansible-collection-processing.html">Ansible collection processing</a>
+                </li>
+            
+        </ul>
+    </div>
+</div>
+
+        </main>
+        <footer class="footer text-muted">
+            <div class="container">
+                <p class="float-right">
+                    <a href="#"><i class="fa fa-arrow-up" aria-hidden="true"></i>
+ Back to top</a>
+                </p>
+                <p>Made with <i class="fa fa-heart" aria-hidden="true"></i> by Gérald Quintana</p>
+        </footer>
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+    </body>
+</html>
