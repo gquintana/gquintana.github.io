@@ -1,0 +1,69 @@
+= Kafka integration tests
+:page-image: /images/logos/kafka.png
+:published_at: 2020-01-16
+:page-tags: [java,kafka]
+:sourcedir: ../sources/2020-01-16-Kafka-lag-reader
+:page-layout: post
+:page-description: "How to retrieve Kafka consumer lag with Java API."
+
+This article shows how to get Kafka lag for a given consumer group using the Java API.
+
+== Getting consumer group offset
+
+Kafka 2.0 introduced an `AdminClient` class which contains a very useful
+https://kafka.apache.org/20/javadoc/org/apache/kafka/clients/admin/AdminClient.html#listConsumerGroupOffsets-java.lang.String-org.apache.kafka.clients.admin.ListConsumerGroupOffsetsOptions-[listConsumerGroupOffsets] method.
+This method returns for a given consumer group is a dictionnary (topic name, partition) -> current offset
+
+[source, java]
+----
+include::{sourcedir}/src/main/java/com/github/gquintana/kafka/lag/ConsumerLagMain.java[tags=consumerGroupOffsets]
+----
+Obviously, this solution expects consumer offsets to be stored in Kafka's `__consumer_offsets` topic.
+
+The `listConsumerGroupOffsets` is asynchronous and returns `KafkaFuture` (a promise).
+My code may be improved to be non blocking.
+
+To get consumer group Ids, there is a `listConsumerGroups` in the same `AdminClient` class:
+
+[source, java]
+----
+include::{sourcedir}/src/main/java/com/github/gquintana/kafka/lag/ConsumerLagMain.java[tags=consumerGroupIds]
+----
+
+By computing the current offset derivative, we could compute the consumer message rate.
+
+== Getting topic end offset
+
+The `KafkaConsumer` class contains an
+https://kafka.apache.org/20/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html#endOffsets-java.util.Collection-[endOffsets] method
+to get the end offset of a topic partition.
+It returns a dictionnary (topic name, partition) -> end offset
+
+[source, java]
+----
+include::{sourcedir}/src/main/java/com/github/gquintana/kafka/lag/ConsumerLagMain.java[tags=topicEndOffsets]
+----
+
+By computing the end offset derivative, we could compute the producer message rate.
+
+== Computing the lag
+
+As consumer lag is equal to topic end offset - consumer current offset,
+computing is straightforward:
+
+[source, java]
+----
+include::{sourcedir}/src/main/java/com/github/gquintana/kafka/lag/ConsumerLagMain.java[tags=computeLag]
+----
+
+== Conclusion
+
+Kafka Java API allows to get consumer lag.
+
+However, I regret several things about this API:
+
+. The `endOffsets` method is not in the `AdminClient` class.
+    If it were the case, instanting a consumer would be useless.
+. `AdminClient` class often returns `KafkaFuture<Something>`,
+    its design is very different from `Consumer` and `Producer` clients.
+    I wonder why they created a `KafkaFuture` class instead of reusing `CompletableFuture`.
