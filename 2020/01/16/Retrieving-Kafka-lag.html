@@ -5,8 +5,8 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Elasticsearch and YAML</title>
-        <meta name="description" content="Gérald's technical blog about Java, Kafka, Elasticsearch, DevOps...">
+        <title>Kafka integration tests</title>
+        <meta name="description" content="How to retrieve Kafka consumer lag with Java API.">
         <meta name="author" content="Gérald Quintana">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -27,135 +27,120 @@
         </header>
         <main class="container position-relative " role="main">
             <div>
-    <h1>Elasticsearch and YAML</h1>
+    <h1>Kafka integration tests</h1>
     <div>
-        <img class="rounded float-right" src="../../../images/logos/elasticsearch.png"/>
+        <img class="rounded float-right" src="../../../images/logos/kafka.png"/>
         <h5>
-            <span>2016-08-25</span>
-            <span class="badge badge-secondary">elasticsearch</span> 
+            <span>2020-01-16</span>
+            <span class="badge badge-secondary">java</span> <span class="badge badge-secondary">kafka</span> 
         </h5>
 
         <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Most examples in Elasticsearch documentation are using JSON to represent documents, requests and responses.
-Writing JSON is not that hard but you sometimes become Raiders of the Lost Curly Brace.</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="https://upload.wikimedia.org/wikipedia/en/4/4c/Raiders_of_the_Lost_Ark.jpg" alt="Raiders of the Lost Ark">
-</div>
-</div>
-<div class="paragraph">
-<p>Do you know that you can replace JSON by YAML?</p>
+<p>This article shows how to get Kafka lag for a given consumer group using the Java API.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="in_responses">In responses</h2>
+<h2 id="getting_consumer_group_offset">Getting consumer group offset</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>You can add <code>format=yaml</code> in the query params:</p>
+<p>Kafka 2.0 introduced an <code>AdminClient</code> class which contains a very useful
+<a href="https://kafka.apache.org/20/javadoc/org/apache/kafka/clients/admin/AdminClient.html#listConsumerGroupOffsets-java.lang.String-org.apache.kafka.clients.admin.ListConsumerGroupOffsetsOptions-">listConsumerGroupOffsets</a> method.
+This method returns for a given consumer group is a dictionnary (topic name, partition) &#8594; current offset</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>curl -XGET http://localhost:9200/logstash-*/_search?format=yaml
-
----
-took: 13
-timed_out: false
-_shards:
-  total: 15
-  successful: 15
-  failed: 0
-hits:
-  total: 2382
-  max_score: 1.0
-  hits:
-  - _index: "logstash-2016.06.22"
-    _type: "test"
-    _id: "AVV36B3vd6qInGJw3x0r"
-    _score: 1.0
-    _source:
-      '@timestamp': "2016-06-22T11:39:07.431Z"
-  - _index: "logstash-2016.06.22"
-    _type: "test"
-    _id: "AVV36Cfrd6qInGJw3x0u"
-    _score: 1.0
-    _source:
-      '@timestamp': "2016-06-22T11:38:42.000Z"</pre>
+<pre class="CodeRay highlight"><code data-lang="java">        <span class="keyword">return</span> adminClient
+                .listConsumerGroupOffsets(groupId)
+                .partitionsToOffsetAndMetadata().get();</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>You can also use the <code>Content-Type: application/yaml</code> HTTP header:</p>
+<p>Obviously, this solution expects consumer offsets to be stored in Kafka&#8217;s <code>__consumer_offsets</code> topic.</p>
+</div>
+<div class="paragraph">
+<p>The <code>listConsumerGroupOffsets</code> is asynchronous and returns <code>KafkaFuture</code> (a promise).
+My code may be improved to be non blocking.</p>
+</div>
+<div class="paragraph">
+<p>To get consumer group Ids, there is a <code>listConsumerGroups</code> in the same <code>AdminClient</code> class:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>curl -XGET -H "Content-Type: application/yaml" http://localhost:9200/_cluster/health
-
----
-cluster_name: "elasticsearch"
-status: "yellow"
-timed_out: false
-number_of_nodes: 1
-number_of_data_nodes: 1
-...</pre>
+<pre class="CodeRay highlight"><code data-lang="java">        <span class="keyword">return</span> adminClient
+                .listConsumerGroups()
+                .valid()
+                .thenApply(r -&gt; r.stream()
+                        .map(ConsumerGroupListing::groupId)
+                        .collect(toList())
+                ).get();</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>While using YAML format for responses you don&#8217;t have to use the <code>pretty=true</code> query param,
-as YAML is naturally indented and human readable.</p>
+<p>By computing the current offset derivative, we could compute the consumer message rate.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="in_requests">In requests</h2>
+<h2 id="getting_topic_end_offset">Getting topic end offset</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Just start your request body with <code>---</code>:</p>
+<p>The <code>KafkaConsumer</code> class contains an
+<a href="https://kafka.apache.org/20/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html#endOffsets-java.util.Collection-">endOffsets</a> method
+to get the end offset of a topic partition.
+It returns a dictionnary (topic name, partition) &#8594; end offset</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>curl -XPOST http://localhost:9200/_search -d '---
-query:
-  match:
-    message: "Elasticsearch"
-'</pre>
+<pre class="CodeRay highlight"><code data-lang="java">            <span class="keyword">return</span> consumer.endOffsets(partitions);</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>This gets pretty handy when dealing with mappings and settings:</p>
+<p>By computing the end offset derivative, we could compute the producer message rate.</p>
 </div>
-<div class="listingblock">
-<div class="title">movie.mapping.yaml</div>
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="yaml"><span class="head"><span class="head">---</span></span>
-<span class="key">properties</span>:
-  <span class="key">title</span>:
-    <span class="key">type</span>: <span class="string"><span class="content">string</span></span>
-  <span class="key">tags</span>:
-    <span class="key">type</span>: <span class="string"><span class="content">string</span></span>
-    <span class="key">index</span>: <span class="string"><span class="content">not_analyzed</span></span>
-  <span class="key">year</span>:
-    <span class="key">type</span>: <span class="string"><span class="content">date</span></span>
-    <span class="key">format</span>: <span class="string"><span class="content">year</span></span></code></pre>
 </div>
+</div>
+<div class="sect1">
+<h2 id="computing_the_lag">Computing the lag</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>As consumer lag is equal to topic end offset - consumer current offset,
+computing is straightforward:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>curl -XPUT http://localhost:9200/movies/_mappings/movie --data-binary @movie.mapping.yaml</pre>
+<pre class="CodeRay highlight"><code data-lang="java">            <span class="type">long</span> lag = endOffset - currentOffset;
+            <span class="keyword">if</span> (lag &lt; <span class="integer">0</span>) {
+                lag = <span class="integer">0</span>;
+            }
+            <span class="keyword">return</span> lag;</code></pre>
 </div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="limits">Limits</h2>
+<h2 id="conclusion">Conclusion</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Some requests like <code>_bulk</code> request may not accept YAML.</p>
+<p>Kafka Java API allows to get consumer lag.</p>
 </div>
 <div class="paragraph">
-<p>Sense (Kibana Console) and other Elasticsearch UIs do not handle YAML properly.</p>
+<p>However, I regret several things about this API:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>The <code>endOffsets</code> method is not in the <code>AdminClient</code> class.
+If it were the case, instanting a consumer would be useless.</p>
+</li>
+<li>
+<p><code>AdminClient</code> class often returns <code>KafkaFuture&lt;Something&gt;</code>,
+its design is very different from <code>Consumer</code> and <code>Producer</code> clients.
+I wonder why they created a <code>KafkaFuture</code> class instead of reusing <code>CompletableFuture</code>.</p>
+</li>
+</ol>
 </div>
 </div>
 </div>
