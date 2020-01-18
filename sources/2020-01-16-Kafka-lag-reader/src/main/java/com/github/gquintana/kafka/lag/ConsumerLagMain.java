@@ -42,10 +42,12 @@ public class ConsumerLagMain implements AutoCloseable {
         List<String> groupIds = getConsumerGroupIds();
         for (String groupId : groupIds) {
             StringBuilder stringBuilder = new StringBuilder().append(groupId).append(":\n");
+            // tag::topicPartitionJoin[]
             Map<TopicPartition, OffsetAndMetadata> consumerGroupOffsets = getConsumerGroupOffsets(groupId);
             Map<TopicPartition, Long> topicEndOffsets = getTopicEndOffsets(groupId, consumerGroupOffsets.keySet());
             Map<Object, Object> consumerGroupLag = consumerGroupOffsets.entrySet().stream()
                     .map(entry -> mapEntry(entry.getKey(), new OffsetAndLag(topicEndOffsets.get(entry.getKey()), entry.getValue().offset())))
+                    // end::topicPartitionJoin[]
                     .peek(entry -> stringBuilder.append(formatLag(entry.getKey(), entry.getValue())).append('\n'))
                     .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
             LOGGER.info(stringBuilder.toString());

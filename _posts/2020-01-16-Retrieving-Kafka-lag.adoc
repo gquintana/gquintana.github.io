@@ -1,4 +1,4 @@
-= Kafka integration tests
+= Retrieving Kafka Lag
 :page-image: /images/logos/kafka.png
 :published_at: 2020-01-16
 :page-tags: [java,kafka]
@@ -7,21 +7,23 @@
 :page-description: "How to retrieve Kafka consumer lag with Java API."
 
 This article shows how to get Kafka lag for a given consumer group using the Java API.
+It's about implementing part of the `kafka-consumer-group` command line tool in pure Java.
 
 == Getting consumer group offset
 
 Kafka 2.0 introduced an `AdminClient` class which contains a very useful
 https://kafka.apache.org/20/javadoc/org/apache/kafka/clients/admin/AdminClient.html#listConsumerGroupOffsets-java.lang.String-org.apache.kafka.clients.admin.ListConsumerGroupOffsetsOptions-[listConsumerGroupOffsets] method.
-This method returns for a given consumer group is a dictionnary (topic name, partition) -> current offset
+This method returns for a given consumer group a dictionnary _(topic name, partition) -> current offset_
 
 [source, java]
 ----
 include::{sourcedir}/src/main/java/com/github/gquintana/kafka/lag/ConsumerLagMain.java[tags=consumerGroupOffsets]
 ----
 Obviously, this solution expects consumer offsets to be stored in Kafka's `__consumer_offsets` topic.
+It does not apply, for example, to some Kafka Connect sink implementations which store their lag in the target data store.
 
-The `listConsumerGroupOffsets` is asynchronous and returns `KafkaFuture` (a promise).
-My code may be improved to be non blocking.
+The `listConsumerGroupOffsets` is asynchronous and returns a `KafkaFuture` (some kind promise) which implements Java's `Future`.
+My code is blocking, there is room for improvement.
 
 To get consumer group Ids, there is a `listConsumerGroups` in the same `AdminClient` class:
 
@@ -32,12 +34,16 @@ include::{sourcedir}/src/main/java/com/github/gquintana/kafka/lag/ConsumerLagMai
 
 By computing the current offset derivative, we could compute the consumer message rate.
 
+There is another method to get consumer offsets, it is in the consumer client and is named https://kafka.apache.org/24/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html#committed-java.util.Set-[committed].
+Contrary to `listConsumerGroupOffsets` method, it requires to know the consumed topic partitions.
+So it's useless in our case.
+
 == Getting topic end offset
 
 The `KafkaConsumer` class contains an
 https://kafka.apache.org/20/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html#endOffsets-java.util.Collection-[endOffsets] method
 to get the end offset of a topic partition.
-It returns a dictionnary (topic name, partition) -> end offset
+It returns a dictionnary _(topic name, partition) -> end offset_
 
 [source, java]
 ----
@@ -46,10 +52,21 @@ include::{sourcedir}/src/main/java/com/github/gquintana/kafka/lag/ConsumerLagMai
 
 By computing the end offset derivative, we could compute the producer message rate.
 
-== Computing the lag
+Getting the topic start offset using https://kafka.apache.org/24/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html#beginningOffsets-java.util.Collection-[beginningOffsets] method,
+we also could compute the topic size per partition.
 
-As consumer lag is equal to topic end offset - consumer current offset,
-computing is straightforward:
+== Joining offsets and computing lag
+
+Both consumer offsets and topic end offsets are given per partition.
+To compute the lag we have to do a join using topic partition as key.
+
+[source, java]
+----
+include::{sourcedir}/src/main/java/com/github/gquintana/kafka/lag/ConsumerLagMain.java[tags=topicPartitionJoin]
+----
+
+As consumer lag is equal to _topic end offset - consumer current offset_,
+computing it is straightforward:
 
 [source, java]
 ----
@@ -58,12 +75,15 @@ include::{sourcedir}/src/main/java/com/github/gquintana/kafka/lag/ConsumerLagMai
 
 == Conclusion
 
-Kafka Java API allows to get consumer lag.
+We managed to get consumer lag using the Java Kafka client API and a few lines of code.
 
 However, I regret several things about this API:
 
 . The `endOffsets` method is not in the `AdminClient` class.
-    If it were the case, instanting a consumer would be useless.
+    If it were the case, instantiating a consumer would be useless.
+. We have to open two connections, and repeat twice the connection settings like `bootstrap.servers`,
+    once for the admin client, then for the consumer client.
+    It would be interesting if they could share options and may be even the TCP connection.
 . `AdminClient` class often returns `KafkaFuture<Something>`,
-    its design is very different from `Consumer` and `Producer` clients.
+    the API design is very different from `Consumer` and `Producer` clients.
     I wonder why they created a `KafkaFuture` class instead of reusing `CompletableFuture`.
