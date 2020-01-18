@@ -7,4 +7,5 @@ gem 'rake-jekyll', '~> 1.1.0'
 
 group :jekyll_plugins do
   gem 'jekyll-asciidoc', '~> 2.1.1'
+  gem 'jekyll-feed', '~> 0.13.0'
 end
