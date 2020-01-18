@@ -3,11 +3,20 @@
 :published_at: 2020-01-16
 :page-tags: [java,kafka]
 :sourcedir: ../sources/2020-01-16-Kafka-lag-reader
+:imagedir: /images/2020-01-16-Retrieving-Kafka-lag
 :page-layout: post
 :page-description: "How to retrieve Kafka consumer lag with Java API."
 
 This article shows how to get Kafka lag for a given consumer group using the Java API.
 It's about implementing part of the `kafka-consumer-group` command line tool in pure Java.
+
+image::{imagedir}/lag.svg[Consumer Lag]
+
+To get consumer lag we will go through several steps:
+
+. Get consumer group current offset, 4 in the above example
+. Get topic end offset: the producers offset, 8 in the above example
+. Compute the lag: the difference between both
 
 == Getting consumer group offset
 
