@@ -5,7 +5,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Kafka integration tests</title>
+        <title>Retrieving Kafka Lag</title>
         <meta name="description" content="How to retrieve Kafka consumer lag with Java API.">
         <meta name="author" content="Gérald Quintana">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
@@ -27,7 +27,7 @@
         </header>
         <main class="container position-relative " role="main">
             <div>
-    <h1>Kafka integration tests</h1>
+    <h1>Retrieving Kafka Lag</h1>
     <div>
         <img class="rounded float-right" src="../../../images/logos/kafka.png"/>
         <h5>
@@ -38,7 +38,8 @@
         <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>This article shows how to get Kafka lag for a given consumer group using the Java API.</p>
+<p>This article shows how to get Kafka lag for a given consumer group using the Java API.
+It&#8217;s about implementing part of the <code>kafka-consumer-group</code> command line tool in pure Java.</p>
 </div>
 </div>
 </div>
@@ -48,7 +49,7 @@
 <div class="paragraph">
 <p>Kafka 2.0 introduced an <code>AdminClient</code> class which contains a very useful
 <a href="https://kafka.apache.org/20/javadoc/org/apache/kafka/clients/admin/AdminClient.html#listConsumerGroupOffsets-java.lang.String-org.apache.kafka.clients.admin.ListConsumerGroupOffsetsOptions-">listConsumerGroupOffsets</a> method.
-This method returns for a given consumer group is a dictionnary (topic name, partition) &#8594; current offset</p>
+This method returns for a given consumer group a dictionnary <em>(topic name, partition) &#8594; current offset</em></p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -58,11 +59,12 @@ This method returns for a given consumer group is a dictionnary (topic name, par
 </div>
 </div>
 <div class="paragraph">
-<p>Obviously, this solution expects consumer offsets to be stored in Kafka&#8217;s <code>__consumer_offsets</code> topic.</p>
+<p>Obviously, this solution expects consumer offsets to be stored in Kafka&#8217;s <code>__consumer_offsets</code> topic.
+It does not apply, for example, to some Kafka Connect sink implementations which store their lag in the target data store.</p>
 </div>
 <div class="paragraph">
-<p>The <code>listConsumerGroupOffsets</code> is asynchronous and returns <code>KafkaFuture</code> (a promise).
-My code may be improved to be non blocking.</p>
+<p>The <code>listConsumerGroupOffsets</code> is asynchronous and returns a <code>KafkaFuture</code> (some kind promise) which implements Java&#8217;s <code>Future</code>.
+My code is blocking, there is room for improvement.</p>
 </div>
 <div class="paragraph">
 <p>To get consumer group Ids, there is a <code>listConsumerGroups</code> in the same <code>AdminClient</code> class:</p>
@@ -81,6 +83,11 @@ My code may be improved to be non blocking.</p>
 <div class="paragraph">
 <p>By computing the current offset derivative, we could compute the consumer message rate.</p>
 </div>
+<div class="paragraph">
+<p>There is another method to get consumer offsets, it is in the consumer client and is named <a href="https://kafka.apache.org/24/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html#committed-java.util.Set-">committed</a>.
+Contrary to <code>listConsumerGroupOffsets</code> method, it requires to know the consumed topic partitions.
+So it&#8217;s useless in our case.</p>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -90,7 +97,7 @@ My code may be improved to be non blocking.</p>
 <p>The <code>KafkaConsumer</code> class contains an
 <a href="https://kafka.apache.org/20/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html#endOffsets-java.util.Collection-">endOffsets</a> method
 to get the end offset of a topic partition.
-It returns a dictionnary (topic name, partition) &#8594; end offset</p>
+It returns a dictionnary <em>(topic name, partition) &#8594; end offset</em></p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -100,14 +107,30 @@ It returns a dictionnary (topic name, partition) &#8594; end offset</p>
 <div class="paragraph">
 <p>By computing the end offset derivative, we could compute the producer message rate.</p>
 </div>
+<div class="paragraph">
+<p>Getting the topic start offset using <a href="https://kafka.apache.org/24/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html#beginningOffsets-java.util.Collection-">beginningOffsets</a> method,
+we also could compute the topic size per partition.</p>
+</div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="computing_the_lag">Computing the lag</h2>
+<h2 id="joining_offsets_and_computing_lag">Joining offsets and computing lag</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>As consumer lag is equal to topic end offset - consumer current offset,
-computing is straightforward:</p>
+<p>Both consumer offsets and topic end offsets are given per partition.
+To compute the lag we have to do a join using topic partition as key.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java">            <span class="predefined-type">Map</span>&lt;TopicPartition, OffsetAndMetadata&gt; consumerGroupOffsets = getConsumerGroupOffsets(groupId);
+            <span class="predefined-type">Map</span>&lt;TopicPartition, <span class="predefined-type">Long</span>&gt; topicEndOffsets = getTopicEndOffsets(groupId, consumerGroupOffsets.keySet());
+            <span class="predefined-type">Map</span>&lt;<span class="predefined-type">Object</span>, <span class="predefined-type">Object</span>&gt; consumerGroupLag = consumerGroupOffsets.entrySet().stream()
+                    .map(entry -&gt; mapEntry(entry.getKey(), <span class="keyword">new</span> OffsetAndLag(topicEndOffsets.get(entry.getKey()), entry.getValue().offset())))</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As consumer lag is equal to <em>topic end offset - consumer current offset</em>,
+computing it is straightforward:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -124,7 +147,7 @@ computing is straightforward:</p>
 <h2 id="conclusion">Conclusion</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Kafka Java API allows to get consumer lag.</p>
+<p>We managed to get consumer lag using the Java Kafka client API and a few lines of code.</p>
 </div>
 <div class="paragraph">
 <p>However, I regret several things about this API:</p>
@@ -133,11 +156,16 @@ computing is straightforward:</p>
 <ol class="arabic">
 <li>
 <p>The <code>endOffsets</code> method is not in the <code>AdminClient</code> class.
-If it were the case, instanting a consumer would be useless.</p>
+If it were the case, instantiating a consumer would be useless.</p>
+</li>
+<li>
+<p>We have to open two connections, and repeat twice the connection settings like <code>bootstrap.servers</code>,
+once for the admin client, then for the consumer client.
+It would be interesting if they could share options and may be even the TCP connection.</p>
 </li>
 <li>
 <p><code>AdminClient</code> class often returns <code>KafkaFuture&lt;Something&gt;</code>,
-its design is very different from <code>Consumer</code> and <code>Producer</code> clients.
+the API design is very different from <code>Consumer</code> and <code>Producer</code> clients.
 I wonder why they created a <code>KafkaFuture</code> class instead of reusing <code>CompletableFuture</code>.</p>
 </li>
 </ol>
@@ -150,7 +178,7 @@ I wonder why they created a <code>KafkaFuture</code> class instead of reusing <c
         <ul>
             
                 <li>2020-01-16
-                    <a href="/2020/01/16/Retrieving-Kafka-lag.html">Kafka integration tests</a>
+                    <a href="/2020/01/16/Retrieving-Kafka-lag.html">Retrieving Kafka Lag</a>
                 </li>
             
                 <li>2020-01-10
