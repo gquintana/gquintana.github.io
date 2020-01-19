@@ -8,7 +8,7 @@
 :page-description: "How to retrieve Kafka consumer lag with Java API."
 
 This article shows how to get Kafka lag for a given consumer group using the Java API.
-It's about implementing part of the `kafka-consumer-group` command line tool in pure Java.
+It's about implementing part of the `kafka-consumer-group` command-line tool in pure Java.
 
 image::{imagedir}/lag.svg[Consumer Lag]
 
@@ -22,7 +22,7 @@ To get consumer lag we will go through several steps:
 
 Kafka 2.0 introduced an `AdminClient` class which contains a very useful
 https://kafka.apache.org/20/javadoc/org/apache/kafka/clients/admin/AdminClient.html#listConsumerGroupOffsets-java.lang.String-org.apache.kafka.clients.admin.ListConsumerGroupOffsetsOptions-[listConsumerGroupOffsets] method.
-This method returns for a given consumer group a dictionnary _(topic name, partition) -> current offset_
+This method returns for a given consumer group a dictionary _(topic name, partition) -> current offset_
 
 [source, java]
 ----
@@ -52,7 +52,7 @@ So it's useless in our case.
 The `KafkaConsumer` class contains an
 https://kafka.apache.org/20/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html#endOffsets-java.util.Collection-[endOffsets] method
 to get the end offset of a topic partition.
-It returns a dictionnary _(topic name, partition) -> end offset_
+It returns a dictionary _(topic name, partition) -> end offset_
 
 [source, java]
 ----
@@ -67,7 +67,7 @@ we also could compute the topic size per partition.
 == Joining offsets and computing lag
 
 Both consumer offsets and topic end offsets are given per partition.
-To compute the lag we have to do a join using topic partition as key.
+To compute the lag we have to do a join using the topic partition as key.
 
 [source, java]
 ----
@@ -92,7 +92,7 @@ However, I regret several things about this API:
     If it were the case, instantiating a consumer would be useless.
 . We have to open two connections, and repeat twice the connection settings like `bootstrap.servers`,
     once for the admin client, then for the consumer client.
-    It would be interesting if they could share options and may be even the TCP connection.
+    It would be interesting if they could share options and maybe even the TCP connection.
 . `AdminClient` class often returns `KafkaFuture<Something>`,
     the API design is very different from `Consumer` and `Producer` clients.
     I wonder why they created a `KafkaFuture` class instead of reusing `CompletableFuture`.
