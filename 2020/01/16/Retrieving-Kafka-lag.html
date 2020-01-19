@@ -40,7 +40,7 @@
 <div class="sectionbody">
 <div class="paragraph">
 <p>This article shows how to get Kafka lag for a given consumer group using the Java API.
-It&#8217;s about implementing part of the <code>kafka-consumer-group</code> command line tool in pure Java.</p>
+It&#8217;s about implementing part of the <code>kafka-consumer-group</code> command-line tool in pure Java.</p>
 </div>
 <div class="imageblock">
 <div class="content">
@@ -71,7 +71,7 @@ It&#8217;s about implementing part of the <code>kafka-consumer-group</code> comm
 <div class="paragraph">
 <p>Kafka 2.0 introduced an <code>AdminClient</code> class which contains a very useful
 <a href="https://kafka.apache.org/20/javadoc/org/apache/kafka/clients/admin/AdminClient.html#listConsumerGroupOffsets-java.lang.String-org.apache.kafka.clients.admin.ListConsumerGroupOffsetsOptions-">listConsumerGroupOffsets</a> method.
-This method returns for a given consumer group a dictionnary <em>(topic name, partition) &#8594; current offset</em></p>
+This method returns for a given consumer group a dictionary <em>(topic name, partition) &#8594; current offset</em></p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -119,7 +119,7 @@ So it&#8217;s useless in our case.</p>
 <p>The <code>KafkaConsumer</code> class contains an
 <a href="https://kafka.apache.org/20/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html#endOffsets-java.util.Collection-">endOffsets</a> method
 to get the end offset of a topic partition.
-It returns a dictionnary <em>(topic name, partition) &#8594; end offset</em></p>
+It returns a dictionary <em>(topic name, partition) &#8594; end offset</em></p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -140,7 +140,7 @@ we also could compute the topic size per partition.</p>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Both consumer offsets and topic end offsets are given per partition.
-To compute the lag we have to do a join using topic partition as key.</p>
+To compute the lag we have to do a join using the topic partition as key.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -183,7 +183,7 @@ If it were the case, instantiating a consumer would be useless.</p>
 <li>
 <p>We have to open two connections, and repeat twice the connection settings like <code>bootstrap.servers</code>,
 once for the admin client, then for the consumer client.
-It would be interesting if they could share options and may be even the TCP connection.</p>
+It would be interesting if they could share options and maybe even the TCP connection.</p>
 </li>
 <li>
 <p><code>AdminClient</code> class often returns <code>KafkaFuture&lt;Something&gt;</code>,
