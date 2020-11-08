@@ -1,0 +1,129 @@
+= Build your own CA with Ansible
+:page-tags: [ansible]
+:page-image: /images/logos/ansible.png
+:source_dir: ../sources/2020-11-28-Build-your-own-CA-with-Ansible
+:image_dir: ../images/2020-11-28-Build-your-own-CA-with-Ansible
+:published_at: 2020-11-28
+:page-layout: post
+:page-description: "How to generate certificates with your own CA."
+
+Securing your Kafka, Elasticsearch, Cassandra or whatever distributed software means using SSL (also known as TLS) to encrypt communications:
+
+* Node to node communication
+* Client to node communication
+
+Setting up SSL means providing SSL  certificates for each node.
+Generating SSL certificate is a cumbersome task:
+
+* The https://kafka.apache.org/documentation/#security_ssl[Kafka documentation] describes extensively the process.
+* Elasticsearch brings its own https://www.elastic.co/guide/en/elasticsearch/reference/master/configuring-tls.html#node-certificates[elasticsearch-certutil] tool.
+* Datastax also https://docs.datastax.com/en/cassandra-oss/3.x/cassandra/configuration/secureSSLCertWithCA.html[documents] a similar process for Cassandra
+
+I will describe here how to generate a SSL certificate for each node using Ansible,
+because I am also deploying Kafka, Elasticsearch and the like with Ansible.
+
+There are several important rules to know when generating certificates:
+
+* The name present in the certificate, must match the public name of the host.
+    We can not share the same certificate on all nodes, unless using star certificates.
+    Any TLS client connecting to a node, will check that certificate name and host name matches, unless disabling host name verification.
+* The name present in the certificate, should match the reverse DNS name corresponding IP of the host.
+    Java clients connecting to a node, will do a reverse DNS lookup to get the public name of the host they are connecting to.
+
+These two rules are meant to prevent *Man in the middle* attacks. 
+A TLS certificate allows to check you're talking to the wanted target, 
+not something in between which could spy and steal information.
+
+When a machine has multiple names (think about DNS aliases, virtual hosts), a certificate can contain multiple names.
+The main name is called CN (Common Name), 
+while other names are called SAN (Subject Alt Names).
+
+== The certificate authority
+
+As Kafka or Elasticsearch clusters should never be publicly exposed,
+using a public certificate authority (Thawte, Verisign and the like) is not necessary.
+A self-signed certificate authority local to the cluster or the environment (Dev, Q/A) should be enough.
+
+So the first step is to create a certificate authority which will be used to sign the certificates of all hosts belonging to our cluster.
+As this step will be done only once, I won't automate it.
+
+[source,shell]
+----
+$ mkdir ownca
+$ openssl req -new -x509 \
+    -days 1825 \ <1>
+    -extensions v3_ca \ <2>
+    -keyout ownca/root.key -out ownca/root.crt <3>
+
+Generating a RSA private key
+......+++++
+....+++++
+writing new private key to 'ownca/root.key'
+Enter PEM pass phrase: <4>
+Verifying - Enter PEM pass phrase:
+-----
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Country Name (2 letter code) [AU]:FR <5>
+State or Province Name (full name) [Some-State]:.
+Locality Name (eg, city) []:.
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:eNova Conseil
+Organizational Unit Name (eg, section) []:.
+Common Name (e.g. server FQDN or YOUR name) []:Root
+Email Address []:rootca@enova-conseil.com
+----
+<1> The CA root certificate will last 5 years
+<2> This certificate will be used as a CA
+<3> Generate both key and self-signed certificate
+<4> Password to protect the key
+<5> Information describing the Root certificate
+
+For safety reasons, the generated key should be kept secret and stored in secure place:
+
+* It must not be transfered to target Kafka servers
+* It must not be kept in source control (Git)
+
+== The nodes certificates
+
+This is were Ansible comes in.
+As your cluster might have many nodes, automating certificate generation makes sense.
+For each target host, I will repeat the same process:
+
+image::{image_dir}/process.svg[Process]
+
+. On the target host, generate a key `target.key` and an CSR  (Certificate signing request) `target.csr`
+. Pull the CSR on the control host. 
+. Sign the CSR with the CA key.
+  This will generate a certificate `target.crt`.
+. Push the generated certificate `target.crt` on the target host.
+  The CA certificate `root.crt` is also pushed.
+
+As the TLS keys `.key` are sensitive, they do not travel, they stay where they were generated.
+On the contrary, certificates `.crt` and CSRs `.csr` only contain public information.
+
+[source,yaml]
+----
+include::{source_dir}/openssl/tasks/main.yml[tags=main]
+----
+
+Once you have the key, the cert and CA certs on the target host, you can start using them:
+
+[source,yaml]
+----
+include::{source_dir}/openssl/tasks/main.yml[tags=after]
+----
+
+The produced PKCS12 file can be used as a Java Keystore.
+
+The attentive reader has noticed I am using a bunch of `openssl_xxx` Ansible modules (namely `openssl_privatekey`, `openssl_csr`, `openssl_certificate` and `openssl_pkcs12`).
+These modules requires to have openssl and PyOpenSSL installed on each host.
+
+[source,yaml]
+----
+include::{source_dir}/openssl/tasks/main.yml[tags=before]
+----

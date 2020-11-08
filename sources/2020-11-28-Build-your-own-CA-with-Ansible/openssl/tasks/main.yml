@@ -1,0 +1,82 @@
+---
+#tag::before[]
+- name: Python OpenSSL package
+  become: true
+  yum:
+    name: 
+      - pyOpenSSL
+      - python2-pip
+      - ca-certificates
+
+- name: Upgrade Python OpenSSL
+  become: true
+  pip:
+    name: pyOpenSSL>=0.15
+#end::before[]
+
+#tag::main[]
+# Step 1
+- name: Generate private key
+  become: true
+  openssl_privatekey:
+    path: "/etc/pki/tls/private/{{ openssl_name }}.key"
+
+- name: Generate CSR
+  become: true
+  openssl_csr:
+    path: "/etc/pki/tls/private/{{ openssl_name }}.csr"
+    privatekey_path: "/etc/pki/tls/private/{{ openssl_name }}.key"
+    country_name: FR
+    organization_name: "eNova Conseil"
+    common_name: "{{ openssl_name }}"
+    subject_alt_name: "DNS:{{ ansible_host }},DNS:{{ ansible_fqdn }}"
+
+# Step 2
+- name: Pull CSR
+  become: true
+  fetch: 
+    src: "/etc/pki/tls/private/{{ openssl_name }}.csr"
+    dest: "{{ openssl_ownca_dir }}/{{ openssl_name }}.csr"
+    flat: true
+
+# Step 3
+- name: Sign CSR with CA key
+  connection: local
+  delegate_to: localhost
+  openssl_certificate:
+    path: "{{ openssl_ownca_dir }}/{{ openssl_name }}.crt"
+    csr_path: "{{ openssl_ownca_dir }}/{{ openssl_name }}.csr"
+    ownca_path: "{{ openssl_ownca_dir }}/root.crt"
+    ownca_privatekey_path: "{{ openssl_ownca_dir }}/root.key"
+    provider: ownca
+
+# Step 4
+- name: Push certificate
+  become: true
+  copy:
+    src: "{{ openssl_ownca_dir }}/{{ openssl_name }}.crt"
+    dest: "/etc/pki/tls/private/{{ openssl_name }}.crt"
+
+- name: Push CA
+  become: true
+  copy: 
+    src: "{{ openssl_ownca_dir }}/root.crt"
+    dest: "/etc/pki/ca-trust/source/anchors/root.pem"
+#end::main[]
+
+#tag::after[]
+- name: Update CA Trust
+  become: true
+  command: "update-ca-trust extract"
+
+- name: Build PKCS12 file containing key and cert
+  become: true
+  openssl_pkcs12:
+    action: export
+    path: "/etc/pki/tls/private/{{ openssl_name }}.p12"
+    friendly_name: "{{ openssl_name }}"
+    privatekey_path: "/etc/pki/tls/private/{{ openssl_name }}.key"
+    certificate_path: "/etc/pki/tls/private/{{ openssl_name }}.crt"
+    other_certificates: "/etc/pki/ca-trust/source/anchors/root.pem"
+    state: present
+#end::after[]
