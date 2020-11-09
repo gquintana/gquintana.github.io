@@ -5,33 +5,33 @@
 :image_dir: ../images/2020-11-28-Build-your-own-CA-with-Ansible
 :published_at: 2020-11-28
 :page-layout: post
-:page-description: "How to generate certificates with your own CA."
+:page-description: "How to generate certificates with Ansible."
 
-Securing your Kafka, Elasticsearch, Cassandra or whatever distributed software means using SSL (also known as TLS) to encrypt communications:
+Securing your Kafka, Elasticsearch, Cassandra, or whatever distributed software means using SSL (also known as TLS) to encrypt communications:
 
 * Node to node communication
 * Client to node communication
 
 Setting up SSL means providing SSL  certificates for each node.
-Generating SSL certificate is a cumbersome task:
+Generating SSL certificates is a cumbersome task:
 
 * The https://kafka.apache.org/documentation/#security_ssl[Kafka documentation] describes extensively the process.
 * Elasticsearch brings its own https://www.elastic.co/guide/en/elasticsearch/reference/master/configuring-tls.html#node-certificates[elasticsearch-certutil] tool.
 * Datastax also https://docs.datastax.com/en/cassandra-oss/3.x/cassandra/configuration/secureSSLCertWithCA.html[documents] a similar process for Cassandra
 
-I will describe here how to generate a SSL certificate for each node using Ansible,
+I will describe here how to generate an SSL certificate for each node using Ansible,
 because I am also deploying Kafka, Elasticsearch and the like with Ansible.
 
 There are several important rules to know when generating certificates:
 
-* The name present in the certificate, must match the public name of the host.
-    We can not share the same certificate on all nodes, unless using star certificates.
-    Any TLS client connecting to a node, will check that certificate name and host name matches, unless disabling host name verification.
-* The name present in the certificate, should match the reverse DNS name corresponding IP of the host.
+* The name present in the certificate must match the public name of the host.
+    We can not share the same certificate on all nodes unless using star certificates.
+    Any TLS client connecting to a node will check that certificate name and hostname matches unless disabling hostname verification.
+* The name present in the certificate, should match the reverse DNS name corresponding to the IP of the host.
     Java clients connecting to a node, will do a reverse DNS lookup to get the public name of the host they are connecting to.
 
 These two rules are meant to prevent *Man in the middle* attacks. 
-A TLS certificate allows to check you're talking to the wanted target, 
+A TLS certificate allows checking you're talking to the wanted target, 
 not something in between which could spy and steal information.
 
 When a machine has multiple names (think about DNS aliases, virtual hosts), a certificate can contain multiple names.
@@ -44,7 +44,7 @@ As Kafka or Elasticsearch clusters should never be publicly exposed,
 using a public certificate authority (Thawte, Verisign and the like) is not necessary.
 A self-signed certificate authority local to the cluster or the environment (Dev, Q/A) should be enough.
 
-So the first step is to create a certificate authority which will be used to sign the certificates of all hosts belonging to our cluster.
+So the first step is to create a certificate authority that will be used to sign the certificates of all hosts belonging to our cluster.
 As this step will be done only once, I won't automate it.
 
 [source,shell]
@@ -80,23 +80,23 @@ Email Address []:rootca@enova-conseil.com
 <1> The CA root certificate will last 5 years
 <2> This certificate will be used as a CA
 <3> Generate both key and self-signed certificate
-<4> Password to protect the key
+<4> The key is protected with a password
 <5> Information describing the Root certificate
 
-For safety reasons, the generated key should be kept secret and stored in secure place:
+For safety reasons, the generated key should be kept secret and stored in a secure place:
 
 * It must not be transfered to target Kafka servers
-* It must not be kept in source control (Git)
+* It must not be kept in source control (Git) unless hidden in Ansible Vault password file
 
 == The nodes certificates
 
-This is were Ansible comes in.
+This is where Ansible comes in.
 As your cluster might have many nodes, automating certificate generation makes sense.
 For each target host, I will repeat the same process:
 
 image::{image_dir}/process.svg[Process]
 
-. On the target host, generate a key `target.key` and an CSR  (Certificate signing request) `target.csr`
+. On the target host, generate a key `target.key` and a CSR  (Certificate signing request) `target.csr`
 . Pull the CSR on the control host. 
 . Sign the CSR with the CA key.
   This will generate a certificate `target.crt`.
@@ -111,17 +111,17 @@ On the contrary, certificates `.crt` and CSRs `.csr` only contain public informa
 include::{source_dir}/openssl/tasks/main.yml[tags=main]
 ----
 
-Once you have the key, the cert and CA certs on the target host, you can start using them:
+Once you have the key, the certificate and CA certificate chain on the target host, you can start using them:
 
 [source,yaml]
 ----
 include::{source_dir}/openssl/tasks/main.yml[tags=after]
 ----
 
-The produced PKCS12 file can be used as a Java Keystore.
+The produced PKCS12 file can be used as a Java Keystore. The `java_keystore` Ansible module can be used to create a JKS file instead.
 
 The attentive reader has noticed I am using a bunch of `openssl_xxx` Ansible modules (namely `openssl_privatekey`, `openssl_csr`, `openssl_certificate` and `openssl_pkcs12`).
-These modules requires to have openssl and PyOpenSSL installed on each host.
+These modules require to have openssl and PyOpenSSL installed on each host.
 
 [source,yaml]
 ----
