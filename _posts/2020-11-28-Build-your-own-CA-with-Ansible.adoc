@@ -2,7 +2,7 @@
 :page-tags: [ansible]
 :page-image: /images/logos/ansible.png
 :source_dir: ../sources/2020-11-28-Build-your-own-CA-with-Ansible
-:image_dir: ../images/2020-11-28-Build-your-own-CA-with-Ansible
+:image_dir: /images/2020-11-28-Build-your-own-CA-with-Ansible
 :published_at: 2020-11-28
 :page-layout: post
 :page-description: "How to generate certificates with Ansible."
