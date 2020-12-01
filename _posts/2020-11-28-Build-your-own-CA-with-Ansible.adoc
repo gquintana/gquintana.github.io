@@ -51,15 +51,15 @@ As this step will be done only once, I won't automate it.
 ----
 $ mkdir ownca
 $ openssl req -new -x509 \
-    -days 1825 \ <1>
-    -extensions v3_ca \ <2>
-    -keyout ownca/root.key -out ownca/root.crt <3>
+    -days 1825 \ # <1>
+    -extensions v3_ca \ # <2>
+    -keyout ownca/root.key -out ownca/root.crt # <3>
 
 Generating a RSA private key
 ......+++++
 ....+++++
 writing new private key to 'ownca/root.key'
-Enter PEM pass phrase: <4>
+Enter PEM pass phrase: # <4>
 Verifying - Enter PEM pass phrase:
 -----
 You are about to be asked to enter information that will be incorporated
@@ -69,7 +69,7 @@ There are quite a few fields but you can leave some blank
 For some fields there will be a default value,
 If you enter '.', the field will be left blank.
 -----
-Country Name (2 letter code) [AU]:FR <5>
+Country Name (2 letter code) [AU]:FR # <5>
 State or Province Name (full name) [Some-State]:.
 Locality Name (eg, city) []:.
 Organization Name (eg, company) [Internet Widgits Pty Ltd]:eNova Conseil
