@@ -1,4 +1,281 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.7">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2020-11-09T21:03:31+00:00</updated><id>/feed.xml</id><title type="html">JRald blog</title><subtitle>Gérald's technical blog about Java, Kafka, Elasticsearch, DevOps...</subtitle><author><name>Gérald Quintana</name></author><entry><title type="html">Retrieving Kafka Lag</title><link href="/2020/01/16/Retrieving-Kafka-lag.html" rel="alternate" type="text/html" title="Retrieving Kafka Lag" /><published>2020-01-16T00:00:00+00:00</published><updated>2020-01-16T00:00:00+00:00</updated><id>/2020/01/16/Retrieving-Kafka-lag</id><content type="html" xml:base="/2020/01/16/Retrieving-Kafka-lag.html">&lt;div id=&quot;preamble&quot;&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.7">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2020-12-01T20:35:18+00:00</updated><id>/feed.xml</id><title type="html">JRald blog</title><subtitle>Gérald's technical blog about Java, Kafka, Elasticsearch, DevOps...</subtitle><author><name>Gérald Quintana</name></author><entry><title type="html">Build your own CA with Ansible</title><link href="/2020/11/28/Build-your-own-CA-with-Ansible.html" rel="alternate" type="text/html" title="Build your own CA with Ansible" /><published>2020-11-28T00:00:00+00:00</published><updated>2020-11-28T00:00:00+00:00</updated><id>/2020/11/28/Build-your-own-CA-with-Ansible</id><content type="html" xml:base="/2020/11/28/Build-your-own-CA-with-Ansible.html">&lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Securing your Kafka, Elasticsearch, Cassandra, or whatever distributed software requires configuring using SSL (also known as TLS) to encrypt communications:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Node to node communication&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Client to node communication&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Setting up SSL means providing SSL  certificates for each node.
+But generating SSL certificates is a cumbersome task:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;The &lt;a href=&quot;https://kafka.apache.org/documentation/#security_ssl&quot;&gt;Kafka documentation&lt;/a&gt; describes extensively the process.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Elasticsearch brings its own &lt;a href=&quot;https://www.elastic.co/guide/en/elasticsearch/reference/master/configuring-tls.html#node-certificates&quot;&gt;elasticsearch-certutil&lt;/a&gt; tool.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Datastax also &lt;a href=&quot;https://docs.datastax.com/en/cassandra-oss/3.x/cassandra/configuration/secureSSLCertWithCA.html&quot;&gt;documents&lt;/a&gt; a similar process for Cassandra&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I will describe here how to generate an SSL certificate for each node using Ansible.
+It makes sense as I am also deploying Kafka, Elasticsearch and the like with Ansible.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There are several important rules to know when generating certificates:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;The name present in the certificate must match the public name of the host.
+We can not share the same certificate on all nodes unless using star certificates.
+Any TLS client connecting to a node will check that certificate name and hostname matches unless disabling hostname verification.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;The name present in the certificate, should match the reverse DNS name corresponding to the IP of the host.
+Java clients connecting to a node, will do a reverse DNS lookup to get the public name of the host they are connecting to.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;These two rules are meant to prevent &lt;strong&gt;Man in the middle&lt;/strong&gt; attacks.
+A TLS certificate allows checking you&amp;#8217;re talking to the wanted target,
+not something in between which could spy and steal information.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;When a machine has multiple names (think about DNS aliases, virtual hosts), a certificate can contain multiple names.
+The main name is called CN (Common Name),
+while other names are called SAN (Subject Alt Names).&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;the_certificate_authority&quot;&gt;The certificate authority&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As Kafka or Elasticsearch clusters should never be publicly exposed,
+using a public certificate authority (Thawte, Verisign and the like) is not necessary.
+A self-signed certificate authority local to the cluster or the environment (Dev, Q/A) should be enough.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So the first step is to create a certificate authority that will be used to sign the certificates of all hosts belonging to our cluster.
+As this step will be done only once, I won&amp;#8217;t automate it.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;CodeRay highlight&quot;&gt;&lt;code data-lang=&quot;shell&quot;&gt;$ mkdir ownca
+$ openssl req -new -x509 \
+    -days 1825 \ &lt;i class=&quot;conum&quot; data-value=&quot;1&quot;&gt;&lt;/i&gt;&lt;b&gt;(1)&lt;/b&gt;
+    -extensions v3_ca \ &lt;i class=&quot;conum&quot; data-value=&quot;2&quot;&gt;&lt;/i&gt;&lt;b&gt;(2)&lt;/b&gt;
+    -keyout ownca/root.key -out ownca/root.crt &lt;i class=&quot;conum&quot; data-value=&quot;3&quot;&gt;&lt;/i&gt;&lt;b&gt;(3)&lt;/b&gt;
+
+Generating a RSA private key
+......+++++
+....+++++
+writing new private key to 'ownca/root.key'
+Enter PEM pass phrase: &lt;i class=&quot;conum&quot; data-value=&quot;4&quot;&gt;&lt;/i&gt;&lt;b&gt;(4)&lt;/b&gt;
+Verifying - Enter PEM pass phrase:
+-----
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Country Name (2 letter code) [AU]:FR &lt;i class=&quot;conum&quot; data-value=&quot;5&quot;&gt;&lt;/i&gt;&lt;b&gt;(5)&lt;/b&gt;
+State or Province Name (full name) [Some-State]:.
+Locality Name (eg, city) []:.
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:eNova Conseil
+Organizational Unit Name (eg, section) []:.
+Common Name (e.g. server FQDN or YOUR name) []:Root
+Email Address []:rootca@enova-conseil.com&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;colist arabic&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;1&quot;&gt;&lt;/i&gt;&lt;b&gt;1&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;The CA root certificate will last 5 years&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;2&quot;&gt;&lt;/i&gt;&lt;b&gt;2&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;This certificate will be used as a CA&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;3&quot;&gt;&lt;/i&gt;&lt;b&gt;3&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;Generate both key and self-signed certificate&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;4&quot;&gt;&lt;/i&gt;&lt;b&gt;4&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;The key is protected with a password&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;5&quot;&gt;&lt;/i&gt;&lt;b&gt;5&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;Information describing the Root certificate&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For safety reasons, the generated key should be kept secret and stored in a secure place:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;It must not be transfered to target Kafka servers&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;It must not be kept in source control (Git) unless hidden in Ansible Vault password file&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;the_nodes_certificates&quot;&gt;The nodes certificates&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This is where Ansible comes in.
+As your cluster might have many nodes, automating certificate generation makes sense.
+For each target host, I will repeat the same process:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;../images/2020-11-28-Build-your-own-CA-with-Ansible/process.svg&quot; alt=&quot;Process&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;olist arabic&quot;&gt;
+&lt;ol class=&quot;arabic&quot;&gt;
+&lt;li&gt;
+&lt;p&gt;On the target host, generate a key &lt;code&gt;target.key&lt;/code&gt; and a CSR  (Certificate signing request) &lt;code&gt;target.csr&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Pull the CSR on the control host.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Sign the CSR with the CA key.
+This will generate a certificate &lt;code&gt;target.crt&lt;/code&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Push the generated certificate &lt;code&gt;target.crt&lt;/code&gt; on the target host.
+The CA certificate &lt;code&gt;root.crt&lt;/code&gt; is also pushed.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As the TLS keys &lt;code&gt;.key&lt;/code&gt; are sensitive, they do not travel, they stay where they were generated.
+On the contrary, certificates &lt;code&gt;.crt&lt;/code&gt; and CSRs &lt;code&gt;.csr&lt;/code&gt; only contain public information.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;CodeRay highlight&quot;&gt;&lt;code data-lang=&quot;yaml&quot;&gt;&lt;span class=&quot;comment&quot;&gt;# Step 1&lt;/span&gt;
+- &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;name: Generate private key&lt;/span&gt;&lt;/span&gt;
+  &lt;span class=&quot;key&quot;&gt;become&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;true&lt;/span&gt;&lt;/span&gt;
+  &lt;span class=&quot;key&quot;&gt;openssl_privatekey&lt;/span&gt;:
+    &lt;span class=&quot;key&quot;&gt;path&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span class=&quot;content&quot;&gt;/etc/pki/tls/private/{{ openssl_name }}.key&lt;/span&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;
+
+- &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;name: Generate CSR&lt;/span&gt;&lt;/span&gt;
+  &lt;span class=&quot;key&quot;&gt;become&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;true&lt;/span&gt;&lt;/span&gt;
+  &lt;span class=&quot;key&quot;&gt;openssl_csr&lt;/span&gt;:
+    &lt;span class=&quot;key&quot;&gt;path&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span class=&quot;content&quot;&gt;/etc/pki/tls/private/{{ openssl_name }}.csr&lt;/span&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;key&quot;&gt;privatekey_path&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span class=&quot;content&quot;&gt;/etc/pki/tls/private/{{ openssl_name }}.key&lt;/span&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;key&quot;&gt;country_name&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;FR&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;key&quot;&gt;organization_name&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span class=&quot;content&quot;&gt;eNova Conseil&lt;/span&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;key&quot;&gt;common_name&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span class=&quot;content&quot;&gt;{{ openssl_name }}&lt;/span&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;key&quot;&gt;subject_alt_name&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span class=&quot;content&quot;&gt;DNS:{{ ansible_host }},DNS:{{ ansible_fqdn }}&lt;/span&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;
+
+&lt;span class=&quot;comment&quot;&gt;# Step 2&lt;/span&gt;
+- &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;name: Pull CSR&lt;/span&gt;&lt;/span&gt;
+  &lt;span class=&quot;key&quot;&gt;become&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;true&lt;/span&gt;&lt;/span&gt;
+  &lt;span class=&quot;key&quot;&gt;fetch&lt;/span&gt;: 
+    &lt;span class=&quot;key&quot;&gt;src&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span class=&quot;content&quot;&gt;/etc/pki/tls/private/{{ openssl_name }}.csr&lt;/span&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;key&quot;&gt;dest&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span class=&quot;content&quot;&gt;{{ openssl_ownca_dir }}/{{ openssl_name }}.csr&lt;/span&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;key&quot;&gt;flat&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;true&lt;/span&gt;&lt;/span&gt;
+
+&lt;span class=&quot;comment&quot;&gt;# Step 3&lt;/span&gt;
+- &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;name: Sign CSR with CA key&lt;/span&gt;&lt;/span&gt;
+  &lt;span class=&quot;key&quot;&gt;connection&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;local&lt;/span&gt;&lt;/span&gt;
+  &lt;span class=&quot;key&quot;&gt;delegate_to&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;localhost&lt;/span&gt;&lt;/span&gt;
+  &lt;span class=&quot;key&quot;&gt;openssl_certificate&lt;/span&gt;:
+    &lt;span class=&quot;key&quot;&gt;path&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span class=&quot;content&quot;&gt;{{ openssl_ownca_dir }}/{{ openssl_name }}.crt&lt;/span&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;key&quot;&gt;csr_path&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span class=&quot;content&quot;&gt;{{ openssl_ownca_dir }}/{{ openssl_name }}.csr&lt;/span&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;key&quot;&gt;ownca_path&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span class=&quot;content&quot;&gt;{{ openssl_ownca_dir }}/root.crt&lt;/span&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;key&quot;&gt;ownca_privatekey_path&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span class=&quot;content&quot;&gt;{{ openssl_ownca_dir }}/root.key&lt;/span&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;key&quot;&gt;provider&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;ownca&lt;/span&gt;&lt;/span&gt;
+
+&lt;span class=&quot;comment&quot;&gt;# Step 4&lt;/span&gt;
+- &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;name: Push certificate&lt;/span&gt;&lt;/span&gt;
+  &lt;span class=&quot;key&quot;&gt;become&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;true&lt;/span&gt;&lt;/span&gt;
+  &lt;span class=&quot;key&quot;&gt;copy&lt;/span&gt;:
+    &lt;span class=&quot;key&quot;&gt;src&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span class=&quot;content&quot;&gt;{{ openssl_ownca_dir }}/{{ openssl_name }}.crt&lt;/span&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;key&quot;&gt;dest&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span class=&quot;content&quot;&gt;/etc/pki/tls/private/{{ openssl_name }}.crt&lt;/span&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;
+
+- &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;name: Push CA&lt;/span&gt;&lt;/span&gt;
+  &lt;span class=&quot;key&quot;&gt;become&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;true&lt;/span&gt;&lt;/span&gt;
+  &lt;span class=&quot;key&quot;&gt;copy&lt;/span&gt;: 
+    &lt;span class=&quot;key&quot;&gt;src&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span class=&quot;content&quot;&gt;{{ openssl_ownca_dir }}/root.crt&lt;/span&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;key&quot;&gt;dest&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span class=&quot;content&quot;&gt;/etc/pki/ca-trust/source/anchors/root.pem&lt;/span&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Once you have the key, the certificate and CA certificate chain on the target host, you can start using them:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;CodeRay highlight&quot;&gt;&lt;code data-lang=&quot;yaml&quot;&gt;- &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;name: Update CA Trust&lt;/span&gt;&lt;/span&gt;
+  &lt;span class=&quot;key&quot;&gt;become&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;true&lt;/span&gt;&lt;/span&gt;
+  &lt;span class=&quot;key&quot;&gt;command&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span class=&quot;content&quot;&gt;update-ca-trust extract&lt;/span&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;
+
+- &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;name: Build PKCS12 file containing key and cert&lt;/span&gt;&lt;/span&gt;
+  &lt;span class=&quot;key&quot;&gt;become&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;true&lt;/span&gt;&lt;/span&gt;
+  &lt;span class=&quot;key&quot;&gt;openssl_pkcs12&lt;/span&gt;:
+    &lt;span class=&quot;key&quot;&gt;action&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;export&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;key&quot;&gt;path&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span class=&quot;content&quot;&gt;/etc/pki/tls/private/{{ openssl_name }}.p12&lt;/span&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;key&quot;&gt;friendly_name&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span class=&quot;content&quot;&gt;{{ openssl_name }}&lt;/span&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;key&quot;&gt;privatekey_path&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span class=&quot;content&quot;&gt;/etc/pki/tls/private/{{ openssl_name }}.key&lt;/span&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;key&quot;&gt;certificate_path&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span class=&quot;content&quot;&gt;/etc/pki/tls/private/{{ openssl_name }}.crt&lt;/span&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;key&quot;&gt;other_certificates&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span class=&quot;content&quot;&gt;/etc/pki/ca-trust/source/anchors/root.pem&lt;/span&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;key&quot;&gt;state&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;present&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The produced PKCS12 file can be used as a Java Keystore. The &lt;code&gt;java_keystore&lt;/code&gt; Ansible module can be used to create a JKS file instead.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The attentive reader has noticed I am using a bunch of &lt;code&gt;openssl_xxx&lt;/code&gt; Ansible modules (namely &lt;code&gt;openssl_privatekey&lt;/code&gt;, &lt;code&gt;openssl_csr&lt;/code&gt;, &lt;code&gt;openssl_certificate&lt;/code&gt; and &lt;code&gt;openssl_pkcs12&lt;/code&gt;).
+These modules require to have openssl and PyOpenSSL installed on each host.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;CodeRay highlight&quot;&gt;&lt;code data-lang=&quot;yaml&quot;&gt;- &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;name: Python OpenSSL package&lt;/span&gt;&lt;/span&gt;
+  &lt;span class=&quot;key&quot;&gt;become&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;true&lt;/span&gt;&lt;/span&gt;
+  &lt;span class=&quot;key&quot;&gt;yum&lt;/span&gt;:
+    &lt;span class=&quot;key&quot;&gt;name&lt;/span&gt;: 
+      - &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;pyOpenSSL&lt;/span&gt;&lt;/span&gt;
+      - &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;python2-pip&lt;/span&gt;&lt;/span&gt;
+      - &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;ca-certificates&lt;/span&gt;&lt;/span&gt;
+
+- &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;name: Upgrade Python OpenSSL&lt;/span&gt;&lt;/span&gt;
+  &lt;span class=&quot;key&quot;&gt;become&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;true&lt;/span&gt;&lt;/span&gt;
+  &lt;span class=&quot;key&quot;&gt;pip&lt;/span&gt;:
+    &lt;span class=&quot;key&quot;&gt;name&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;pyOpenSSL&amp;gt;=0.15&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;</content><author><name>Gérald Quintana</name></author><category term="ansible" /><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="/images/logos/ansible.png" /><media:content medium="image" url="/images/logos/ansible.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">Retrieving Kafka Lag</title><link href="/2020/01/16/Retrieving-Kafka-lag.html" rel="alternate" type="text/html" title="Retrieving Kafka Lag" /><published>2020-01-16T00:00:00+00:00</published><updated>2020-01-16T00:00:00+00:00</updated><id>/2020/01/16/Retrieving-Kafka-lag</id><content type="html" xml:base="/2020/01/16/Retrieving-Kafka-lag.html">&lt;div id=&quot;preamble&quot;&gt;
 &lt;div class=&quot;sectionbody&quot;&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;This article shows how to get Kafka lag for a given consumer group using the Java API.
@@ -1981,288 +2258,4 @@ Depending on the underlying file system, you&amp;#8217;ll get a different implem
 This almost means you can read a remote file as if it were local.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
-&lt;/div&gt;</content><author><name>Gérald Quintana</name></author><category term="java" /><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="/images/logos/java.png" /><media:content medium="image" url="/images/logos/java.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">Ansible and rolling upgrades</title><link href="/2017/07/15/Ansible-and-rolling-upgrades.html" rel="alternate" type="text/html" title="Ansible and rolling upgrades" /><published>2017-07-15T00:00:00+00:00</published><updated>2017-07-15T00:00:00+00:00</updated><id>/2017/07/15/Ansible-and-rolling-upgrades</id><content type="html" xml:base="/2017/07/15/Ansible-and-rolling-upgrades.html">&lt;div id=&quot;preamble&quot;&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Ansible is a nice tool to deploy distributed systems like Elasticsearch, Kafka, Cassandra and the like.
-These systems are built with high availability in mind and can tolerate partial failures.
-However, upgrading these softwares, or updating their configuration, requires restarting each member of the cluster.
-Care must be taken when deploying changes to avoid complete unavailability.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The aim of this article is to describe a pattern I discovered
-trying to improve the deployment speed of Ansible playbooks
-and yet being able to guarantee availability during this upgrade process.
-This is the story of two contradicting goals.
-To improve deployment speed, you need to deploy all hosts in parallel.
-To guarantee availability, you can&amp;#8217;t stop all hosts at the same time: you must deploy each host one after the other.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;the_problem&quot;&gt;The problem&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Let&amp;#8217;s take the Elasticsearch example to explain Ansible basics.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The tasks required to deploy Elasticsearch on each host of the cluster are gathered in an &lt;code&gt;elasticsearch&lt;/code&gt; role.
-In short, the &lt;code&gt;elasticsearch&lt;/code&gt; role is the recipe to install and update an Elasticsearch on a given machine.
-Once declared, this role is applied to all hosts belonging to the &lt;code&gt;elasticsearch&lt;/code&gt; group in the Ansible playbook.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;playbook.yml&lt;/div&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;CodeRay highlight&quot;&gt;&lt;code data-lang=&quot;yaml&quot;&gt;- &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;hosts: elasticsearch&lt;/span&gt;&lt;/span&gt;
-  &lt;span class=&quot;key&quot;&gt;any_errors_fatal&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;true&lt;/span&gt;&lt;/span&gt;
-  &lt;span class=&quot;key&quot;&gt;roles&lt;/span&gt;:
-    - &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;role: elasticsearch&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;At some point, the &lt;code&gt;elasticsearch&lt;/code&gt; role will probably contain something to stop Elasticsearch in order for changes to be reloaded:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;roles/elasticsearch/tasks/main.yml&lt;/div&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;CodeRay highlight&quot;&gt;&lt;code data-lang=&quot;yaml&quot;&gt;&lt;span class=&quot;head&quot;&gt;&lt;span class=&quot;head&quot;&gt;...&lt;/span&gt;&lt;/span&gt;
-- &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;name: Stop service&lt;/span&gt;&lt;/span&gt;
-  &lt;span class=&quot;key&quot;&gt;become&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;true&lt;/span&gt;&lt;/span&gt;
-  &lt;span class=&quot;key&quot;&gt;service&lt;/span&gt;:
-    &lt;span class=&quot;key&quot;&gt;name&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;elasticsearch&lt;/span&gt;&lt;/span&gt;
-    &lt;span class=&quot;key&quot;&gt;state&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;stopped&lt;/span&gt;&lt;/span&gt;
-    &lt;span class=&quot;key&quot;&gt;enabled&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;true&lt;/span&gt;&lt;/span&gt;
-&lt;span class=&quot;head&quot;&gt;&lt;span class=&quot;head&quot;&gt;...&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;This naive Ansible playbook will stop all Elasticsearch nodes at the same time,
-making the whole cluster unavailable until enough nodes are started again.
-To fix this problem, the role can be ran in serial instead of parallel:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;deploy.yml&lt;/div&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;CodeRay highlight&quot;&gt;&lt;code data-lang=&quot;yaml&quot;&gt;- &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;hosts: es&lt;/span&gt;&lt;/span&gt;
-  &lt;span class=&quot;key&quot;&gt;serial&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;1&lt;/span&gt;&lt;/span&gt; &lt;span class=&quot;comment&quot;&gt;# Force serial execution&lt;/span&gt;
-  &lt;span class=&quot;key&quot;&gt;roles&lt;/span&gt;:
-    - &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;role: elasticsearch&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;But deploying every host, one after the other (in serial), takes a very long time and makes deployment endless.
-Bigger clusters mean longer deployment times.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;refactoring_the_role&quot;&gt;Refactoring the role&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The main idea to improve speed is to split the role into multiple steps, and do as much as possible in parallel:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;olist arabic&quot;&gt;
-&lt;ol class=&quot;arabic&quot;&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;strong&gt;In Parallel&lt;/strong&gt;: Deploy system settings, software settings, software binaries.
-But don&amp;#8217;t stop anything and don&amp;#8217;t remove anything at this point.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;strong&gt;In Serial&lt;/strong&gt;:&lt;/p&gt;
-&lt;div class=&quot;ulist&quot;&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;Stop the node&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;Install or upgrade the node as quickly as possible, do as few things as possible.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;Start the node&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;strong&gt;In Parallel&lt;/strong&gt;: finish applying settings on the running cluster and remove old files and binaries.&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;For this purpose, describe each step in its own YAML file:
-&lt;code&gt;before.yml&lt;/code&gt; for step 1, &lt;code&gt;stop_start.yml&lt;/code&gt; for step 2 and &lt;code&gt;after.yml&lt;/code&gt; for step 3.
-Finally, the role entry point &lt;code&gt;main.yml&lt;/code&gt; will include the appropriate step using a variable named &lt;code&gt;elasticsearch_step&lt;/code&gt;:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;roles/elasticsearch/tasks/main.yml&lt;/div&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;CodeRay highlight&quot;&gt;&lt;code data-lang=&quot;yaml&quot;&gt;- &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;name: &amp;quot;Running step {{ elasticsearch_step }}&amp;quot;&lt;/span&gt;&lt;/span&gt;
-  &lt;span class=&quot;key&quot;&gt;include&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span class=&quot;content&quot;&gt;{{ elasticsearch_step }}.yml&lt;/span&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;This little trick, will allow calling the &lt;code&gt;elasticsearch&lt;/code&gt; role, yet running only a part of it.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;We can also create a fake step including all the steps, it will allow to run the whole role as before (more on that later):&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;roles/elasticsearch/tasks/all.yml&lt;/div&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;CodeRay highlight&quot;&gt;&lt;code data-lang=&quot;yaml&quot;&gt;- &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;include: &amp;quot;before.yml&amp;quot;&lt;/span&gt;&lt;/span&gt;
-- &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;include: &amp;quot;stop_start.yml&amp;quot;&lt;/span&gt;&lt;/span&gt;
-- &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;include: &amp;quot;after.yml&amp;quot;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;refactoring_the_playbook&quot;&gt;Refactoring the playbook&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Now, in the playbook we will call the role 3 times, each individual step being called independently.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;playbook.yml&lt;/div&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;CodeRay highlight&quot;&gt;&lt;code data-lang=&quot;yaml&quot;&gt;&lt;span class=&quot;comment&quot;&gt;# In parallel&lt;/span&gt;
-- &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;hosts: elasticsearch&lt;/span&gt;&lt;/span&gt;
-  &lt;span class=&quot;key&quot;&gt;any_errors_fatal&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;true&lt;/span&gt;&lt;/span&gt;
-  &lt;span class=&quot;key&quot;&gt;roles&lt;/span&gt;:
-    - &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;role: elasticsearch&lt;/span&gt;&lt;/span&gt;
-      &lt;span class=&quot;key&quot;&gt;elasticsearch_step&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span class=&quot;content&quot;&gt;before&lt;/span&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;
-
-&lt;span class=&quot;comment&quot;&gt;# In serial&lt;/span&gt;
-- &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;hosts: elasticsearch&lt;/span&gt;&lt;/span&gt;
-  &lt;span class=&quot;key&quot;&gt;any_errors_fatal&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;true&lt;/span&gt;&lt;/span&gt;
-  &lt;span class=&quot;key&quot;&gt;serial&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;1&lt;/span&gt;&lt;/span&gt;
-  &lt;span class=&quot;key&quot;&gt;roles&lt;/span&gt;:
-    - &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;role: elasticsearch&lt;/span&gt;&lt;/span&gt;
-      &lt;span class=&quot;key&quot;&gt;elasticsearch_step&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span class=&quot;content&quot;&gt;stop_start&lt;/span&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;
-
-&lt;span class=&quot;comment&quot;&gt;# In parallel&lt;/span&gt;
-- &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;hosts: elasticsearch&lt;/span&gt;&lt;/span&gt;
-  &lt;span class=&quot;key&quot;&gt;any_errors_fatal&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;true&lt;/span&gt;&lt;/span&gt;
-  &lt;span class=&quot;key&quot;&gt;roles&lt;/span&gt;:
-    - &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;role: elasticsearch&lt;/span&gt;&lt;/span&gt;
-      &lt;span class=&quot;key&quot;&gt;elasticsearch_step&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span class=&quot;content&quot;&gt;after&lt;/span&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;To install a brand new cluster, there is nothing to stop, and we don&amp;#8217;t fear anything.
-In this particular case, this role can still be used, and the &lt;code&gt;stop_start&lt;/code&gt; step can be called in parallel:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;playbook.yml&lt;/div&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;CodeRay highlight&quot;&gt;&lt;code data-lang=&quot;yaml&quot;&gt;&lt;span class=&quot;comment&quot;&gt;# New cluster&lt;/span&gt;
-- &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;hosts: elasticsearch&lt;/span&gt;&lt;/span&gt;
-  &lt;span class=&quot;key&quot;&gt;any_errors_fatal&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;true&lt;/span&gt;&lt;/span&gt;
-  &lt;span class=&quot;key&quot;&gt;roles&lt;/span&gt;:
-    - &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;role: elasticsearch&lt;/span&gt;&lt;/span&gt;
-      &lt;span class=&quot;key&quot;&gt;elasticsearch_step&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span class=&quot;content&quot;&gt;before&lt;/span&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;
-    - &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;role: elasticsearch&lt;/span&gt;&lt;/span&gt;
-      &lt;span class=&quot;key&quot;&gt;elasticsearch_step&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span class=&quot;content&quot;&gt;stop_start&lt;/span&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;
-    - &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;role: elasticsearch&lt;/span&gt;&lt;/span&gt;
-      &lt;span class=&quot;key&quot;&gt;elasticsearch_step&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span class=&quot;content&quot;&gt;after&lt;/span&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Or even simpler, we can use the fake &lt;code&gt;all&lt;/code&gt; step:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;playbook.yml&lt;/div&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;CodeRay highlight&quot;&gt;&lt;code data-lang=&quot;yaml&quot;&gt;&lt;span class=&quot;comment&quot;&gt;# New cluster&lt;/span&gt;
-- &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;hosts: elasticsearch&lt;/span&gt;&lt;/span&gt;
-  &lt;span class=&quot;key&quot;&gt;any_errors_fatal&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;true&lt;/span&gt;&lt;/span&gt;
-  &lt;span class=&quot;key&quot;&gt;roles&lt;/span&gt;:
-    - &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;role: elasticsearch&lt;/span&gt;&lt;/span&gt;
-      &lt;span class=&quot;key&quot;&gt;elasticsearch_step&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span class=&quot;content&quot;&gt;all&lt;/span&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;You may have noticed the &lt;code&gt;serial&lt;/code&gt; attribute is a number, I set to 1.
-For big clusters, and provided you have more than one replica of your data,
-you can stop&amp;#8217;n&amp;#8217;start nodes two by two, three by three&amp;#8230;&amp;#8203;&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;unreloaded_configuration&quot;&gt;Unreloaded configuration&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Most of the time, I am only running the Ansible playbook to change settings that don&amp;#8217;t need nodes to be restarted.
-To skip the expensive part, the trick is to detect in the &lt;code&gt;before&lt;/code&gt; step whether nodes should be restarted or not.
-A a result, the &lt;code&gt;before&lt;/code&gt; step should mark whether the &lt;code&gt;stop_start&lt;/code&gt; is required:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;roles/elasticsearch/tasks/before.yml&lt;/div&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;CodeRay highlight&quot;&gt;&lt;code data-lang=&quot;yaml&quot;&gt;- &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;set_fact:&lt;/span&gt;&lt;span class=&quot;content&quot;&gt;
-    elasticsearch_restart_needed: True&lt;/span&gt;&lt;/span&gt;
-  &lt;span class=&quot;key&quot;&gt;when&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;...&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;On lucky days, you can skip the expensive &lt;code&gt;stop_start&lt;/code&gt; step and have a quick and fully parallel deployment.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Other days, when upgrading software version, or changing configuration which can not be hot reloaded, running the Ansible playbook will be slower.
-Node specific configuration (&lt;code&gt;elasticsearch.yml&lt;/code&gt;, Kafka &lt;code&gt;server.properties&lt;/code&gt;&amp;#8230;&amp;#8203;) is usually part of the problem as it requires node restart.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;playbook.yml&lt;/div&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;CodeRay highlight&quot;&gt;&lt;code data-lang=&quot;yaml&quot;&gt;- &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;hosts: elasticsearch&lt;/span&gt;&lt;/span&gt;
-  &lt;span class=&quot;key&quot;&gt;any_errors_fatal&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;true&lt;/span&gt;&lt;/span&gt;
-  &lt;span class=&quot;key&quot;&gt;serial&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;1&lt;/span&gt;&lt;/span&gt;
-  &lt;span class=&quot;key&quot;&gt;roles&lt;/span&gt;:
-    - &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;role: elasticsearch&lt;/span&gt;&lt;/span&gt;
-      &lt;span class=&quot;key&quot;&gt;elasticsearch_step&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span class=&quot;content&quot;&gt;stop_start&lt;/span&gt;&lt;span class=&quot;delimiter&quot;&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;
-  &lt;span class=&quot;key&quot;&gt;when&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;elasticsearch_restart_needed defined and elasticsearch_restart_needed&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;sect1&quot;&gt;
-&lt;h2 id=&quot;cluster_wide_configuration&quot;&gt;Cluster wide configuration&lt;/h2&gt;
-&lt;div class=&quot;sectionbody&quot;&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In distributed systems, some configuration must be done only once for the whole cluster.
-Here are some examples:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;ulist&quot;&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;strong&gt;Elasticsearch&lt;/strong&gt;: License, Users and grants, Indices, Mappings, Templates, Cluster settings (allocation awareness, minimum master nodes&amp;#8230;&amp;#8203;)&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;strong&gt;Kafka&lt;/strong&gt;: Users and grants, Topics&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;strong&gt;Cassandra&lt;/strong&gt;: Users and grants, Keyspaces, Tables&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;This kind of configuration must be done on a running cluster, the cluster will probably replicate the change using internal specific mechanisms.
-Obviously, it must be ran in the &lt;code&gt;after&lt;/code&gt; step, once the cluster is started and listening.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class=&quot;listingblock&quot;&gt;
-&lt;div class=&quot;title&quot;&gt;roles/elasticsearch/tasks/after.yml&lt;/div&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;pre class=&quot;CodeRay highlight&quot;&gt;&lt;code data-lang=&quot;yaml&quot;&gt;&lt;span class=&quot;comment&quot;&gt;# Configure article index&lt;/span&gt;
-- &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;uri:&lt;/span&gt;&lt;span class=&quot;content&quot;&gt;
-    url: &amp;quot;http://{{ ansible_ssh_hostname }}:9200/article&amp;quot;
-    method: PUT
-    body_format: json
-    body: &amp;quot;{{ lookup('file','article_setting.json') }}&amp;quot;&lt;/span&gt;&lt;/span&gt;
-  &lt;span class=&quot;key&quot;&gt;run_once&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&lt;span class=&quot;content&quot;&gt;true&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The trick here is to use &lt;code&gt;run_once&lt;/code&gt; to play this task on a single node.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;</content><author><name>Gérald Quintana</name></author><category term="ansible" /><category term="elasticsearch" /><category term="kafka" /><category term="cassandra" /><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="/images/logos/ansible.png" /><media:content medium="image" url="/images/logos/ansible.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry></feed>
+&lt;/div&gt;</content><author><name>Gérald Quintana</name></author><category term="java" /><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="/images/logos/java.png" /><media:content medium="image" url="/images/logos/java.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry></feed>

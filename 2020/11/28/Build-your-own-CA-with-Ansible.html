@@ -1,0 +1,361 @@
+<!doctype html>
+<!--[if IE 9]>
+<html class="lt-ie10" lang="en"> <![endif]-->
+<html class="no-js" lang="en" data-useragent="Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0)">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Build your own CA with Ansible</title>
+        <meta name="description" content="How to generate certificates with Ansible.">
+        <meta name="author" content="Gérald Quintana">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="/css/coderay.css">
+        <link rel="stylesheet" href="/css/asciidoc2.css">
+        <link rel="stylesheet"
+              href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/default.min.css">
+    </head>
+    <body>
+        <header class="container sticky-top">
+            <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+                 <a class="navbar-brand" href="/"><h1>JRald blog</h1></a>
+                 <h2>
+                     <a href="https://twitter.com/gerald_quintana"><i class="fa fa-twitter"></i></a>
+                     <a href="https://github.com/gquintana"><i class="fa fa-github"></i></a>
+                     <a href="/feed.xml"><i class="fa fa-rss"></i></a>
+                 </h2>
+            </nav>
+        </header>
+        <main class="container position-relative " role="main">
+            <div>
+    <h1>Build your own CA with Ansible</h1>
+    <div>
+        <img class="rounded float-right" src="../../../images/logos/ansible.png"/>
+        <h5>
+            <span>2020-11-28</span>
+            <span class="badge badge-secondary">ansible</span> 
+        </h5>
+
+        <div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Securing your Kafka, Elasticsearch, Cassandra, or whatever distributed software requires configuring using SSL (also known as TLS) to encrypt communications:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Node to node communication</p>
+</li>
+<li>
+<p>Client to node communication</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Setting up SSL means providing SSL  certificates for each node.
+But generating SSL certificates is a cumbersome task:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The <a href="https://kafka.apache.org/documentation/#security_ssl">Kafka documentation</a> describes extensively the process.</p>
+</li>
+<li>
+<p>Elasticsearch brings its own <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/configuring-tls.html#node-certificates">elasticsearch-certutil</a> tool.</p>
+</li>
+<li>
+<p>Datastax also <a href="https://docs.datastax.com/en/cassandra-oss/3.x/cassandra/configuration/secureSSLCertWithCA.html">documents</a> a similar process for Cassandra</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>I will describe here how to generate an SSL certificate for each node using Ansible.
+It makes sense as I am also deploying Kafka, Elasticsearch and the like with Ansible.</p>
+</div>
+<div class="paragraph">
+<p>There are several important rules to know when generating certificates:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The name present in the certificate must match the public name of the host.
+We can not share the same certificate on all nodes unless using star certificates.
+Any TLS client connecting to a node will check that certificate name and hostname matches unless disabling hostname verification.</p>
+</li>
+<li>
+<p>The name present in the certificate, should match the reverse DNS name corresponding to the IP of the host.
+Java clients connecting to a node, will do a reverse DNS lookup to get the public name of the host they are connecting to.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>These two rules are meant to prevent <strong>Man in the middle</strong> attacks.
+A TLS certificate allows checking you&#8217;re talking to the wanted target,
+not something in between which could spy and steal information.</p>
+</div>
+<div class="paragraph">
+<p>When a machine has multiple names (think about DNS aliases, virtual hosts), a certificate can contain multiple names.
+The main name is called CN (Common Name),
+while other names are called SAN (Subject Alt Names).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="the_certificate_authority">The certificate authority</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>As Kafka or Elasticsearch clusters should never be publicly exposed,
+using a public certificate authority (Thawte, Verisign and the like) is not necessary.
+A self-signed certificate authority local to the cluster or the environment (Dev, Q/A) should be enough.</p>
+</div>
+<div class="paragraph">
+<p>So the first step is to create a certificate authority that will be used to sign the certificates of all hosts belonging to our cluster.
+As this step will be done only once, I won&#8217;t automate it.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="shell">$ mkdir ownca
+$ openssl req -new -x509 \
+    -days 1825 \ <i class="conum" data-value="1"></i><b>(1)</b>
+    -extensions v3_ca \ <i class="conum" data-value="2"></i><b>(2)</b>
+    -keyout ownca/root.key -out ownca/root.crt <i class="conum" data-value="3"></i><b>(3)</b>
+
+Generating a RSA private key
+......+++++
+....+++++
+writing new private key to 'ownca/root.key'
+Enter PEM pass phrase: <i class="conum" data-value="4"></i><b>(4)</b>
+Verifying - Enter PEM pass phrase:
+-----
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Country Name (2 letter code) [AU]:FR <i class="conum" data-value="5"></i><b>(5)</b>
+State or Province Name (full name) [Some-State]:.
+Locality Name (eg, city) []:.
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:eNova Conseil
+Organizational Unit Name (eg, section) []:.
+Common Name (e.g. server FQDN or YOUR name) []:Root
+Email Address []:rootca@enova-conseil.com</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The CA root certificate will last 5 years</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>This certificate will be used as a CA</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Generate both key and self-signed certificate</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>The key is protected with a password</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Information describing the Root certificate</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>For safety reasons, the generated key should be kept secret and stored in a secure place:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>It must not be transfered to target Kafka servers</p>
+</li>
+<li>
+<p>It must not be kept in source control (Git) unless hidden in Ansible Vault password file</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="the_nodes_certificates">The nodes certificates</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This is where Ansible comes in.
+As your cluster might have many nodes, automating certificate generation makes sense.
+For each target host, I will repeat the same process:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="../images/2020-11-28-Build-your-own-CA-with-Ansible/process.svg" alt="Process">
+</div>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>On the target host, generate a key <code>target.key</code> and a CSR  (Certificate signing request) <code>target.csr</code></p>
+</li>
+<li>
+<p>Pull the CSR on the control host.</p>
+</li>
+<li>
+<p>Sign the CSR with the CA key.
+This will generate a certificate <code>target.crt</code>.</p>
+</li>
+<li>
+<p>Push the generated certificate <code>target.crt</code> on the target host.
+The CA certificate <code>root.crt</code> is also pushed.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>As the TLS keys <code>.key</code> are sensitive, they do not travel, they stay where they were generated.
+On the contrary, certificates <code>.crt</code> and CSRs <code>.csr</code> only contain public information.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="yaml"><span class="comment"># Step 1</span>
+- <span class="string"><span class="content">name: Generate private key</span></span>
+  <span class="key">become</span>: <span class="string"><span class="content">true</span></span>
+  <span class="key">openssl_privatekey</span>:
+    <span class="key">path</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">/etc/pki/tls/private/{{ openssl_name }}.key</span><span class="delimiter">&quot;</span></span>
+
+- <span class="string"><span class="content">name: Generate CSR</span></span>
+  <span class="key">become</span>: <span class="string"><span class="content">true</span></span>
+  <span class="key">openssl_csr</span>:
+    <span class="key">path</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">/etc/pki/tls/private/{{ openssl_name }}.csr</span><span class="delimiter">&quot;</span></span>
+    <span class="key">privatekey_path</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">/etc/pki/tls/private/{{ openssl_name }}.key</span><span class="delimiter">&quot;</span></span>
+    <span class="key">country_name</span>: <span class="string"><span class="content">FR</span></span>
+    <span class="key">organization_name</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">eNova Conseil</span><span class="delimiter">&quot;</span></span>
+    <span class="key">common_name</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">{{ openssl_name }}</span><span class="delimiter">&quot;</span></span>
+    <span class="key">subject_alt_name</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">DNS:{{ ansible_host }},DNS:{{ ansible_fqdn }}</span><span class="delimiter">&quot;</span></span>
+
+<span class="comment"># Step 2</span>
+- <span class="string"><span class="content">name: Pull CSR</span></span>
+  <span class="key">become</span>: <span class="string"><span class="content">true</span></span>
+  <span class="key">fetch</span>: 
+    <span class="key">src</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">/etc/pki/tls/private/{{ openssl_name }}.csr</span><span class="delimiter">&quot;</span></span>
+    <span class="key">dest</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">{{ openssl_ownca_dir }}/{{ openssl_name }}.csr</span><span class="delimiter">&quot;</span></span>
+    <span class="key">flat</span>: <span class="string"><span class="content">true</span></span>
+
+<span class="comment"># Step 3</span>
+- <span class="string"><span class="content">name: Sign CSR with CA key</span></span>
+  <span class="key">connection</span>: <span class="string"><span class="content">local</span></span>
+  <span class="key">delegate_to</span>: <span class="string"><span class="content">localhost</span></span>
+  <span class="key">openssl_certificate</span>:
+    <span class="key">path</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">{{ openssl_ownca_dir }}/{{ openssl_name }}.crt</span><span class="delimiter">&quot;</span></span>
+    <span class="key">csr_path</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">{{ openssl_ownca_dir }}/{{ openssl_name }}.csr</span><span class="delimiter">&quot;</span></span>
+    <span class="key">ownca_path</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">{{ openssl_ownca_dir }}/root.crt</span><span class="delimiter">&quot;</span></span>
+    <span class="key">ownca_privatekey_path</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">{{ openssl_ownca_dir }}/root.key</span><span class="delimiter">&quot;</span></span>
+    <span class="key">provider</span>: <span class="string"><span class="content">ownca</span></span>
+
+<span class="comment"># Step 4</span>
+- <span class="string"><span class="content">name: Push certificate</span></span>
+  <span class="key">become</span>: <span class="string"><span class="content">true</span></span>
+  <span class="key">copy</span>:
+    <span class="key">src</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">{{ openssl_ownca_dir }}/{{ openssl_name }}.crt</span><span class="delimiter">&quot;</span></span>
+    <span class="key">dest</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">/etc/pki/tls/private/{{ openssl_name }}.crt</span><span class="delimiter">&quot;</span></span>
+
+- <span class="string"><span class="content">name: Push CA</span></span>
+  <span class="key">become</span>: <span class="string"><span class="content">true</span></span>
+  <span class="key">copy</span>: 
+    <span class="key">src</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">{{ openssl_ownca_dir }}/root.crt</span><span class="delimiter">&quot;</span></span>
+    <span class="key">dest</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">/etc/pki/ca-trust/source/anchors/root.pem</span><span class="delimiter">&quot;</span></span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Once you have the key, the certificate and CA certificate chain on the target host, you can start using them:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="yaml">- <span class="string"><span class="content">name: Update CA Trust</span></span>
+  <span class="key">become</span>: <span class="string"><span class="content">true</span></span>
+  <span class="key">command</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">update-ca-trust extract</span><span class="delimiter">&quot;</span></span>
+
+- <span class="string"><span class="content">name: Build PKCS12 file containing key and cert</span></span>
+  <span class="key">become</span>: <span class="string"><span class="content">true</span></span>
+  <span class="key">openssl_pkcs12</span>:
+    <span class="key">action</span>: <span class="string"><span class="content">export</span></span>
+    <span class="key">path</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">/etc/pki/tls/private/{{ openssl_name }}.p12</span><span class="delimiter">&quot;</span></span>
+    <span class="key">friendly_name</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">{{ openssl_name }}</span><span class="delimiter">&quot;</span></span>
+    <span class="key">privatekey_path</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">/etc/pki/tls/private/{{ openssl_name }}.key</span><span class="delimiter">&quot;</span></span>
+    <span class="key">certificate_path</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">/etc/pki/tls/private/{{ openssl_name }}.crt</span><span class="delimiter">&quot;</span></span>
+    <span class="key">other_certificates</span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">/etc/pki/ca-trust/source/anchors/root.pem</span><span class="delimiter">&quot;</span></span>
+    <span class="key">state</span>: <span class="string"><span class="content">present</span></span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The produced PKCS12 file can be used as a Java Keystore. The <code>java_keystore</code> Ansible module can be used to create a JKS file instead.</p>
+</div>
+<div class="paragraph">
+<p>The attentive reader has noticed I am using a bunch of <code>openssl_xxx</code> Ansible modules (namely <code>openssl_privatekey</code>, <code>openssl_csr</code>, <code>openssl_certificate</code> and <code>openssl_pkcs12</code>).
+These modules require to have openssl and PyOpenSSL installed on each host.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="yaml">- <span class="string"><span class="content">name: Python OpenSSL package</span></span>
+  <span class="key">become</span>: <span class="string"><span class="content">true</span></span>
+  <span class="key">yum</span>:
+    <span class="key">name</span>: 
+      - <span class="string"><span class="content">pyOpenSSL</span></span>
+      - <span class="string"><span class="content">python2-pip</span></span>
+      - <span class="string"><span class="content">ca-certificates</span></span>
+
+- <span class="string"><span class="content">name: Upgrade Python OpenSSL</span></span>
+  <span class="key">become</span>: <span class="string"><span class="content">true</span></span>
+  <span class="key">pip</span>:
+    <span class="key">name</span>: <span class="string"><span class="content">pyOpenSSL&gt;=0.15</span></span></code></pre>
+</div>
+</div>
+</div>
+</div>
+    </div>
+    <div class="clearfix">
+        <h4>Other posts</h4>
+        <ul>
+            
+                <li>2020-11-28
+                    <a href="/2020/11/28/Build-your-own-CA-with-Ansible.html">Build your own CA with Ansible</a>
+                </li>
+            
+                <li>2020-01-16
+                    <a href="/2020/01/16/Retrieving-Kafka-lag.html">Retrieving Kafka Lag</a>
+                </li>
+            
+                <li>2020-01-10
+                    <a href="/2020/01/10/Home-temperature-monitoring.html">Home temperature monitoring</a>
+                </li>
+            
+                <li>2019-12-10
+                    <a href="/2019/12/10/Kafka-connect-plugin-install.html">Kafka connect plugin install</a>
+                </li>
+            
+                <li>2019-07-03
+                    <a href="/2019/07/03/Kafka-integration-tests.html">Kafka integration tests</a>
+                </li>
+            
+        </ul>
+    </div>
+</div>
+
+        </main>
+        <footer class="footer text-muted">
+            <div class="container">
+                <p class="float-right">
+                    <a href="#"><i class="fa fa-arrow-up" aria-hidden="true"></i>
+ Back to top</a>
+                </p>
+                <p>Made with <i class="fa fa-heart" aria-hidden="true"></i> by Gérald Quintana</p>
+        </footer>
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+    </body>
+</html>
