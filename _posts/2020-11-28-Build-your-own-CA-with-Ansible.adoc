@@ -7,20 +7,20 @@
 :page-layout: post
 :page-description: "How to generate certificates with Ansible."
 
-Securing your Kafka, Elasticsearch, Cassandra, or whatever distributed software means using SSL (also known as TLS) to encrypt communications:
+Securing your Kafka, Elasticsearch, Cassandra, or whatever distributed software requires configuring using SSL (also known as TLS) to encrypt communications:
 
 * Node to node communication
 * Client to node communication
 
 Setting up SSL means providing SSL  certificates for each node.
-Generating SSL certificates is a cumbersome task:
+But generating SSL certificates is a cumbersome task:
 
 * The https://kafka.apache.org/documentation/#security_ssl[Kafka documentation] describes extensively the process.
 * Elasticsearch brings its own https://www.elastic.co/guide/en/elasticsearch/reference/master/configuring-tls.html#node-certificates[elasticsearch-certutil] tool.
 * Datastax also https://docs.datastax.com/en/cassandra-oss/3.x/cassandra/configuration/secureSSLCertWithCA.html[documents] a similar process for Cassandra
 
-I will describe here how to generate an SSL certificate for each node using Ansible,
-because I am also deploying Kafka, Elasticsearch and the like with Ansible.
+I will describe here how to generate an SSL certificate for each node using Ansible.
+It makes sense as I am also deploying Kafka, Elasticsearch and the like with Ansible.
 
 There are several important rules to know when generating certificates:
 
